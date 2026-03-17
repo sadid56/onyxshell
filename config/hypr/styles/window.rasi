@@ -1,0 +1,37 @@
+configuration {
+    window-format: "{t}";
+    show-icons: true;
+}
+
+@import "base.rasi"
+
+window {
+    width: 40%;
+}
+
+entry {
+    placeholder: "Search open windows...";
+}
+
+listview {
+    columns: 3;
+    lines: 3;
+    spacing: 25px;
+    cycle: false;
+    dynamic: true;
+    layout: vertical;
+    fixed-columns: true;
+    fixed-height: false;
+}
+
+element {
+    orientation: vertical;
+    padding: 30px 10px;
+    border-radius: 15px;
+    spacing: 15px;
+    cursor: pointer;
+}
+
+element-icon {
+    size: 64px;
+}

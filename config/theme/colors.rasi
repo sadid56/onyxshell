@@ -1,0 +1,18 @@
+/* ~/.config/theme/colors.rasi */
+* {
+    base:     #1e1e2e;
+    mantle:   #181825;
+    crust:    #11111b;
+    text:     #cdd6f4;
+    subtext0: #a6adc8;
+    subtext1: #a6adc8; /* added for your element text */
+    surface0: #313244;
+    surface1: #45475a;
+    mauve:    #cba6f7;
+    blue:     #89b4fa;
+    red:      #f38ba8;
+    peach:    #fab387;
+    green:    #a6e3a1;
+    yellow:   #f9e2af;
+    bg-col:   #1e1e2e; /* optional alias for background usage */
+}
