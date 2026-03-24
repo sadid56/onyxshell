@@ -24,10 +24,13 @@ Onyxshell is a beautiful, modular, and modern dotfiles configuration for the [Hy
 - **Bar/Panel:** Waybar
 - **App Launcher / Menus:** Rofi
 - **Terminal:** Kitty
+- **Dropdown Terminal:** Kitty + pyprland
 - **File Manager:** Yazi
+- **Clipboard Manager:** Cliphist
 - **Notifications:** Swaync
-- **Wallpapers:** swww
+- **Wallpapers:** swww _(Note: Place your wallpapers in `~/Pictures/Images` for the wallpaper picker to detect them)_
 - **Screen Locker:** Hyprlock
+- **Screenshot:** Hyprshot
 - **Logout Menu:** wlogout
 
 ## Prerequisites

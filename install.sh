@@ -52,6 +52,9 @@ OFFICIAL_PACKAGES=(
     gnome-keyring
     libnotify
     pavucontrol
+    xdg-desktop-portal 
+    xdg-desktop-portal-hyprland 
+    xdg-desktop-portal-gtk
 )
 
 AUR_PACKAGES=(
