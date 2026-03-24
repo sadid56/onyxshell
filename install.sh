@@ -32,16 +32,15 @@ fi
 # 3. Define Required Packages
 OFFICIAL_PACKAGES=(
     hyprland
+    hyprlock
+    hyprshot
     kitty
-    thunar
-    rofi-wayland
+    yazi
+    rofi
     waybar
     swaync
     wl-clipboard
     cliphist
-    fcitx5-im
-    hyprlock
-    wlogout
     playerctl
     brightnessctl
     wireplumber
@@ -50,11 +49,11 @@ OFFICIAL_PACKAGES=(
     noto-fonts-emoji
     polkit-gnome
     swww
-    hyprshot
 )
 
 AUR_PACKAGES=(
     brave-bin
+    wlogout
 )
 
 # 4. Install Packages

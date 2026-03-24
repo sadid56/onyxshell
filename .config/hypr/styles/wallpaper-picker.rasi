@@ -1,0 +1,27 @@
+
+
+@import "base.rasi"
+
+window {
+    width: 850px;
+    height: 490px;
+}
+
+entry {
+    placeholder: "Search Wallpapers...";
+}
+
+listview {
+    columns: 4;
+    lines: 3;
+}
+
+element-icon {
+    size: 175px;
+}
+element {
+    padding: 0px 8px;
+}
+element-text {
+    font: "Figtree 10";
+}

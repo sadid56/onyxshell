@@ -1,0 +1,140 @@
+@import url("../theme/colors.css");
+
+* {
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13.px;
+    font-weight: bold;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: transparent;
+    color: @text;
+}
+
+/* Added #group-hardware and #custom-notification, removed individual #cpu and #memory */
+#workspaces,
+#clock,
+#custom-arch,
+#tray,
+#network,
+#pulseaudio,
+#backlight,
+#hardware,
+#battery,
+#custom-cava_mviz,
+#custom-notification {
+    background-color: @base;
+    border-radius: 16px;
+    margin-top: 6px;
+    margin-bottom: 0px;
+    padding: 5px 14px;
+}
+
+.modules-right {
+    padding-right: 10px;
+}
+
+#custom-cava_mviz{
+    margin-left: 8px;
+}
+
+/* Replaced #cpu and #memory with #group-hardware */
+#network,
+#pulseaudio,
+#backlight,
+#battery {
+    margin-left: 8px;
+    padding-right: 20px;
+}
+
+#hardware{
+  padding-right: 12px;
+   margin-left: 8px;
+}
+
+#custom-arch {
+    color: @blue;
+    font-size: 16px;
+    margin-left: 10px;
+    margin-right: 5px;
+    padding-left: 17px;
+}
+
+#workspaces {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#workspaces button {
+    color: @text;
+    padding: 0px 10px;
+    margin: 2px 4px;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+#workspaces button.active {
+    color: @base;
+    background-color: @mauve;
+    padding: 0px 20px;
+    font-weight: bold;
+}
+
+#workspaces button:hover {
+    background-color: rgba(203, 166, 247, 0.3);
+    color: @text;
+}
+
+#tray {
+    margin-left: 10px;
+}
+
+#clock {
+    color: @text;
+    font-size: 14px;
+}
+
+#network {
+    color: @blue;
+}
+#pulseaudio {
+    color: @peach;
+}
+#backlight {
+    color: @yellow;
+}
+
+#cpu {
+    color: @mauve;
+    padding-right: 15px;
+}
+
+#memory {
+    color: @mauve;
+    padding-right: 5px;
+}
+
+#battery {
+    color: @green;
+    padding-right: 14px;
+    padding-left: 13px;
+}
+#battery.warning {
+    color: @peach;
+}
+#battery.critical {
+    color: @red;
+}
+
+#custom-cava_mviz{
+    color: @text;
+}
+
+#custom-notification {
+    color: @yellow;
+    margin-left: 8px;
+    font-size: 15px;
+    padding-right: 18px;
+    padding-left: 16px;
+}

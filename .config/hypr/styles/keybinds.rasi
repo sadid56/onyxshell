@@ -1,0 +1,62 @@
+@import "../../theme/colors.rasi"
+
+* {
+    background-color: transparent;
+    text-color: @text;
+    font: "monospace 12"; 
+}
+
+window {
+    width: 900px;
+    background-color: @base;
+    border: 2px;
+    border-color: @mauve;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+mainbox {
+    spacing: 15px;
+}
+
+inputbar {
+    background-color: @surface0;
+    border-radius: 8px;
+    padding: 12px;
+    children: [ prompt, entry ];
+}
+
+prompt {
+    text-color: @mauve;
+    font: "monospace bold 12";
+    margin: 0px 10px 0px 0px;
+}
+
+entry {
+    placeholder: "Search keybinds...";
+    placeholder-color: @subtext0;
+    text-color: @text;
+}
+
+listview {
+    lines: 14;
+    scrollbar: false;
+    spacing: 5px;
+    border: 0px;
+}
+
+element {
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: transparent;
+    text-color: @text;
+}
+
+element selected {
+    background-color: @mauve;
+    text-color: @base;
+}
+
+element-text selected {
+    text-color: @base;
+}

@@ -1,0 +1,15 @@
+[manager]
+# Background and default text
+cwd = { fg = "#f97e72" } # Soft pink/red from SynthWave
+
+# Hovered item (The neon highlight)
+hovered         = { fg = "#2de2e6", bg = "#34294f", bold = true } # Cyan on Dark Purple
+preview_hovered = { underline = true }
+
+[filetype]
+rules = [
+	{ mime = "image/*", fg = "#fe4450" },   # Neon Pink
+	{ mime = "video/*", fg = "#ff8b39" },   # Orange
+	{ mime = "text/*",  fg = "#72f1b8" },   # Neon Green
+	{ mime = "application/x-executable", fg = "#f92aad" } # Purple
+]

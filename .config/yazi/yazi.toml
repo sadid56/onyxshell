@@ -1,0 +1,26 @@
+[opener]
+gwenview = [
+	{ run = 'gwenview "$@"', orphan = true, desc = "Gwenview" }
+]
+vlc = [
+	{ run = 'vlc "$@"', orphan = true, desc = "VLC" }
+]
+
+[open]
+prepend_rules = [
+	{ mime = "image/*", use = "gwenview" },
+	{ mime = "video/*", use = "vlc" },
+	# Fallback for code/text to your preferred editor (e.g., nvim)
+	{ mime = "text/*", use = "edit" }
+]
+
+[manager]
+show_hidden = true
+sort_by = "natural"
+ratio = [1, 4, 3] # Balanced view for parent, current, and preview
+mouse_events = ["click", "scroll"]
+
+[preview]
+max_width = 1000
+max_height = 1000
+image_filter = "lanczos3"

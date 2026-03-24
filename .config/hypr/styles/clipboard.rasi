@@ -1,0 +1,36 @@
+configuration {
+    modi: "dmenu";
+    show-icons: false;
+    display-dmenu: "󰅌";
+    }
+
+@import "base.rasi"
+
+window{
+    height: 650px;
+  }
+
+entry {
+    placeholder: "Search  Clipboard...";
+   }
+
+listview {
+    columns: 1;
+    lines: 7;
+    spacing: 6px;
+    padding: 0px;
+}
+
+element {
+    padding: 15px 0px;
+    border-radius: 10px;
+    background-color: transparent;
+    text-color: @text;
+    spacing: 0px;
+}
+
+element-text {
+    margin: 0px;
+    padding: 0px;
+    vertical-align: 0.5;
+}
