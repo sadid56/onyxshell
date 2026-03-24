@@ -1,0 +1,14 @@
+
+[pyprland]
+plugins = [
+  "scratchpads",
+]
+
+[scratchpads.term]
+animation = "fromTop"
+command = "kitty --class kitty-dropdown"
+class = "kitty-dropdown"
+size = "80% 60%"
+unfocus = "hide"
+lazy = false
+margin = 50

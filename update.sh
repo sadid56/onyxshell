@@ -8,9 +8,11 @@ CONFIG_DIRS=(
   "rofi"
   "wlogout"
   "hypr"
+  "pypr"
   "cava"
   "swaync"
   "yazi"
+  "theme"
 )
 
 echo "🚀 Starting dotfiles update..."
@@ -37,26 +39,24 @@ for dir in "${CONFIG_DIRS[@]}"; do
   fi
 done
 
-# Handle the 'theme' folder
-# (Assuming your themes are in ~/.themes. If they are in ~/.local/share/themes, change this path!)
-THEME_DIR="$HOME/.themes"
-if [ -d "$THEME_DIR" ]; then
-  mkdir -p "$REPO_DIR/.themes"
-  cp -r "$THEME_DIR/"* "$REPO_DIR/.themes/"
-  echo "  ✔️ Copied themes"
-else
-  echo "  ⚠️ Warning: Theme directory $THEME_DIR not found, skipping."
-fi
-
-# Navigate into the repository
-cd "$REPO_DIR" || exit
 
 # Git operations
 echo "🔍 Staging changes..."
 git add .
 
 echo "📝 Committing changes..."
-COMMIT_MSG="Update configs: waybar, rofi, wlogout, hypr, theme, cava, swaync, yazi - $(date +'%Y-%m-%d %H:%M:%S')"
+# Prompt the user for a commit message
+read -p "Enter commit message (or press Enter for default): " CUSTOM_MESSAGE
+
+# Check if the input is empty
+if [ -z "$CUSTOM_MESSAGE" ]; then
+  # Fallback message if you just press Enter
+  COMMIT_MSG="Update configs - $(date +'%Y-%m-%d %H:%M:%S')"
+else
+  # Use your custom message
+  COMMIT_MSG="$CUSTOM_MESSAGE"
+fi
+
 git commit -m "$COMMIT_MSG"
 
 echo "☁️ Pushing to GitHub..."
