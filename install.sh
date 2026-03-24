@@ -20,11 +20,11 @@ sudo pacman -Syu --noconfirm
 if ! command -v yay &> /dev/null; then
     echo -e "${BLUE}[*] Installing yay AUR helper...${RESET}"
     sudo pacman -S --needed --noconfirm base-devel git
-    git clone https://aur.archlinux.org/yay.git /tmp/yay
-    cd /tmp/yay
+    git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
+    cd /tmp/yay-bin
     makepkg -si --noconfirm
     cd -
-    rm -rf /tmp/yay
+    rm -rf /tmp/yay-bin
 else
     echo -e "${GREEN}[+] yay is already installed.${RESET}"
 fi
@@ -47,13 +47,17 @@ OFFICIAL_PACKAGES=(
     network-manager-applet
     ttf-jetbrains-mono-nerd
     noto-fonts-emoji
-    polkit-gnome
     swww
+    cava
+    gnome-keyring
+    libnotify
+    pavucontrol
 )
 
 AUR_PACKAGES=(
     brave-bin
     wlogout
+    pyprland
 )
 
 # 4. Install Packages

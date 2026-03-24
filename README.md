@@ -2,13 +2,29 @@
 
 Onyxshell is a beautiful, modular, and modern dotfiles configuration for the [Hyprland](https://hyprland.org/) Wayland compositor. Focused on smooth animations, seamless workflows, and striking visuals.
 
+## Screenshots
+
+<div align="center">
+  <img src="assets/desktop.png" alt="Full Desktop" width="800"/>
+  <br><em>Full Desktop</em><br><br>
+  
+  <img src="assets/wlogout.png" alt="Logout Menu (wlogout)" width="800"/>
+  <br><em>Logout Menu (wlogout)</em><br><br>
+
+  <img src="assets/rofi-app-launcher.png" alt="App Launcher (Rofi)" width="800"/>
+  <br><em>App Launcher (Rofi)</em><br><br>
+
+  <img src="assets/wallpaper-select.png" alt="Wallpaper Picker" width="800"/>
+  <br><em>Wallpaper Picker</em>
+</div>
+
 ## Features
 
 - **Window Manager:** Hyprland (Wayland)
 - **Bar/Panel:** Waybar
 - **App Launcher / Menus:** Rofi
 - **Terminal:** Kitty
-- **File Manager:** Thunar
+- **File Manager:** Yazi
 - **Notifications:** Swaync
 - **Wallpapers:** swww
 - **Screen Locker:** Hyprlock
@@ -20,9 +36,9 @@ Onyxshell is built to be installed on **Arch Linux**. The included installation 
 
 ### Manual Dependency List (If not using the script)
 
-- Base packages: `hyprland`, `kitty`, `thunar`, `rofi`, `waybar`, `swaync`, `wl-clipboard`, `cliphist`, `fcitx5-im`, `hyprlock`, `wlogout`, `playerctl`, `brightnessctl`, `wireplumber`, `network-manager-applet`, `polkit-gnome`, `swww`, `hyprshot`
+- Base packages: `hyprland`, `hyprlock`, `hyprshot`, `kitty`, `yazi`, `rofi`, `waybar`, `swaync`, `wl-clipboard`, `cliphist`, `playerctl`, `brightnessctl`, `wireplumber`, `network-manager-applet`, `swww`, `cava`, `gnome-keyring`, `libnotify`, `pavucontrol`
 - Fonts: `ttf-jetbrains-mono-nerd`, `noto-fonts-emoji`
-- AUR packages: `brave-bin`
+- AUR packages: `brave-bin`, `wlogout`, `pyprland`
 
 ## Installation
 
