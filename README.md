@@ -39,7 +39,7 @@ Onyxshell is built to be installed on **Arch Linux**. The included installation 
 
 ### Manual Dependency List (If not using the script)
 
-- Base packages: `hyprland`, `hyprlock`, `hyprshot`, `kitty`, `yazi`, `rofi`, `waybar`, `swaync`, `wl-clipboard`, `cliphist`, `playerctl`, `brightnessctl`, `wireplumber`, `network-manager-applet`, `swww`, `cava`, `gnome-keyring`, `libnotify`, `pavucontrol`
+- Base packages: `hyprland`, `hyprlock`, `hyprshot`, `kitty`, `yazi`, `rofi`, `waybar`, `swaync`, `wl-clipboard`, `cliphist`, `playerctl`, `brightnessctl`, `wireplumber`, `network-manager-applet`, `awww`, `cava`, `gnome-keyring`, `libnotify`, `pavucontrol`
 - Fonts: `ttf-jetbrains-mono-nerd`, `noto-fonts-emoji`
 - AUR packages: `brave-bin`, `wlogout`, `pyprland`
 

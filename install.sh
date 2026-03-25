@@ -47,7 +47,7 @@ OFFICIAL_PACKAGES=(
     network-manager-applet
     ttf-jetbrains-mono-nerd
     noto-fonts-emoji
-    swww
+    awww
     cava
     gnome-keyring
     libnotify

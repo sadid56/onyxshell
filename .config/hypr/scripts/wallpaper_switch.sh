@@ -1,41 +1,40 @@
 #!/bin/bash
 
-# Define your wallpaper directory
 WALLPAPER_DIR="$HOME/Pictures/Images"
+HOUR=$(date +%H)
 
-# Check if swww-daemon is running, if not, start it (you had this in your autostart, but it's good as a fallback)
-if ! pgrep -x "swww-daemon" >/dev/null; then
-  swww-daemon &
+if [ "$HOUR" -lt 12 ]; then
+  TYPE="grow"
+elif [ "$HOUR" -lt 18 ]; then
+  TYPE="wipe"
+else
+  TYPE="outer"
+fi
+
+if ! pgrep -x "awww-daemon" >/dev/null; then
+  awww-daemon &
   sleep 0.5
 fi
 
-# Get a list of all images in the directory
-# We use find to ensure we get absolute paths which Rofi needs for icons
-WALLPAPERS=$(find "$WALLPAPER_DIR" -type f \( -iname \*.jpg -o -iname \*.jpeg -o -iname \*.png -o -iname \*.gif \))
+WALLPAPERS=$(find "$WALLPAPER_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \))
 
 if [ -z "$WALLPAPERS" ]; then
-  notify-send "Wallpaper Picker" "No wallpapers found in $WALLPAPER_DIR"
+  notify-send "Wallpaper Picker" "No wallpapers found"
   exit 1
 fi
 
-# Create a string formatted for Rofi: "filename\0icon\x1ffull_path\n"
 ROFI_INPUT=""
 while IFS= read -r file; do
-  filename=$(basename "$file")
-  # This specific format tells Rofi to use the file itself as the icon
-  ROFI_INPUT+="$filename\0icon\x1f$file\n"
+  ROFI_INPUT+="$(basename "$file")\0icon\x1f$file\n"
 done <<<"$WALLPAPERS"
 
-# Pipe the formatted string into Rofi
-# -dmenu reads from stdin
-# -theme points to our new visual theme
-# -markup-rows allows the special formatting to work
-SELECTED_FILE=$(echo -e "$ROFI_INPUT" | rofi -dmenu -i -markup-rows -p "" -theme ~/.config/hypr/styles/wallpaper-picker.rasi)
+SELECTED_NAME=$(echo -e "$ROFI_INPUT" | rofi -dmenu -i -markup-rows -p "Wallpaper" -theme ~/.config/hypr/styles/wallpaper-picker.rasi)
 
-if [ -n "$SELECTED_FILE" ]; then
-  # Construct the full path
-  FULL_PATH="$WALLPAPER_DIR/$SELECTED_FILE"
-
-  # Apply using swww with the wipe transition we discussed
-  swww img "$FULL_PATH" --transition-type wipe --transition-angle 30 --transition-step 90
+if [ -n "$SELECTED_NAME" ]; then
+  awww img "$WALLPAPER_DIR/$SELECTED_NAME" \
+    --transition-type "$TYPE" \
+    --transition-pos "$(shuf -i 0-1 -n 1),$(shuf -i 0-1 -n 1)" \
+    --transition-step 90 \
+    --transition-fps 60 \
+    --transition-angle $(shuf -i 0-360 -n 1)
 fi
