@@ -52,6 +52,8 @@ You can install Onyxshell automatically using the provided `install.sh` script.
 Run the following command in the root of this repository:
 
 ```bash
+git clone https://github.com/sadid56/onyxshell.git
+cd onyxshell
 chmod +x install.sh && ./install.sh
 ```
 
