@@ -87,15 +87,11 @@ done
 # 6. Copy Onyxshell Configs
 echo -e "\n${BLUE}[*] Installing Onyxshell configurations...${RESET}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cp -r "$SCRIPT_DIR/config/"* "$CONFIG_DIR/"
+cp -r "$SCRIPT_DIR/.config/"* "$CONFIG_DIR/"
 
 # 7. Make Scripts Executable
 echo -e "\n${BLUE}[*] Setting execution permissions for scripts...${RESET}"
 chmod +x "$CONFIG_DIR/hypr/scripts/"*.sh 2>/dev/null || true
-# If there are other scripts, add them here
-if [ -f "$SCRIPT_DIR/update.sh" ]; then
-    chmod +x "$SCRIPT_DIR/update.sh"
-fi
 
 echo -e "\n${BLUE}====================================================${RESET}"
 echo -e "${GREEN}    Installation Complete!                          ${RESET}"
