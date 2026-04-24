@@ -55,6 +55,7 @@ OFFICIAL_PACKAGES=(
     xdg-desktop-portal 
     xdg-desktop-portal-hyprland 
     xdg-desktop-portal-gtk
+    7zip
 )
 
 AUR_PACKAGES=(
