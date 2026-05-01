@@ -67,7 +67,7 @@ fi
 # 4. PACKAGES
 # =========================
 OFFICIAL_PACKAGES=(
-    hyprland hyprlock hyprshot kitty yazi rofi waybar swaync
+    hyprland hyprlock hyprshot hypridle kitty yazi rofi waybar swaync
     wl-clipboard cliphist playerctl brightnessctl wireplumber
     network-manager-applet ttf-jetbrains-mono-nerd noto-fonts-emoji
     cava gnome-keyring libnotify pavucontrol
