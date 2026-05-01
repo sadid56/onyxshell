@@ -77,7 +77,7 @@
       "class<notion-app>": "󰎚",
       "class<thunar>": "",
       "class<org.kde.dolphin>": "",
-      "class<nautilus>": "",
+      "class<org.gnome.Nautilus>": "",
       "title<.*yazi.*>": "󰇥",
       /* --- System Utilities --- */
       "class<org.pulseaudio.pavucontrol>": "󰕾",

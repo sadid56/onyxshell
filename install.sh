@@ -14,7 +14,6 @@ if [[ "$1" == "--yes" ]]; then
     AUTO_YES=true
 fi
 
-# Confirmation function
 confirm() {
     if $AUTO_YES; then
         return 0
@@ -31,19 +30,28 @@ confirm() {
 }
 
 echo -e "${BLUE}====================================================${RESET}"
-echo -e "${GREEN}    Welcome to the Onyxshell Installer!             ${RESET}"
+echo -e "${GREEN}    Onyxshell + Zsh Full Setup Installer           ${RESET}"
 echo -e "${BLUE}====================================================${RESET}"
 
-# 1. System Update
+# =========================
+# 1. SYSTEM UPDATE
+# =========================
 if confirm "Update system packages?"; then
-    echo -e "\n${BLUE}[*] Updating system packages...${RESET}"
     sudo pacman -Syu --noconfirm
 fi
 
-# 2. Check and install yay (AUR Helper)
+# =========================
+# 2. BASE TOOLS
+# =========================
+if confirm "Install base tools (git, curl, zsh)?"; then
+    sudo pacman -S --needed --noconfirm git curl zsh base-devel
+fi
+
+# =========================
+# 3. YAY INSTALL
+# =========================
 if ! command -v yay &> /dev/null; then
     if confirm "Install yay AUR helper?"; then
-        echo -e "${BLUE}[*] Installing yay AUR helper...${RESET}"
         sudo pacman -S --needed --noconfirm base-devel git
         git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
         cd /tmp/yay-bin
@@ -52,91 +60,87 @@ if ! command -v yay &> /dev/null; then
         rm -rf /tmp/yay-bin
     fi
 else
-    echo -e "${GREEN}[+] yay is already installed.${RESET}"
+    echo -e "${GREEN}[+] yay already installed${RESET}"
 fi
 
-# 3. Define Required Packages
+# =========================
+# 4. PACKAGES
+# =========================
 OFFICIAL_PACKAGES=(
-    hyprland
-    hyprlock
-    hyprshot
-    kitty
-    yazi
-    rofi
-    waybar
-    swaync
-    wl-clipboard
-    cliphist
-    playerctl
-    brightnessctl
-    wireplumber
-    network-manager-applet
-    ttf-jetbrains-mono-nerd
-    noto-fonts-emoji
-    awww
-    cava
-    gnome-keyring
-    libnotify
-    pavucontrol
-    xdg-desktop-portal 
-    xdg-desktop-portal-hyprland 
-    xdg-desktop-portal-gtk
-    7zip
-    gnome-themes-extra
-    adwaita-icon-theme
-    nwg-look
-    qt6ct
-    qt5ct
+    hyprland hyprlock hyprshot kitty yazi rofi waybar swaync
+    wl-clipboard cliphist playerctl brightnessctl wireplumber
+    network-manager-applet ttf-jetbrains-mono-nerd noto-fonts-emoji
+    cava gnome-keyring libnotify pavucontrol
+    xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
+    gnome-themes-extra adwaita-icon-theme nwg-look qt6ct qt5ct
+    fastfetch neovim zsh git curl
 )
 
 AUR_PACKAGES=(
-    brave-bin
-    wlogout
-    pyprland
+    brave-bin wlogout pyprland quickshell-overview-git
 )
 
-# 4. Install Packages
 if confirm "Install official packages?"; then
-    echo -e "\n${BLUE}[*] Installing official packages...${RESET}"
     sudo pacman -S --needed --noconfirm "${OFFICIAL_PACKAGES[@]}"
 fi
 
 if confirm "Install AUR packages?"; then
-    echo -e "\n${BLUE}[*] Installing AUR packages...${RESET}"
     yay -S --needed --noconfirm "${AUR_PACKAGES[@]}"
 fi
 
-# 5. Backup Existing Configs
-if confirm "Backup existing configurations?"; then
-    echo -e "\n${BLUE}[*] Backing up existing configurations...${RESET}"
-    CONFIG_DIR="$HOME/.config"
-    BACKUP_DIR="$HOME/.config/onyxshell_backup_$(date +%Y%m%d_%H%M%S)"
+# =========================
+# 5. OH MY ZSH INSTALL
+# =========================
+if confirm "Install Oh My Zsh + plugins?"; then
 
-    mkdir -p "$BACKUP_DIR"
+    if [ ! -d "$HOME/.oh-my-zsh" ]; then
+        echo -e "${BLUE}[*] Installing Oh My Zsh...${RESET}"
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    else
+        echo -e "${GREEN}[+] Oh My Zsh already installed${RESET}"
+    fi
 
-    for folder in hypr rofi swaync waybar wlogout cava theme; do
-        if [ -d "$CONFIG_DIR/$folder" ]; then
-            mv "$CONFIG_DIR/$folder" "$BACKUP_DIR/$folder"
-            echo -e "${GREEN}[+] Backed up $folder to $BACKUP_DIR${RESET}"
-        fi
-    done
-fi
+    ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
 
-# 6. Copy Onyxshell Configs
-if confirm "Install Onyxshell configurations? (this will overwrite configs)"; then
-    echo -e "\n${BLUE}[*] Installing Onyxshell configurations...${RESET}"
+    mkdir -p "$ZSH_CUSTOM/plugins"
+    mkdir -p "$ZSH_CUSTOM/themes"
+
+    # Plugins
+    [[ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]] && \
+        git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
+
+    [[ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]] && \
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
+
+    # Theme
+    [[ ! -d "$ZSH_CUSTOM/themes/powerlevel10k" ]] && \
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k
+
+    # Restore .zshrc from repo if it exists
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    cp -r "$SCRIPT_DIR/.config/"* "$HOME/.config/"
+    if [ -f "$SCRIPT_DIR/zsh/.zshrc" ]; then
+        echo -e "${BLUE}[*] Restoring .zshrc from repository...${RESET}"
+        cp "$SCRIPT_DIR/zsh/.zshrc" "$HOME/.zshrc"
+        echo -e "${GREEN}[+] .zshrc restored${RESET}"
+    fi
 fi
 
-# 7. Make Scripts Executable
-if confirm "Set executable permissions for scripts?"; then
-    echo -e "\n${BLUE}[*] Setting execution permissions for scripts...${RESET}"
+
+# =========================
+# 7. DEFAULT SHELL
+# =========================
+if confirm "Set Zsh as default shell?"; then
+    chsh -s "$(which zsh)"
+fi
+
+# =========================
+# 8. HYPR SCRIPTS PERMISSION
+# =========================
+if confirm "Make Hypr scripts executable?"; then
     chmod +x "$HOME/.config/hypr/scripts/"*.sh 2>/dev/null || true
 fi
 
-echo -e "\n${BLUE}====================================================${RESET}"
-echo -e "${GREEN}    Installation Complete!                          ${RESET}"
 echo -e "${BLUE}====================================================${RESET}"
-echo -e "You can now log out and select ${GREEN}Hyprland${RESET} from your Display Manager (like SDDM or GDM)."
-echo -e "Enjoy your new Onyxshell setup!"
+echo -e "${GREEN}   INSTALLATION COMPLETE 🎉                         ${RESET}"
+echo -e "${BLUE}====================================================${RESET}"
+echo "Restart your terminal or log out and select Hyprland + Zsh ready!"

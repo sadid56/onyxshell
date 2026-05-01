@@ -13,6 +13,11 @@ CONFIG_DIRS=(
   "swaync"
   "yazi"
   "theme"
+  "quickshell"
+  "xdg-desktop-portal"
+  "nvim"
+  "kitty"
+  "fastfetch"
 )
 
 echo "🚀 Starting dotfiles update..."
@@ -38,6 +43,16 @@ for dir in "${CONFIG_DIRS[@]}"; do
     echo "  ⚠️ Warning: ~/.config/$dir not found on your system, skipping."
   fi
 done
+
+# Copy .zshrc separately
+echo "📁 Copying .zshrc..."
+if [ -f "$HOME/.zshrc" ]; then
+  mkdir -p "$REPO_DIR/zsh"
+  cp "$HOME/.zshrc" "$REPO_DIR/zsh/.zshrc"
+  echo "  ✔️ Copied .zshrc"
+else
+  echo "  ⚠️ Warning: ~/.zshrc not found on your system, skipping."
+fi
 
 
 # Git operations

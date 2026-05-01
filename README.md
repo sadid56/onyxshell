@@ -32,16 +32,11 @@ Onyxshell is a beautiful, modular, and modern dotfiles configuration for the [Hy
 - **Screen Locker:** Hyprlock
 - **Screenshot:** Hyprshot
 - **Logout Menu:** wlogout
+- **Quickshell:** Window Overview
 
 ## Prerequisites
 
 Onyxshell is built to be installed on **Arch Linux**. The included installation script handles installing the required dependencies via `pacman` and `yay` (AUR).
-
-### Manual Dependency List (If not using the script)
-
-- Base packages: `hyprland`, `hyprlock`, `hyprshot`, `kitty`, `yazi`, `rofi`, `waybar`, `swaync`, `wl-clipboard`, `cliphist`, `playerctl`, `brightnessctl`, `wireplumber`, `network-manager-applet`, `awww`, `cava`, `gnome-keyring`, `libnotify`, `pavucontrol`
-- Fonts: `ttf-jetbrains-mono-nerd`, `noto-fonts-emoji`
-- AUR packages: `brave-bin`, `wlogout`, `pyprland`
 
 ## Installation
 

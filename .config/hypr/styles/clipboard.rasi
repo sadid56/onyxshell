@@ -22,7 +22,7 @@ listview {
 }
 
 element {
-    padding: 15px 0px;
+    padding: 25px 0px;
     border-radius: 10px;
     background-color: transparent;
     text-color: @text;
