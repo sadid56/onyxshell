@@ -73,7 +73,7 @@ OFFICIAL_PACKAGES=(
     cava gnome-keyring libnotify pavucontrol
     xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
     gnome-themes-extra adwaita-icon-theme nwg-look qt6ct qt5ct
-    fastfetch neovim zsh git curl
+    fastfetch neovim zsh nodejs npm fzf power-profile-daemon
 )
 
 AUR_PACKAGES=(
@@ -82,6 +82,10 @@ AUR_PACKAGES=(
 
 if confirm "Install official packages?"; then
     sudo pacman -S --needed --noconfirm "${OFFICIAL_PACKAGES[@]}"
+fi
+
+if confirm "Enable Power Profiles Daemon service?"; then
+    sudo systemctl enable --now power-profiles-daemon.service
 fi
 
 if confirm "Install AUR packages?"; then
