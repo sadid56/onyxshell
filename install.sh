@@ -73,7 +73,7 @@ OFFICIAL_PACKAGES=(
     cava gnome-keyring libnotify pavucontrol
     xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
     gnome-themes-extra adwaita-icon-theme nwg-look qt6ct qt5ct
-    fastfetch neovim zsh nodejs npm fzf power-profile-daemon
+    fastfetch neovim zsh nodejs npm fzf power-profile-daemon vlc vlc-plugins-all gwenview
 )
 
 AUR_PACKAGES=(
