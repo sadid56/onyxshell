@@ -85,6 +85,8 @@ OFFICIAL_PACKAGES=(
     gnome-themes-extra
     adwaita-icon-theme
     nwg-look
+    qt6ct
+    qt5ct
 )
 
 AUR_PACKAGES=(
