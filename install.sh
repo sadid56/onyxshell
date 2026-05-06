@@ -77,7 +77,7 @@ OFFICIAL_PACKAGES=(
 )
 
 AUR_PACKAGES=(
-    brave-bin wlogout pyprland quickshell-overview-git
+    brave-bin wlogout pyprland quickshell-overview-git clipse-gui
 )
 
 if confirm "Install official packages?"; then

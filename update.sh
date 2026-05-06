@@ -18,6 +18,7 @@ CONFIG_DIRS=(
   "nvim"
   "kitty"
   "fastfetch"
+  "clipse-gui"
 )
 
 echo "🚀 Starting dotfiles update..."

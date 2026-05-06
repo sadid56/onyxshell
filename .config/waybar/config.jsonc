@@ -62,7 +62,7 @@
       "title<.*Spotify.*>": "",
       "class<vlc>": "󰕔",
       "class<mpv>": "",
-      "class<obs>": "󰑋",
+      "class<com.obsproject.Studio>": "󰑋",
       "class<steam>": "",
       /* --- Social & Communication --- */
       "class<discord>": "",
