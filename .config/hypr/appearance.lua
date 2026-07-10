@@ -15,7 +15,7 @@ hl.config({
         layout           = "dwindle",
     },
 
-    misc = {
+    debug = {
         vfr = true,
     },
 
