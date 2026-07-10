@@ -20,7 +20,8 @@ confirm() {
     fi
 
     while true; do
-        read -rp "$(echo -e "${BLUE}[?] $1 (y/n): ${RESET}")" choice
+        read -rp "$(echo -e "${BLUE}[?] $1 [Y/n]: ${RESET}")" choice
+        choice="${choice:-y}"
         case "$choice" in
             [Yy]*) return 0 ;;
             [Nn]*) echo -e "${RED}[-] Skipped.${RESET}"; return 1 ;;
@@ -123,10 +124,41 @@ if confirm "Install Oh My Zsh + plugins?"; then
     # Restore .zshrc from repo if it exists
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     if [ -f "$SCRIPT_DIR/zsh/.zshrc" ]; then
+        if [ -f "$HOME/.zshrc" ]; then
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            echo -e "${BLUE}[*] Backing up existing ~/.zshrc to ~/.zshrc_backup_${TIMESTAMP}...${RESET}"
+            mv "$HOME/.zshrc" "$HOME/.zshrc_backup_${TIMESTAMP}"
+        fi
         echo -e "${BLUE}[*] Restoring .zshrc from repository...${RESET}"
         cp "$SCRIPT_DIR/zsh/.zshrc" "$HOME/.zshrc"
         echo -e "${GREEN}[+] .zshrc restored${RESET}"
     fi
+fi
+
+# =========================
+# 6. COPY CONFIGURATION FILES
+# =========================
+if confirm "Copy configuration files to ~/.config?"; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+    mkdir -p "$HOME/.config"
+
+    for SRC_DIR in "$SCRIPT_DIR/.config"/*; do
+        if [ -d "$SRC_DIR" ]; then
+            dir=$(basename "$SRC_DIR")
+            DEST_DIR="$HOME/.config/$dir"
+
+            if [ -d "$DEST_DIR" ]; then
+                BACKUP_DIR="${DEST_DIR}_backup_${TIMESTAMP}"
+                echo -e "${BLUE}[*] Backing up existing $DEST_DIR to $BACKUP_DIR...${RESET}"
+                mv "$DEST_DIR" "$BACKUP_DIR"
+            fi
+
+            echo -e "${GREEN}[+] Copying $dir config to ~/.config/$dir...${RESET}"
+            cp -r "$SRC_DIR" "$DEST_DIR"
+        fi
+    done
 fi
 
 
