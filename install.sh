@@ -70,7 +70,7 @@ fi
 OFFICIAL_PACKAGES=(
     hyprland hyprlock hyprshot hypridle kitty yazi rofi waybar swaync
     wl-clipboard cliphist playerctl brightnessctl wireplumber
-    network-manager-applet ttf-jetbrains-mono-nerd noto-fonts-emoji
+    network-manager-applet ttf-jetbrains-mono-nerd noto-fonts-emoji awww
     cava gnome-keyring libnotify pavucontrol
     xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
     gnome-themes-extra adwaita-icon-theme nwg-look qt6ct qt5ct
