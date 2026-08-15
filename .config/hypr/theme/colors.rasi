@@ -1,4 +1,4 @@
-/* ~/.config/theme/colors.rasi */
+/* ~/.config/hypr/theme/colors.rasi */
 * {
     base:     #1e1e2e;
     mantle:   #181825;

@@ -3,31 +3,31 @@
 
 -- Per-device input overrides
 hl.device({
-    name        = "epic-mouse-v1",
-    sensitivity = -0.5,
+	name = "epic-mouse-v1",
+	sensitivity = -1,
 })
 
 -- Gestures config
 hl.gesture({
-    fingers   = 3,
-    direction = "horizontal",
-    action    = "workspace",
+	fingers = 3,
+	direction = "horizontal",
+	action = "workspace",
 })
 
 -- General tweaks and system components
 hl.config({
-    misc = {
-        disable_hyprland_logo     = false,
-        on_focus_under_fullscreen = 1,
-    },
+	misc = {
+		disable_hyprland_logo = false,
+		on_focus_under_fullscreen = 1,
+	},
 
-    cursor = {
-        no_hardware_cursors = 0,
-    },
+	cursor = {
+		no_hardware_cursors = 0,
+	},
 
-    group = {
-        groupbar = {
-            enabled = false,
-        },
-    },
+	group = {
+		groupbar = {
+			enabled = false,
+		},
+	},
 })

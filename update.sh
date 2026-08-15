@@ -8,17 +8,12 @@ CONFIG_DIRS=(
   "rofi"
   "wlogout"
   "hypr"
-  "pypr"
   "cava"
   "swaync"
-  "yazi"
-  "theme"
-  "quickshell"
   "xdg-desktop-portal"
   "nvim"
   "kitty"
   "fastfetch"
-  "clipse-gui"
 )
 
 echo "🚀 Starting dotfiles update..."

@@ -1,8 +1,11 @@
 configuration {
     modi: "dmenu";
-    show-icons: false;
+    show-icons: true;
     display-dmenu: "󰅌";
-    }
+    hover-select: true;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+}
 
 @import "base.rasi"
 
@@ -22,15 +25,24 @@ listview {
 }
 
 element {
-    padding: 25px 0px;
+    padding: 10px 15px;
     border-radius: 10px;
     background-color: transparent;
     text-color: @text;
-    spacing: 0px;
+    spacing: 12px;
+}
+
+element-icon {
+    size: 48px;
+    vertical-align: 0.5;
 }
 
 element-text {
     margin: 0px;
     padding: 0px;
     vertical-align: 0.5;
+}
+
+prompt {
+    enabled: false;
 }

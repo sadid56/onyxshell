@@ -3,19 +3,12 @@
   "position": "top",
   "height": 40,
   "spacing": 0,
-  "modules-left": [
-    "custom/arch",
-    "hyprland/workspaces",
-    "custom/cava_mviz"
-  ],
-  "modules-center": [
-    "clock"
-  ],
+  "modules-left": ["custom/arch", "hyprland/workspaces", "group/hardware"],
+  "modules-center": ["clock"],
   "modules-right": [
     "network",
     "pulseaudio",
     // "backlight",
-    "group/hardware",
     "battery",
     "tray",
     "custom/notification"
@@ -23,7 +16,7 @@
   "custom/arch": {
     "format": " ",
     "tooltip": false,
-    "on-click": "rofi -show drun"
+    "on-click": "wlogout"
   },
   "hyprland/workspaces": {
     "disable-scroll": true,
@@ -48,6 +41,7 @@
       "class<google-chrome>": "",
       "class<chromium>": "",
       "class<brave-browser>": "🦁",
+      "class<brave-origin>": "🦁",
       "class<zen-alpha>": "󰈹",
       "class<vivaldi-stable>": "",
       /* --- Developer & SaaS Tools --- */
@@ -85,13 +79,13 @@
       "class<nm-connection-editor>": "󰤨",
       "title<.*btop.*>": "",
       "title<.*htop.*>": "",
-      "class<antigravity>": ""
-    }
+      "class<antigravity-ide>": "",
+    },
   },
   "clock": {
-    "format": "  {:%I:%M:%S %p}",
+    "format": "󱑂  {:%I:%M:%S %p}",
     "interval": 1,
-    "tooltip-format": "<tt>{calendar}</tt>"
+    "tooltip-format": "<tt>{calendar}</tt>",
   },
   "network": {
     "interval": 1,
@@ -99,44 +93,37 @@
     "format-ethernet": "↓ {bandwidthDownBytes} - 󰈀 Wired",
     "format-disconnected": "󰌙 Offline",
     "tooltip-format": "{ifname} via {gwaddr} ",
-    "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
-    "on-click": "kitty -e nmtui"
+    "tooltip-format-wifi": "{essid} ({signalStrength}%) 󰤨",
+    "on-click": "kitty -e nmtui",
   },
   "pulseaudio": {
     "format": "{volume}% <span rise='-800' size='115%'>{icon}</span>",
     "format-muted": "0% <span rise='-800' size='115%'>󰖁</span>",
     "format-icons": {
-      "default": [
-        "󰕿",
-        "󰖀",
-        "󰕾"
-      ],
+      "default": ["󰕿", "󰖀", "󰕾"],
       "headphone": "󰋋",
-      "headset": "󰋎"
+      "headset": "󰋎",
     },
     "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-    "on-click-right": "pavucontrol"
+    "on-click-right": "pavucontrol",
   },
   "group/hardware": {
     "orientation": "horizontal",
-    "modules": [
-      "cpu",
-      "memory"
-    ]
+    "modules": ["cpu", "memory"],
   },
   "cpu": {
-    "format": "{usage}% <span size='110%'>󰍛</span>",
-    "interval": 2
+    "format": "{usage}% <span size='110%'>󰘚</span>",
+    "interval": 2,
   },
   "memory": {
-    "format": "{percentage}% <span size='110%'>󰓅</span>",
-    "interval": 2
+    "format": "{percentage}% <span size='110%'>󰾆</span>",
+    "interval": 2,
   },
   "battery": {
     "interval": 10,
     "states": {
       "warning": 30,
-      "critical": 15
+      "critical": 15,
     },
     "format": "{capacity}% <span size='110%'>{icon}</span>",
     "format-charging": "{capacity}% <span size='110%'>󰂄</span>",
@@ -170,7 +157,7 @@
       "inhibited-notification": "󰂚",
       "inhibited-none": "󰂜",
       "dnd-inhibited-notification": "󰂛",
-      "dnd-inhibited-none": "󰂜"
+      "dnd-inhibited-none": "󰂜",
     },
     "return-type": "json",
     "exec-if": "which swaync-client",
@@ -178,9 +165,5 @@
     "on-click": "sleep 0.1 && swaync-client -t -sw",
     "on-click-right": "swaync-client -d -sw",
     "escape": true
-  },
-  "custom/cava_mviz": {
-    "exec": "$HOME/.config/hypr/scripts/waybar_cava.sh",
-    "format": "{}"
   }
 }

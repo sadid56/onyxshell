@@ -1,4 +1,4 @@
-@import url("../theme/colors.css");
+@import url("../hypr/theme/colors.css");
 
 * {
     font-family: "Figtree", sans-serif;
@@ -98,6 +98,8 @@
 
 .widget-buttons-grid > flowbox {
     padding: 0px; 
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .widget-buttons-grid > flowbox > flowboxchild > button {
@@ -215,6 +217,7 @@ scale slider {
     border: 1px solid @surface1;
     padding: 12px;
     margin: 0px;
+    min-width: 480px;
 }
 
 .notification-content {

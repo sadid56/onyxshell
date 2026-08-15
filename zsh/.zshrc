@@ -1,8 +1,13 @@
-## Complete ZSH setup
+fastfetch -c $HOME/.config/fastfetch/config-pokemon.jsonc
 
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
+
+## Complete ZSH setup
 
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -16,9 +21,6 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-# fastfetch. Will be disabled by default if want to use it just uncommit pokemon or compact
-# fastfetch -c $HOME/.config/fastfetch/config-compact.jsonc
-# fastfetch -c $HOME/.config/fastfetch/config-pokemon.jsonc
 
 # Set-up FZF key bindings (CTRL R for fuzzy history finder)
 source <(fzf --zsh)
@@ -34,8 +36,10 @@ alias l='ls -l'
 alias la='ls -a'
 alias lla='ls -la'
 alias lt='ls --tree'
-alias pn='pnpm'
-alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
-
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/sadid/.local/bin:$PATH"
+export PATH="/home/sadid/.local/bin:$PATH"

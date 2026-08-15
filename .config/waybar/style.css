@@ -1,4 +1,4 @@
-@import url("../theme/colors.css");
+@import url("../hypr/theme/colors.css");
 
 * {
     font-family: "JetBrainsMono Nerd Font", sans-serif;
@@ -22,7 +22,6 @@ window#waybar {
 #backlight,
 #hardware,
 #battery,
-#custom-cava_mviz,
 #custom-notification {
     background-color: @base;
     border-radius: 16px;
@@ -35,9 +34,7 @@ window#waybar {
     padding-right: 10px;
 }
 
-#custom-cava_mviz{
-    margin-left: 8px;
-}
+
 
 /* Replaced #cpu and #memory with #group-hardware */
 #network,
@@ -60,6 +57,8 @@ window#waybar {
     margin-right: 5px;
     padding-left: 17px;
 }
+
+
 
 #workspaces {
     padding-left: 5px;

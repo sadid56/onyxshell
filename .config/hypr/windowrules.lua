@@ -63,11 +63,12 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name      = "clipboard-manager",
-    match     = { class = "^(clipse-gui)$" },
+    name      = "dropdown-terminal",
+    match     = { class = "^(kitty-dropdown)$" },
+    workspace = "special:dropdown",
     float     = true,
+    size      = { 1536, 648 },
     center    = true,
-    size      = { 640, 700 },
-    animation = "popin 90%",
-    dim_around = true,
 })
+
+
