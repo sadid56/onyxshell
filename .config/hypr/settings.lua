@@ -1,10 +1,9 @@
--- Settings and Tweaks Configuration
 -- Reference: https://wiki.hypr.land/Configuring/Variables/
 
 -- Per-device input overrides
 hl.device({
-	name = "epic-mouse-v1",
-	sensitivity = -1,
+	name = "elan07d2:00-04f3:321a-touchpad",
+	sensitivity = 0.8,
 })
 
 -- Gestures config

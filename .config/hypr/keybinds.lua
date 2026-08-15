@@ -93,7 +93,7 @@ hl.bind(mainMod .. " + CTRL + down",  hl.dsp.window.move({ direction = "d" }))
 ------------------------
 ---- SYSTEM & MEDIA ----
 ------------------------
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("kitty --class floating_mem -e watch --color -t -n 1 ~/.config/hypr/scripts/sysmon.sh"))
+hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("kitty --class floating_mem -e ~/.config/hypr/scripts/sysmon.sh"))
 
 -- System Controls
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("wlogout"))

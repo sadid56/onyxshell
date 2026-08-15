@@ -1,6 +1,22 @@
 #!/bin/bash
+spawned=false
 if ! hyprctl clients | grep -q "class: kitty-dropdown"; then
     kitty --class kitty-dropdown &
-    sleep 0.25
+    spawned=true
+    for i in {1..50}; do
+        if hyprctl clients | grep -q "class: kitty-dropdown"; then
+            break
+        fi
+        sleep 0.05
+    done
+    sleep 0.05
 fi
-hyprctl dispatch "hl.dsp.workspace.toggle_special('dropdown')"
+
+if [ "$spawned" = true ]; then
+    if ! hyprctl monitors | grep -q "special:dropdown"; then
+        hyprctl dispatch "hl.dsp.workspace.toggle_special('dropdown')"
+    fi
+else
+    # If it was already running, toggle its state
+    hyprctl dispatch "hl.dsp.workspace.toggle_special('dropdown')"
+fi

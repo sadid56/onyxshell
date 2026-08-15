@@ -18,3 +18,4 @@ hl.animation({ leaf = "border",      enabled = true, speed = 8, bezier = "defaul
 hl.animation({ leaf = "borderangle", enabled = true, speed = 6, bezier = "default" })
 hl.animation({ leaf = "fade",        enabled = true, speed = 3, bezier = "default" })
 hl.animation({ leaf = "workspaces",  enabled = true, speed = 5, bezier = "smoothOut" })
+hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 5, bezier = "smoothOut", style = "slidevert" })
