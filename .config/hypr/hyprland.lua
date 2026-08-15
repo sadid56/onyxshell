@@ -15,14 +15,14 @@ hl.monitor({
 ---------------------
 terminal = "kitty"
 fileManager = "nautilus"
-menu = "rofi -show drun"
 browser = "brave-origin"
 
 -------------------
 ---- AUTOSTART ----
 -------------------
 hl.on("hyprland.start", function()
-	hl.exec_cmd("waybar")
+	-- hl.exec_cmd("waybar")
+	hl.exec_cmd("quickshell -p /home/sadid/.config/quickshell/shell.qml")
 	hl.exec_cmd("awww-daemon")
 	hl.exec_cmd("hypridle")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
@@ -31,7 +31,6 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("systemctl --user start hyprpolkitagent")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'")
-	hl.exec_cmd("swaync")
 end)
 
 -------------------------------

@@ -4,17 +4,13 @@
 # Reload Hyprland config
 hyprctl reload
 
-# Restart Waybar
-killall waybar
-waybar &
-
-# Restart SwayNC (Sway Notification Center)
-killall swaync
-swaync &
+# Restart Quickshell
+killall quickshell
+quickshell -p /home/sadid/.config/quickshell/shell.qml &
 
 # Restart Hypridle
 killall hypridle
 hypridle &
 
 # Notify user of completion
-notify-send -u low "Desktop Reloaded" "Waybar, SwayNC, Hypridle, and Hyprland configuration reloaded."
+notify-send -u low "Desktop Reloaded" "Quickshell, Hypridle, and Hyprland configuration reloaded."

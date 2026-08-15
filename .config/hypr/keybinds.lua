@@ -10,24 +10,24 @@ local secondMod = "ALT"
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("~/.config/hypr/scripts/dropdown.sh"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(secondMod .. " + SPACE", hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("rofi -show drun -theme ~/.config/hypr/styles/application-dashboard.rasi"))
+hl.bind(secondMod .. " + SPACE", hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleLauncher"))
+hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleLauncher"))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
 
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("~/.config/hypr/scripts/reload.sh"))
-hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_waybar.sh"))
+hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleBar"))
 
 -- Show keybinds cheat sheet
-hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("~/.config/hypr/scripts/keybinds.sh"))
+hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleKeybinds"))
 
 ----------------------------------
 ---- CLIPBOARD & NOTIFICATIONS ---
 ----------------------------------
 -- for cliphist
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("rofi -modi 'clipboard:~/.config/hypr/scripts/cliphist.sh' -show clipboard -show-icons -theme ~/.config/hypr/styles/clipboard.rasi"))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleClipboard"))
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist wipe && notify-send 'Clipboard cleared'"))
-hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t -sw"))
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleNotifications"))
 
 ---------------------------
 ---- WINDOW MANAGEMENT ----
@@ -96,8 +96,8 @@ hl.bind(mainMod .. " + CTRL + down",  hl.dsp.window.move({ direction = "d" }))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("kitty --class floating_mem -e ~/.config/hypr/scripts/sysmon.sh"))
 
 -- System Controls
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("wlogout"))
-hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("~/.config/hypr/scripts/wallpaper_switch.sh"))
+hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleControlCenter"))
+hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleWallpaperSelector"))
 hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("~/.config/hypr/scripts/shutdown.sh"))
 
 -- Screenshots

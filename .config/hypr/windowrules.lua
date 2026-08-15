@@ -25,19 +25,22 @@ hl.window_rule({
 ---------------------
 ---- LAYER RULES ----
 ---------------------
+
 hl.layer_rule({
-    name  = "wlogout-blur",
-    match = { namespace = "^logout_dialog$" },
-    blur  = true,
+	name         = "rofi-style",
+	match        = { namespace = "rofi" },
+	blur         = true,
+	dim_around   = true,
+	animation    = "popin 85%",
+	ignore_alpha = 0.3,
 })
 
 hl.layer_rule({
-    name         = "rofi-style",
-    match        = { namespace = "rofi" },
-    blur         = true,
-    dim_around   = true,
-    animation    = "popin 85%",
-    ignore_alpha = 0.3,
+	name         = "quickshell-style",
+	match        = { namespace = "quickshell" },
+	blur         = true,
+	ignore_alpha = 0.3,
+	animation    = "fade",
 })
 
 ----------------------

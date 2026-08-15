@@ -48,38 +48,20 @@ if confirm "Install base tools (git, curl, zsh)?"; then
     sudo pacman -S --needed --noconfirm git curl zsh base-devel
 fi
 
-# =========================
-# 3. YAY INSTALL
-# =========================
-if ! command -v yay &> /dev/null; then
-    if confirm "Install yay AUR helper?"; then
-        sudo pacman -S --needed --noconfirm base-devel git
-        git clone https://aur.archlinux.org/yay.git /tmp/yay
-        cd /tmp/yay
-        makepkg -si --noconfirm
-        cd -
-        rm -rf /tmp/yay
-    fi
-else
-    echo -e "${GREEN}[+] yay already installed${RESET}"
-fi
 
 # =========================
 # 4. PACKAGES
 # =========================
 OFFICIAL_PACKAGES=(
-    hyprland hyprlock hyprshot hypridle kitty rofi waybar swaync
+    hyprland hyprlock hyprshot hypridle hyprpicker kitty
     wl-clipboard cliphist playerctl brightnessctl wireplumber
     network-manager-applet ttf-jetbrains-mono-nerd noto-fonts-emoji awww
     cava gnome-keyring libnotify pavucontrol
     xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
     gnome-themes-extra adwaita-icon-theme nwg-look qt6ct qt5ct
-    fastfetch neovim zsh nodejs npm fzf power-profiles-daemon hyprpolkitagent nautilus
+    fastfetch neovim zsh nodejs npm fzf power-profiles-daemon hyprpolkitagent nautilus quickshell matugen
 )
 
-AUR_PACKAGES=(
-    brave-bin wlogout
-)
 
 if confirm "Install official packages?"; then
     sudo pacman -S --needed --noconfirm "${OFFICIAL_PACKAGES[@]}"
@@ -89,10 +71,6 @@ if confirm "Enable Power Profiles Daemon service?"; then
     sudo systemctl enable --now power-profiles-daemon.service
 fi
 
-echo -e "${BLUE}[*] AUR packages to be installed: ${AUR_PACKAGES[*]}${RESET}"
-if confirm "Install AUR packages?"; then
-    yay -S --needed --noconfirm "${AUR_PACKAGES[@]}"
-fi
 
 # =========================
 # 5. OH MY ZSH INSTALL

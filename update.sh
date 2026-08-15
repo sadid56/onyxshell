@@ -4,16 +4,13 @@ REPO_DIR="$HOME/onyxshell"
 
 # List of all the config folders inside ~/.config/ that you want to back up
 CONFIG_DIRS=(
-  "waybar"
-  "rofi"
-  "wlogout"
   "hypr"
   "cava"
-  "swaync"
   "xdg-desktop-portal"
   "nvim"
   "kitty"
   "fastfetch"
+  "quickshell"
 )
 
 echo "🚀 Starting dotfiles update..."
