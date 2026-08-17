@@ -53,6 +53,17 @@ QtObject {
         popupManager.restartLoaderTimer(loader);
     }
 
+    function clearAllNotifications() {
+        var temp = root.activeNotifs.slice();
+        for (var i = temp.length - 1; i >= 0; i--) {
+            var n = temp[i];
+            if (n && typeof n.dismiss === "function") {
+                n.dismiss();
+            }
+        }
+        root.activeNotifs = [];
+    }
+
     function setLoaderInactive(loader) {
         popupManager.setLoaderInactive(loader);
     }

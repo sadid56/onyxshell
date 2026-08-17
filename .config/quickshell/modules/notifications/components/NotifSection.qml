@@ -10,7 +10,7 @@ ColumnLayout {
     spacing: 12
 
     property var theme
-    property var activeNotifs: (typeof notifWindow !== "undefined" && notifWindow.activeNotifs) ? notifWindow.activeNotifs : ((typeof root !== "undefined" && root.activeNotifs) ? root.activeNotifs : [])
+    readonly property var activeNotifs: (typeof notifWindow !== "undefined" && notifWindow.activeNotifs) ? notifWindow.activeNotifs : ((typeof root !== "undefined" && root.activeNotifs) ? root.activeNotifs : [])
 
     RowLayout {
         Layout.fillWidth: true
@@ -36,14 +36,17 @@ ColumnLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    var temp = notifSectionRoot.activeNotifs;
-                    for (var i = temp.length - 1; i >= 0; i--) {
-                        var n = temp[i];
-                        if (n && typeof n.dismiss === "function") {
-                            n.dismiss();
+                    if (typeof root !== "undefined" && typeof root.clearAllNotifications === "function") {
+                        root.clearAllNotifications();
+                    } else {
+                        var temp = notifSectionRoot.activeNotifs;
+                        for (var i = temp.length - 1; i >= 0; i--) {
+                            var n = temp[i];
+                            if (n && typeof n.dismiss === "function") {
+                                n.dismiss();
+                            }
                         }
                     }
-                    notifSectionRoot.activeNotifs = [];
                 }
             }
         }

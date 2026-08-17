@@ -29,11 +29,6 @@ QtObject {
     property alias errorPopup: errorPopup
     property alias trayMenuPopup: trayMenuPopup
 
-    onActiveNotifsChanged: {
-        if (notifsLoader.item) {
-            notifsLoader.item.activeNotifs = popupManager.activeNotifs;
-        }
-    }
 
     function closeAllPopupsExcept(excludeLoader) {
         var loaders = [
@@ -178,19 +173,8 @@ QtObject {
             id: notifsLoader
             property bool loaded: false
             active: loaded
-            onLoaded: {
-                if (item) {
-                    item.activeNotifs = popupManager.activeNotifs;
-                }
-            }
             sourceComponent: NotificationCenter {
                 theme: popupManager.theme
-                activeNotifs: popupManager.activeNotifs
-                onActiveChanged: {
-                    if (active) {
-                        activeNotifs = popupManager.activeNotifs;
-                    }
-                }
             }
         },
 

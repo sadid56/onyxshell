@@ -15,7 +15,7 @@ Popup {
     flatBottom: true
     slideFromRight: true
 
-    property var activeNotifs: (typeof root !== "undefined" && root.activeNotifs) ? root.activeNotifs : []
+    readonly property var activeNotifs: (typeof root !== "undefined" && root.activeNotifs) ? root.activeNotifs : ((typeof popupManager !== "undefined" && popupManager.activeNotifs) ? popupManager.activeNotifs : [])
     property int notifCount: activeNotifs.length
 
     property int volumeValue: 50
@@ -200,7 +200,6 @@ Popup {
 
     NotifSection {
         theme: notifWindow.theme
-        activeNotifs: notifWindow.activeNotifs
     }
 
     UI.Divider {
