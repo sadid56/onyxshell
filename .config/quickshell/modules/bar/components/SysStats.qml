@@ -37,7 +37,7 @@ Item {
     Process {
         id: statsProc
         command: ["sh", "-c", "cat /proc/meminfo /proc/stat /sys/class/power_supply/BAT0/capacity /sys/class/power_supply/BAT0/status 2>/dev/null"]
-        
+
         stdout: StdioCollector {
             onStreamFinished: {
                 var text = this.text;

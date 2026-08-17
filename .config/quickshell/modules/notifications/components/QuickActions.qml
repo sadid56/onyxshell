@@ -5,25 +5,25 @@ import "../../../components/ui" as UIButtons
 RowLayout {
     id: quickActionsRoot
     Layout.fillWidth: true
-    spacing: 10
+    spacing: 8
 
     property var theme
     property bool wifiEnabled: true
+    property bool bluetoothEnabled: true
     property bool isMuted: false
     property bool isMicMuted: false
+
     property var wifiToggleProc
+    property var bluetoothToggleProc
     property var muteToggleProc
     property var micToggleProc
-    property var screenshotProc
-    property var hyprpickerProc
-
-    signal closeRequested()
 
     UIButtons.Button {
         Layout.fillWidth: true
-        height: 48
+        height: 44
         theme: quickActionsRoot.theme
-        icon: quickActionsRoot.wifiEnabled ? "󰤨" : "󰤮"
+        iconSize: 20
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getWifiIcon(100, quickActionsRoot.wifiEnabled, quickActionsRoot.wifiEnabled)
         active: quickActionsRoot.wifiEnabled
         onClicked: {
             quickActionsRoot.wifiEnabled = !quickActionsRoot.wifiEnabled;
@@ -37,25 +37,27 @@ RowLayout {
 
     UIButtons.Button {
         Layout.fillWidth: true
-        height: 48
+        height: 44
         theme: quickActionsRoot.theme
-        icon: quickActionsRoot.isMicMuted ? "󰍭" : "󰍬"
-        active: !quickActionsRoot.isMicMuted
+        iconSize: 20
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getBluetoothIcon(quickActionsRoot.bluetoothEnabled)
+        active: quickActionsRoot.bluetoothEnabled
         onClicked: {
-            quickActionsRoot.isMicMuted = !quickActionsRoot.isMicMuted;
-            if (quickActionsRoot.micToggleProc) {
-                quickActionsRoot.micToggleProc.command = ["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"];
-                quickActionsRoot.micToggleProc.running = false;
-                quickActionsRoot.micToggleProc.running = true;
+            quickActionsRoot.bluetoothEnabled = !quickActionsRoot.bluetoothEnabled;
+            if (quickActionsRoot.bluetoothToggleProc) {
+                quickActionsRoot.bluetoothToggleProc.command = ["sh", "-c", quickActionsRoot.bluetoothEnabled ? "rfkill unblock bluetooth && (bluetoothctl power on 2>/dev/null || true)" : "rfkill block bluetooth"];
+                quickActionsRoot.bluetoothToggleProc.running = false;
+                quickActionsRoot.bluetoothToggleProc.running = true;
             }
         }
     }
 
     UIButtons.Button {
         Layout.fillWidth: true
-        height: 48
+        height: 44
         theme: quickActionsRoot.theme
-        icon: quickActionsRoot.isMuted ? "󰖁" : "󰕾"
+        iconSize: 20
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getSpeakerIcon(quickActionsRoot.isMuted)
         active: !quickActionsRoot.isMuted
         onClicked: {
             quickActionsRoot.isMuted = !quickActionsRoot.isMuted;
@@ -69,28 +71,17 @@ RowLayout {
 
     UIButtons.Button {
         Layout.fillWidth: true
-        height: 48
+        height: 44
         theme: quickActionsRoot.theme
-        icon: "󰹑"
+        iconSize: 20
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getMicIcon(quickActionsRoot.isMicMuted)
+        active: !quickActionsRoot.isMicMuted
         onClicked: {
-            quickActionsRoot.closeRequested();
-            if (quickActionsRoot.screenshotProc) {
-                quickActionsRoot.screenshotProc.running = false;
-                quickActionsRoot.screenshotProc.running = true;
-            }
-        }
-    }
-
-    UIButtons.Button {
-        Layout.fillWidth: true
-        height: 48
-        theme: quickActionsRoot.theme
-        icon: "󰈋"
-        onClicked: {
-            quickActionsRoot.closeRequested();
-            if (quickActionsRoot.hyprpickerProc) {
-                quickActionsRoot.hyprpickerProc.running = false;
-                quickActionsRoot.hyprpickerProc.running = true;
+            quickActionsRoot.isMicMuted = !quickActionsRoot.isMicMuted;
+            if (quickActionsRoot.micToggleProc) {
+                quickActionsRoot.micToggleProc.command = ["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"];
+                quickActionsRoot.micToggleProc.running = false;
+                quickActionsRoot.micToggleProc.running = true;
             }
         }
     }

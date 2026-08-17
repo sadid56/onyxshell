@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
+import Quickshell.Widgets
 import "../../../components/ui" as UI
 
 UI.AnimatedListView {
@@ -7,15 +9,32 @@ UI.AnimatedListView {
     Layout.fillWidth: true
     Layout.fillHeight: true
     Layout.preferredHeight: Math.min(380, count * 54)
-    spacing: 8
+    spacing: 4
     focus: true
-    pillColor: entriesListRoot.theme.getColor("surfaceVariant")
+    pillColor: entriesListRoot.theme ? entriesListRoot.theme.getColor("surfaceVariant") : "#2b2a27"
 
-    property var theme
     property var clipService
     property string searchQuery: ""
     property var entriesModel: []
-    onEntriesModelChanged: syncListModel(dynamicClipModel, entriesModel, "", 20)
+
+    function normalizeEntries(src) {
+        if (!src) return [];
+        var res = [];
+        for (var i = 0; i < src.length; i++) {
+            var item = src[i];
+            if (typeof item === "object" && item.entryData !== undefined) {
+                res.push(item);
+            } else {
+                res.push({ "entryData": String(item) });
+            }
+        }
+        return res;
+    }
+
+    onEntriesModelChanged: {
+        var processed = normalizeEntries(entriesModel);
+        syncListModel(dynamicClipModel, processed, "entryData", 25);
+    }
 
     signal entryClicked(string entryText)
     signal deleteClicked(string entryText)
@@ -32,7 +51,7 @@ UI.AnimatedListView {
     delegate: Item {
         id: delegateWrapper
         width: entriesListRoot.width
-        height: 52
+        height: 48
         z: 1
 
         readonly property string entryText: entryData !== undefined ? entryData : (modelData !== undefined ? modelData : "")
@@ -40,45 +59,6 @@ UI.AnimatedListView {
         property bool isImage: entriesListRoot.clipService ? entriesListRoot.clipService.isImageEntry(entryText) : false
         property string imageSource: (isImage && entriesListRoot.clipService) ? entriesListRoot.clipService.getImagePreview(entryText) : ""
         property string cleanDisplay: entryText.indexOf("\t") !== -1 ? entryText.substring(entryText.indexOf("\t") + 1).replace(/\r?\n|\r/g, " ") : entryText.replace(/\r?\n|\r/g, " ")
-
-        transform: Translate {
-            id: slideTrans
-            y: 0
-        }
-
-        ParallelAnimation {
-            id: entranceAnim
-            NumberAnimation {
-                target: slideTrans
-                property: "y"
-                from: 14
-                to: 0
-                duration: 260
-                easing.type: Easing.OutBack
-                easing.overshoot: 1.4
-            }
-            NumberAnimation {
-                target: delegateWrapper
-                property: "opacity"
-                from: 0.90
-                to: 1.0
-                duration: 220
-                easing.type: Easing.OutQuad
-            }
-        }
-
-        onEntryTextChanged: entranceAnim.restart()
-
-        Connections {
-            target: entriesListRoot
-            function onSearchQueryChanged() {
-                entranceAnim.restart();
-            }
-        }
-
-        Component.onCompleted: {
-            entranceAnim.restart();
-        }
 
         MouseArea {
             id: mouseArea
@@ -106,7 +86,7 @@ UI.AnimatedListView {
                 width: 28
                 height: 28
                 radius: 14
-                color: entriesListRoot.theme.getColor("surface")
+                color: entriesListRoot.theme ? entriesListRoot.theme.getColor("surface") : "#1b1b1b"
                 Layout.alignment: Qt.AlignVCenter
                 clip: true
 
@@ -117,15 +97,19 @@ UI.AnimatedListView {
                     visible: delegateWrapper.isImage && delegateWrapper.imageSource !== ""
                 }
 
-                Text {
+                IconImage {
                     anchors.centerIn: parent
-                    text: delegateWrapper.isImage ? "󰋩" : "󰆏"
-                    font.family: "Noto Sans"
-                    font.pixelSize: 14
-                    color: delegateWrapper.isHighlighted ? entriesListRoot.theme.getColor("primary") : entriesListRoot.theme.getColor("outline")
+                    width: 14
+                    height: 14
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon(delegateWrapper.isImage ? "image.svg" : "image-copy.svg")
                     visible: !delegateWrapper.isImage || delegateWrapper.imageSource === ""
-
-                    Behavior on color { ColorAnimation { duration: 140 } }
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        colorization: 1.0
+                        colorizationColor: delegateWrapper.isHighlighted ?
+                               (entriesListRoot.theme ? entriesListRoot.theme.getColor("primary") : "#ffb3b4") :
+                               (entriesListRoot.theme ? entriesListRoot.theme.getColor("outline") : "#757680")
+                    }
                 }
             }
 
@@ -134,7 +118,9 @@ UI.AnimatedListView {
                 font.family: "Google Sans Flex, sans-serif"
                 font.pixelSize: 13
                 font.bold: false
-                color: delegateWrapper.isHighlighted ? entriesListRoot.theme.getColor("primary") : entriesListRoot.theme.getColor("onSurface")
+                color: delegateWrapper.isHighlighted ?
+                       (entriesListRoot.theme ? entriesListRoot.theme.getColor("primary") : "#ffb3b4") :
+                       (entriesListRoot.theme ? entriesListRoot.theme.getColor("onSurface") : "#f0dede")
                 elide: Text.ElideRight
                 maximumLineCount: 1
                 Layout.fillWidth: true
@@ -145,21 +131,29 @@ UI.AnimatedListView {
 
             Rectangle {
                 id: deleteBtn
-                width: 24
-                height: 24
-                radius: 12
-                color: deleteMouse.containsMouse ? entriesListRoot.theme.getColor("errorContainer") : "transparent"
+                width: 26
+                height: 26
+                radius: 13
+                color: deleteMouse.containsMouse ?
+                       (entriesListRoot.theme ? entriesListRoot.theme.getColor("errorContainer") : "#93000a") :
+                       "transparent"
                 Layout.alignment: Qt.AlignVCenter
                 visible: mouseArea.containsMouse
 
                 Behavior on color { ColorAnimation { duration: 120 } }
 
-                Text {
+                IconImage {
                     anchors.centerIn: parent
-                    text: "󰅖"
-                    font.family: "Noto Sans"
-                    font.pixelSize: 13
-                    color: deleteMouse.containsMouse ? entriesListRoot.theme.getColor("onErrorContainer") : entriesListRoot.theme.getColor("outline")
+                    width: 12
+                    height: 12
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("dismiss.svg")
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        colorization: 1.0
+                        colorizationColor: deleteMouse.containsMouse ?
+                               (entriesListRoot.theme ? entriesListRoot.theme.getColor("error") : "#ffb4ab") :
+                               (entriesListRoot.theme ? entriesListRoot.theme.getColor("outline") : "#757680")
+                    }
                 }
 
                 MouseArea {

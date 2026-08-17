@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.SystemTray
@@ -8,7 +9,7 @@ import "../../../components/feedback" as UIFeedback
 Row {
     id: sysStatsRoot
     spacing: 16
-    
+
     property var theme
     property var sysStats
     property var toggleNotifications
@@ -23,15 +24,6 @@ Row {
     function getNotifX() {
         var pos = notifButton.mapToItem(null, 0, 0);
         return pos.x + notifButton.width / 2;
-    }
-
-    function getBatteryIcon(percentage, isCharging) {
-        if (isCharging) return "󰂄";
-        var icons = ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"];
-        var idx = Math.floor(percentage / 10);
-        if (idx < 0) idx = 0;
-        if (idx >= icons.length) idx = icons.length - 1;
-        return icons[idx];
     }
 
     RowLayout {
@@ -65,88 +57,191 @@ Row {
                 spacing: 12
                 Layout.alignment: Qt.AlignVCenter
 
-                Text {
-                    text: "󰁅 " + sysStatsRoot.sysStats.networkDown
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: 11
-                    font.bold: true
+                RowLayout {
+                    spacing: 4
                     Layout.alignment: Qt.AlignVCenter
-                    color: {
-                        var s = sysStatsRoot.sysStats.networkDown;
-                        if (s.indexOf("MB/s") !== -1) {
-                            var valMb = parseFloat(s);
-                            if (valMb >= 5.0) return sysStatsRoot.theme.getColor("error");
-                            return sysStatsRoot.theme.getColor("secondary");
+
+                    IconImage {
+                        width: 10
+                        height: 10
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("arrow-down.svg")
+                        Layout.alignment: Qt.AlignVCenter
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: netDownText.color
                         }
-                        if (s.indexOf("KB/s") !== -1) {
-                            var valKb = parseFloat(s);
-                            if (valKb >= 500.0) return sysStatsRoot.theme.getColor("secondary");
-                            if (valKb >= 100.0) return sysStatsRoot.theme.getColor("primary");
+                    }
+
+                    Text {
+                        id: netDownText
+                        text: sysStatsRoot.sysStats.networkDown
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 11
+                        font.bold: true
+                        Layout.alignment: Qt.AlignVCenter
+                        color: {
+                            var s = sysStatsRoot.sysStats.networkDown;
+                            if (s.indexOf("MB/s") !== -1) {
+                                var valMb = parseFloat(s);
+                                if (valMb >= 5.0) return sysStatsRoot.theme.getColor("error");
+                                return sysStatsRoot.theme.getColor("secondary");
+                            }
+                            if (s.indexOf("KB/s") !== -1) {
+                                var valKb = parseFloat(s);
+                                if (valKb >= 500.0) return sysStatsRoot.theme.getColor("secondary");
+                                if (valKb >= 100.0) return sysStatsRoot.theme.getColor("primary");
+                            }
+                            return sysStatsRoot.theme.getColor("onSurface");
                         }
-                        return sysStatsRoot.theme.getColor("onSurface");
                     }
                 }
 
-                Text {
-                    text: "󰁝 " + sysStatsRoot.sysStats.networkUp
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: 11
-                    font.bold: true
+                RowLayout {
+                    spacing: 4
                     Layout.alignment: Qt.AlignVCenter
-                    color: {
-                        var s = sysStatsRoot.sysStats.networkUp;
-                        if (s.indexOf("MB/s") !== -1) {
-                            var valMb = parseFloat(s);
-                            if (valMb >= 5.0) return sysStatsRoot.theme.getColor("error");
-                            return sysStatsRoot.theme.getColor("secondary");
+
+                    IconImage {
+                        width: 10
+                        height: 10
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("arrow-up.svg")
+                        Layout.alignment: Qt.AlignVCenter
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: netUpText.color
                         }
-                        if (s.indexOf("KB/s") !== -1) {
-                            var valKb = parseFloat(s);
-                            if (valKb >= 500.0) return sysStatsRoot.theme.getColor("secondary");
-                            if (valKb >= 100.0) return sysStatsRoot.theme.getColor("primary");
+                    }
+
+                    Text {
+                        id: netUpText
+                        text: sysStatsRoot.sysStats.networkUp
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 11
+                        font.bold: true
+                        Layout.alignment: Qt.AlignVCenter
+                        color: {
+                            var s = sysStatsRoot.sysStats.networkUp;
+                            if (s.indexOf("MB/s") !== -1) {
+                                var valMb = parseFloat(s);
+                                if (valMb >= 5.0) return sysStatsRoot.theme.getColor("error");
+                                return sysStatsRoot.theme.getColor("secondary");
+                            }
+                            if (s.indexOf("KB/s") !== -1) {
+                                var valKb = parseFloat(s);
+                                if (valKb >= 500.0) return sysStatsRoot.theme.getColor("secondary");
+                                if (valKb >= 100.0) return sysStatsRoot.theme.getColor("primary");
+                            }
+                            return sysStatsRoot.theme.getColor("onSurface");
                         }
-                        return sysStatsRoot.theme.getColor("onSurface");
                     }
                 }
 
-                Text {
+                IconImage {
                     id: wifiIcon
-                    text: sysStatsRoot.sysStats.networkSsid === "Disconnected" ? "" : ""
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: 13
-                    font.bold: true
+                    width: 20
+                    height: 20
                     Layout.alignment: Qt.AlignVCenter
-                    color: sysStatsRoot.sysStats.networkSsid === "Disconnected" ? sysStatsRoot.theme.getColor("error") : sysStatsRoot.theme.getColor("onSurface")
-                    opacity: {
-                        if (sysStatsRoot.sysStats.networkSsid === "Disconnected") return 1.0;
-                        var sig = sysStatsRoot.sysStats.wifiSignal;
-                        if (sig < 0) return 1.0;
-                        if (sig > 75) return 1.0;
-                        if (sig > 50) return 0.75;
-                        if (sig > 25) return 0.50;
-                        return 0.35;
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getWifiIcon(
+                        sysStatsRoot.sysStats.wifiSignal,
+                        sysStatsRoot.sysStats.networkSsid !== "Disconnected",
+                        true
+                    )
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        colorization: 1.0
+                        colorizationColor: sysStatsRoot.sysStats.networkSsid === "Disconnected"
+                            ? (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("error") : "#ff5555")
+                            : (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF")
                     }
                 }
             }
         }
 
-        UIFeedback.StatsItem {
-            theme: sysStatsRoot.theme
-            icon: ""
-            value: Math.round(sysStatsRoot.sysStats.cpuUsage) + "%"
+        RowLayout {
+            spacing: 4
+            Layout.alignment: Qt.AlignVCenter
+
+            IconImage {
+                width: 15
+                height: 15
+                Layout.alignment: Qt.AlignVCenter
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getCpuIcon()
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
+                }
+            }
+
+            Text {
+                text: Math.round(sysStatsRoot.sysStats.cpuUsage) + "%"
+                font.family: "Noto Sans"
+                font.pixelSize: 13
+                font.bold: true
+                color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
+                Layout.alignment: Qt.AlignVCenter
+            }
         }
 
-        UIFeedback.StatsItem {
-            theme: sysStatsRoot.theme
-            icon: "󰾆"
-            value: Math.round(sysStatsRoot.sysStats.memUsage) + "%"
+        RowLayout {
+            spacing: 4
+            Layout.alignment: Qt.AlignVCenter
+
+            IconImage {
+                width: 15
+                height: 15
+                Layout.alignment: Qt.AlignVCenter
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getMemoryIcon()
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
+                }
+            }
+
+            Text {
+                text: Math.round(sysStatsRoot.sysStats.memUsage) + "%"
+                font.family: "Noto Sans"
+                font.pixelSize: 13
+                font.bold: true
+                color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
+                Layout.alignment: Qt.AlignVCenter
+            }
         }
 
-        UIFeedback.StatsItem {
-            theme: sysStatsRoot.theme
-            icon: getBatteryIcon(sysStatsRoot.sysStats.batteryPercentage, sysStatsRoot.sysStats.batteryIsCharging)
-            value: sysStatsRoot.sysStats.batteryPercentage + "%"
-            customColor: sysStatsRoot.sysStats.batteryPercentage < 20 ? sysStatsRoot.theme.getColor("error") : ""
+        RowLayout {
+            spacing: 4
+            Layout.alignment: Qt.AlignVCenter
+
+            IconImage {
+                id: batterySvgIcon
+                width: 22
+                height: 22
+                Layout.alignment: Qt.AlignVCenter
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getBatteryIcon(
+                    sysStatsRoot.sysStats.batteryPercentage,
+                    sysStatsRoot.sysStats.batteryIsCharging
+                )
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: sysStatsRoot.sysStats.batteryPercentage < 20 
+                        ? (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("error") : "#ff5555")
+                        : (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF")
+                }
+            }
+
+            Text {
+                text: sysStatsRoot.sysStats.batteryPercentage + "%"
+                font.family: "Noto Sans"
+                font.pixelSize: 13
+                font.bold: true
+                color: sysStatsRoot.sysStats.batteryPercentage < 20
+                    ? (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("error") : "#ff5555")
+                    : (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF")
+                Layout.alignment: Qt.AlignVCenter
+            }
         }
     }
 
@@ -170,13 +265,13 @@ Row {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    
+
                     onEntered: {
                         var pos = trayItemDelegate.mapToItem(null, 0, 0);
                         var centerX = pos.x + trayItemDelegate.width / 2;
                         root.showTrayMenu(modelData, centerX);
                     }
-                    
+
                     onExited: {
                         root.hideTrayMenu();
                     }
@@ -194,14 +289,17 @@ Row {
         width: 20
         height: 20
         Layout.alignment: Qt.AlignVCenter
-        
-        Text {
+
+        IconImage {
             anchors.centerIn: parent
-            text: sysStatsRoot.notifCount > 0 ? "󰂚" : "󰂜"
-            font.pixelSize: 15
-            color: sysStatsRoot.theme.getColor("primary")
-            font.family: "JetBrainsMono Nerd Font"
-            font.bold: true
+            width: 18
+            height: 18
+            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getNotificationIcon(false)
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                colorization: 1.0
+                colorizationColor: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("primary") : "#ffb3b4"
+            }
         }
 
         Rectangle {
@@ -224,7 +322,7 @@ Row {
                 color: "black"
             }
         }
-        
+
         MouseArea {
             anchors.fill: parent
             anchors.rightMargin: -20

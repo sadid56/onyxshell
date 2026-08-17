@@ -15,7 +15,7 @@ ColumnLayout {
 
     UISliders.Slider {
         theme: quickSlidersRoot.theme
-        icon: quickSlidersRoot.volumeValue === 0 ? "󰝟" : (quickSlidersRoot.volumeValue < 33 ? "󰕿" : (quickSlidersRoot.volumeValue < 66 ? "󰖀" : "󰕾"))
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getSpeakerIcon(quickSlidersRoot.volumeValue === 0)
         value: quickSlidersRoot.volumeValue
         onMoved: val => {
             quickSlidersRoot.volumeValue = val;
@@ -27,7 +27,7 @@ ColumnLayout {
 
     UISliders.Slider {
         theme: quickSlidersRoot.theme
-        icon: quickSlidersRoot.brightnessValue < 25 ? "󰃞" : (quickSlidersRoot.brightnessValue < 50 ? "󰃟" : (quickSlidersRoot.brightnessValue < 75 ? "󰃝" : "󰃠"))
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("brightness.svg")
         value: quickSlidersRoot.brightnessValue
         onMoved: val => {
             quickSlidersRoot.brightnessValue = val;

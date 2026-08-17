@@ -1,6 +1,8 @@
 -- Appearance Configuration
 -- Reference: https://wiki.hypr.land/Configuring/Variables/
 
+local rounded = tonumber(os.getenv("ROUNDED")) or 16
+
 hl.config({
 	general = {
 		gaps_in = 5,
@@ -20,7 +22,7 @@ hl.config({
 	},
 
 	decoration = {
-		rounding = 16,
+		rounding = rounded,
 		rounding_power = 2,
 		active_opacity = 1.0,
 

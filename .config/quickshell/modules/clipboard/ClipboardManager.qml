@@ -11,12 +11,11 @@ Popup {
 
     popupWidth: 480
     popupHeight: Math.min(520, mainLayout.implicitHeight + 36)
-    topOverlap: 14
     closeOnHoverOutside: false
-    
+
     property var clipService
     property string searchQuery: ""
-    
+
     function getFilteredEntries() {
         if (!clipService || !clipService.entries) return [];
         if (searchQuery === "") return clipService.entries;
@@ -25,7 +24,7 @@ Popup {
         for (var i = 0; i < clipService.entries.length; i++) {
             var entry = clipService.entries[i];
             var cleanText = entry.substring(entry.indexOf("\t") + 1).toLowerCase();
-            
+
             var score = 0;
             if (cleanText === query) {
                 score += 1000;
@@ -36,13 +35,13 @@ Popup {
             } else if (cleanText.indexOf(query) !== -1) {
                 score += 150;
             }
-            
+
             if (score > 0) {
                 score += Math.max(0, 50 - Math.abs(cleanText.length - query.length)) + Math.max(0, 30 - i);
                 scored.push({ entry: entry, score: score });
             }
         }
-        
+
         scored.sort((a, b) => b.score - a.score);
         var res = [];
         for (var j = 0; j < scored.length; j++) {
@@ -67,16 +66,16 @@ Popup {
             id: searchInput
             theme: clipWindow.theme
             placeholder: "Search clipboard history..."
-            icon: ""
-            
+            icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("search.svg")
+
             onTextChanged: clipWindow.searchQuery = text
             onEscapePressed: clipWindow.active = false
-            
+
             onDownPressed: {
                 entriesList.focus = true;
                 if (entriesList.count > 0) entriesList.currentIndex = 0;
             }
-            
+
             onReturnPressed: {
                 var filtered = clipWindow.getFilteredEntries();
                 if (filtered.length > 0) {
@@ -106,12 +105,12 @@ Popup {
                 return clipWindow.getFilteredEntries();
             }
             visible: entriesList.count > 0
-            
+
             onEntryClicked: entryText => {
                 clipWindow.clipService.copyEntry(entryText);
                 clipWindow.active = false;
             }
-            
+
             onDeleteClicked: entryText => {
                 clipWindow.clipService.deleteEntry(entryText);
             }

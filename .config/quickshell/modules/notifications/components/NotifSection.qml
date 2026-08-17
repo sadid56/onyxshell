@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
+import Quickshell.Widgets
 
 ColumnLayout {
     id: notifSectionRoot
@@ -8,7 +10,7 @@ ColumnLayout {
     spacing: 12
 
     property var theme
-    property var activeNotifs: []
+    property var activeNotifs: (typeof notifWindow !== "undefined" && notifWindow.activeNotifs) ? notifWindow.activeNotifs : ((typeof root !== "undefined" && root.activeNotifs) ? root.activeNotifs : [])
 
     RowLayout {
         Layout.fillWidth: true
@@ -51,16 +53,19 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         visible: notifSectionRoot.activeNotifs.length === 0
-        spacing: 6
+        spacing: 10
         Layout.topMargin: 40
 
-        Text {
-            text: "󰂚"
-            font.family: "Noto Sans"
-            font.pixelSize: 32
-            color: notifSectionRoot.theme.getColor("outline")
-            Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
+        IconImage {
+            width: 32
+            height: 32
+            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("alert.svg")
+            Layout.alignment: Qt.AlignHCenter
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                colorization: 1.0
+                colorizationColor: notifSectionRoot.theme.getColor("outline")
+            }
         }
 
         Text {

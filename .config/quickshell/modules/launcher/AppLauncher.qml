@@ -12,9 +12,8 @@ Popup {
 
     popupWidth: 480
     popupHeight: Math.min(520, mainLayout.implicitHeight + 44)
-    topOverlap: 14
     closeOnHoverOutside: false
-    
+
     property string searchQuery: ""
     property var allApps: []
 
@@ -22,15 +21,15 @@ Popup {
         if (searchQuery === "") return allApps;
         var scored = [];
         var query = searchQuery.trim().toLowerCase();
-        
+
         for (var i = 0; i < allApps.length; i++) {
             var app = allApps[i];
             var name = app.name.toLowerCase();
             var comment = (app.comment || "").toLowerCase();
             var exec = (app.exec || "").toLowerCase();
-            
+
             var score = 0;
-            
+
             if (name === query) {
                 score += 1000;
             } else if (name.indexOf(query) === 0) {
@@ -44,15 +43,15 @@ Popup {
             } else if (comment.indexOf(query) !== -1) {
                 score += 40;
             }
-            
+
             if (score > 0) {
                 score += Math.max(0, 50 - Math.abs(name.length - query.length));
                 scored.push({ app: app, score: score });
             }
         }
-        
+
         scored.sort((a, b) => b.score - a.score);
-        
+
         var res = [];
         for (var j = 0; j < scored.length; j++) {
             res.push(scored[j].app);
@@ -118,16 +117,16 @@ Popup {
             id: searchInput
             theme: launcherWindow.theme
             placeholder: "Search applications..."
-            icon: "󰍉"
-            
+            icon: shellConfig.getIcon("search.svg")
+
             onTextChanged: launcherWindow.searchQuery = text
             onEscapePressed: launcherWindow.active = false
-            
+
             onDownPressed: {
                 appList.focus = true;
                 if (appList.count > 0) appList.currentIndex = 0;
             }
-            
+
             onReturnPressed: {
                 var filtered = launcherWindow.getFilteredApps();
                 if (filtered.length > 0) {
@@ -152,14 +151,14 @@ Popup {
             theme: launcherWindow.theme
             appsModel: launcherWindow.getFilteredApps()
             visible: appList.count > 0
-            
+
             onAppClicked: app => {
                 if (app && app.exec) {
                     Quickshell.execDetached(app.exec.split(/\s+/));
                     launcherWindow.active = false;
                 }
             }
-            
+
             onUpPressedAtStart: searchInput.forceFocus()
             onEscapePressed: launcherWindow.active = false
         }

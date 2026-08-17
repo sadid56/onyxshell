@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Decode binary clipboard entries from cliphist into temporary image files.
 Outputs a JSON mapping of entry ID -> file path.
@@ -13,13 +12,11 @@ PREVIEW_DIR = "/tmp/cliphist_previews"
 def main():
     os.makedirs(PREVIEW_DIR, exist_ok=True)
 
-    # Use binary mode to handle mixed binary/text output from cliphist
     result = subprocess.run(["cliphist", "list"], capture_output=True)
     if result.returncode != 0:
         print("{}")
         return
 
-    # Decode with errors='replace' to handle binary garbage in text entries
     raw = result.stdout.decode("utf-8", errors="replace")
 
     mapping = {}
@@ -48,10 +45,9 @@ def main():
 
             out_path = os.path.join(PREVIEW_DIR, f"{entry_id}.{ext}")
 
-            # Only decode if not already cached
             if not os.path.exists(out_path):
                 try:
-                    # Feed original line bytes to cliphist decode
+
                     original_line = f"{entry_id}\t{content}"
                     decode = subprocess.run(
                         ["cliphist", "decode"],

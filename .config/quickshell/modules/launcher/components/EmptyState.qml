@@ -1,25 +1,32 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
+import Quickshell.Widgets
 
 ColumnLayout {
     id: emptyStateRoot
     Layout.fillWidth: true
-    spacing: 8
+    spacing: 10
     Layout.topMargin: 20
     Layout.bottomMargin: 20
-    
+
     property var theme
     property string searchQuery
     property bool isLoading: false
 
-    Text {
-        text: emptyStateRoot.isLoading ? "󰑐" : "󱉬"
-        font.family: "Noto Sans"
-        font.pixelSize: 32
-        color: emptyStateRoot.theme.getColor("outline")
-        Layout.fillWidth: true
-        horizontalAlignment: Text.AlignHCenter
-        
+    IconImage {
+        width: 32
+        height: 32
+        source: emptyStateRoot.isLoading
+            ? (typeof shellConfig !== "undefined" ? shellConfig.getIcon("arrow-clockwise-filled.svg") : "")
+            : (typeof shellConfig !== "undefined" ? shellConfig.getIcon("search.svg") : "")
+        Layout.alignment: Qt.AlignHCenter
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            colorization: 1.0
+            colorizationColor: emptyStateRoot.theme ? emptyStateRoot.theme.getColor("outline") : "#FFFFFF"
+        }
+
         RotationAnimation on rotation {
             running: emptyStateRoot.isLoading
             from: 0
@@ -30,8 +37,8 @@ ColumnLayout {
     }
 
     Text {
-        text: emptyStateRoot.isLoading 
-            ? "Loading applications..." 
+        text: emptyStateRoot.isLoading
+            ? "Loading applications..."
             : (emptyStateRoot.searchQuery === "" ? "No applications installed" : "No matching applications found")
         font.family: "Google Sans Flex, sans-serif"
         font.pixelSize: 13

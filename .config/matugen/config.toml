@@ -1,0 +1,15 @@
+[config]
+# Matugen 4.0 configuration
+
+[templates.quickshell]
+input_path = '~/.config/matugen/templates/colors.json'
+output_path = '~/.config/quickshell/colors.json'
+
+[templates.kitty]
+input_path = '~/.config/matugen/templates/kitty-colors.conf'
+output_path = '~/.config/kitty/kitty-colors.conf'
+post_hook = 'kitty @ --to=unix:@mykitty set-colors -a "$HOME/.config/kitty/kitty-colors.conf"'
+
+[templates.fish]
+input_path = '~/.config/matugen/templates/fish-colors.fish'
+output_path = '~/.config/fish/conf.d/matugen_colors.fish'

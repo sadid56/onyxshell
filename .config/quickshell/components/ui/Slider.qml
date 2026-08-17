@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
+import Quickshell.Widgets
 
 Item {
     id: sliderRoot
@@ -9,7 +11,7 @@ Item {
 
     property var theme
     property string title: ""
-    property string icon: "󰖨"
+    property string icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("brightness.svg")
     property int value: 50
     property int min: 0
     property int max: 100
@@ -42,11 +44,27 @@ Item {
             anchors.rightMargin: 16
             spacing: 10
 
+            IconImage {
+                width: 19
+                height: 19
+                source: sliderRoot.icon.length > 2 ? sliderRoot.icon : ""
+                visible: sliderRoot.icon !== "" && sliderRoot.icon.length > 2
+                Layout.alignment: Qt.AlignVCenter
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: fillBar.width > 36 
+                        ? (sliderRoot.theme ? sliderRoot.theme.getColor("onPrimary") : "#000000") 
+                        : (sliderRoot.theme ? sliderRoot.theme.getColor("primary") : "#FFFFFF")
+                }
+            }
+
             Text {
                 text: sliderRoot.icon
                 font.family: "Noto Sans"
                 font.pixelSize: 19
                 color: fillBar.width > 36 ? sliderRoot.theme.getColor("onPrimary") : sliderRoot.theme.getColor("primary")
+                visible: sliderRoot.icon !== "" && sliderRoot.icon.length <= 2
                 Layout.alignment: Qt.AlignVCenter
             }
 

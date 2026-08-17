@@ -1,15 +1,17 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
+import Quickshell.Widgets
 
 Rectangle {
     id: inputRoot
     Layout.fillWidth: true
-    implicitHeight: 46
-    height: 46
-    radius: 14
+    implicitHeight: 48
+    height: 48
+    radius: 24
     color: inputRoot.theme.getColor("surfaceVariant")
-    border.color: textInput.activeFocus ? inputRoot.theme.getColor("primary") : (inputMouseArea.containsMouse ? inputRoot.theme.getColor("outline") : "transparent")
-    border.width: textInput.activeFocus ? 1.5 : 1
+    border.color: textInput.activeFocus ? inputRoot.theme.getColor("primary") : "transparent"
+    border.width: textInput.activeFocus ? 1.5 : 0
 
     Behavior on border.color { ColorAnimation { duration: 180 } }
     Behavior on color { ColorAnimation { duration: 180 } }
@@ -17,7 +19,7 @@ Rectangle {
     property var theme
     property alias text: textInput.text
     property string placeholder: "Search..."
-    property string icon: "󰍉"
+    property string icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("search.svg")
     property int echoMode: TextInput.Normal
     property bool clearButtonEnabled: true
     property alias textInput: textInput
@@ -25,7 +27,7 @@ Rectangle {
     signal escapePressed()
     signal downPressed()
     signal returnPressed()
-    
+
     function forceFocus() {
         textInput.forceActiveFocus();
     }
@@ -44,11 +46,25 @@ Rectangle {
         anchors.rightMargin: 14
         spacing: 10
 
+        IconImage {
+            width: 16
+            height: 16
+            source: inputRoot.icon.length > 2 ? inputRoot.icon : (typeof shellConfig !== "undefined" ? shellConfig.getIcon("search.svg") : "")
+            visible: inputRoot.icon !== "" && inputRoot.icon.length > 2
+            Layout.alignment: Qt.AlignVCenter
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                colorization: 1.0
+                colorizationColor: textInput.activeFocus ? inputRoot.theme.getColor("primary") : inputRoot.theme.getColor("outline")
+            }
+        }
+
         Text {
             text: inputRoot.icon
             font.family: "Noto Sans"
             font.pixelSize: 17
             color: textInput.activeFocus ? inputRoot.theme.getColor("primary") : inputRoot.theme.getColor("outline")
+            visible: inputRoot.icon !== "" && inputRoot.icon.length <= 2
             Layout.alignment: Qt.AlignVCenter
 
             Behavior on color { ColorAnimation { duration: 180 } }
@@ -98,12 +114,16 @@ Rectangle {
 
             Behavior on color { ColorAnimation { duration: 120 } }
 
-            Text {
+            IconImage {
                 anchors.centerIn: parent
-                text: "󰅖"
-                font.family: "Noto Sans"
-                font.pixelSize: 12
-                color: clearMouse.containsMouse ? inputRoot.theme.getColor("primary") : inputRoot.theme.getColor("outline")
+                width: 12
+                height: 12
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("dismiss.svg")
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: clearMouse.containsMouse ? inputRoot.theme.getColor("primary") : inputRoot.theme.getColor("outline")
+                }
             }
 
             MouseArea {

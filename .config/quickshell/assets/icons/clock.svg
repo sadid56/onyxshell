@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <!-- Outer Smooth Circular Dial Ring -->
+  <circle cx="12" cy="12" r="9.25" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- Center Circular Hub Pin -->
+  <circle cx="12" cy="12" r="1.4" fill="#FFFFFF"/>
+  <!-- Precision Hour & Minute Clock Hands -->
+  <path d="M12 6.5V12L15.5 14" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

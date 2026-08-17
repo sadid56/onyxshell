@@ -2,6 +2,7 @@ import time
 import subprocess
 import sys
 import json
+import os
 
 def get_ssid():
     try:
@@ -47,26 +48,31 @@ last_rx, last_tx = get_net_bytes()
 last_time = time.time()
 ssid = get_ssid()
 
-# Print initially
-print(json.dumps({"ssid": ssid, "down": "0 B/s", "up": "0 B/s", "signal": -1}), flush=True)
+try:
+    print(json.dumps({"ssid": ssid, "down": "0 B/s", "up": "0 B/s", "signal": -1}), flush=True)
+except BrokenPipeError:
+    sys.exit(0)
 
 ssid_counter = 0
 
 while True:
     try:
+        if os.getppid() == 1:
+            sys.exit(0)
+
         time.sleep(1.0)
         now = time.time()
         rx, tx = get_net_bytes()
         dt = now - last_time
         if dt <= 0:
             continue
-        
+
         down_speed = (rx - last_rx) / dt
         up_speed = (tx - last_tx) / dt
-        
+
         last_rx, last_tx = rx, tx
         last_time = now
-        
+
         def format_speed(speed):
             if speed < 1024:
                 return f"{int(speed)} B/s"
@@ -74,19 +80,19 @@ while True:
                 return f"{speed / 1024:.1f} KB/s"
             else:
                 return f"{speed / (1024 * 1024):.1f} MB/s"
-                
+
         ssid_counter += 1
         if ssid_counter >= 5:
             ssid = get_ssid()
             ssid_counter = 0
-            
+
         print(json.dumps({
             "ssid": ssid,
             "down": format_speed(down_speed),
             "up": format_speed(up_speed),
             "signal": get_wifi_signal()
         }), flush=True)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, BrokenPipeError):
         break
     except Exception:
         time.sleep(1.0)

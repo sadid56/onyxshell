@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# ====================================================
+# Onyxshell Dotfiles Sync & Update Script
+# https://github.com/sadid56/onyxshell
+# ====================================================
+
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -14,6 +19,9 @@ CONFIG_DIRS=(
   "cava"
   "nvim"
   "xdg-desktop-portal"
+  "fish"
+  "matugen"
+  "htop"
 )
 
 echo "🚀 Starting dotfiles update from ~/.config..."
@@ -36,18 +44,9 @@ for dir in "${CONFIG_DIRS[@]}"; do
   fi
 done
 
-# Copy .zshrc
-echo "📁 Syncing .zshrc..."
-if [ -f "$HOME/.zshrc" ]; then
-  mkdir -p "$REPO_DIR/zsh"
-  cp "$HOME/.zshrc" "$REPO_DIR/zsh/.zshrc"
-  echo "  ✔️ Synced .zshrc"
-else
-  echo "  ⚠️ Warning: ~/.zshrc not found on your system, skipping."
-fi
-
-# Clean __pycache__ if any
+# Clean cache files
 find "$REPO_DIR" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+find "$REPO_DIR" -name ".DS_Store" -delete 2>/dev/null || true
 
 # Git operations
 cd "$REPO_DIR"

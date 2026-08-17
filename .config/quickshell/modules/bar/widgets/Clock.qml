@@ -6,7 +6,7 @@ MouseArea {
     implicitWidth: clockRow.implicitWidth
     implicitHeight: clockRow.implicitHeight
     cursorShape: Qt.PointingHandCursor
-    
+
     property var theme
     property var toggleCalendar
 
@@ -25,11 +25,11 @@ MouseArea {
     onClicked: {
         root.toggleLoaderActive(calendarLoader, statusBar.getClockX());
     }
-    
+
     Row {
         id: clockRow
         spacing: 8
-        
+
         Text {
             id: clockText
             font.family: "Noto Sans"
@@ -49,11 +49,11 @@ MouseArea {
         onTriggered: {
             var date = new Date();
             var timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-            
+
             var day = date.getDate();
             var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             var monthStr = months[date.getMonth()];
-            
+
             clockText.text = timeStr + " • " + day + " " + monthStr;
         }
     }

@@ -7,7 +7,7 @@ import "../bar/widgets"
 
 PanelWindow {
     id: toastWindow
-    
+
     anchors { top: true; bottom: true; left: false; right: true }
     implicitWidth: 416
     color: "transparent"
@@ -21,7 +21,8 @@ PanelWindow {
     property var theme
     property bool active: false
     property var currentNotification: null
-    property int topOverlap: 14
+    readonly property int toastRadius: 16
+    readonly property int topOverlap: 14
 
     readonly property string appName: currentNotification ? (currentNotification.appName || currentNotification.applicationName || "") : ""
     readonly property string summaryText: currentNotification ? (currentNotification.summary || "Notification") : "Notification"
@@ -70,11 +71,11 @@ PanelWindow {
         toastTranslate.x = 0;
         dismissTimer.stop();
         active = true;
-        
+
         progressAnim.stop();
         progressBarCanvas.progress = 1.0;
         progressAnim.start();
-        
+
         dismissTimer.start();
     }
 
@@ -84,14 +85,14 @@ PanelWindow {
         y: toastWindow.active ? -toastWindow.topOverlap : -(toastWindow.topOverlap + 10)
         width: 400
         height: Math.max(84, notifRow.implicitHeight + toastWindow.topOverlap + 18)
-        radius: 16
+        radius: toastWindow.toastRadius
         clip: true
-        
-        color: toastWindow.theme.getColor("surface")
+
+        color: toastWindow.theme ? toastWindow.theme.getColor("surface") : "#1b1b1b"
         border.width: 0
 
         opacity: toastWindow.active ? Math.max(0.0, 1.0 - Math.abs(toastTranslate.x) / 250.0) : 0.0
-        
+
         transform: Translate {
             id: toastTranslate
             x: 0
@@ -123,7 +124,7 @@ PanelWindow {
                 width: 38
                 height: 38
                 radius: 19
-                color: toastWindow.theme.getColor("surfaceVariant")
+                color: toastWindow.theme ? toastWindow.theme.getColor("surfaceVariant") : "#34343c"
                 clip: true
                 Layout.alignment: Qt.AlignVCenter
 
@@ -148,7 +149,7 @@ PanelWindow {
                     font.family: "Google Sans Flex, sans-serif"
                     font.pixelSize: 10
                     font.bold: true
-                    color: toastWindow.theme.getColor("primary")
+                    color: toastWindow.theme ? toastWindow.theme.getColor("primary") : "#ffb3b4"
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                     visible: toastWindow.appName !== "" && toastWindow.appName !== toastWindow.summaryText
@@ -159,7 +160,7 @@ PanelWindow {
                     font.family: "Google Sans Flex, sans-serif"
                     font.pixelSize: 12
                     font.bold: true
-                    color: toastWindow.theme.getColor("onSurface")
+                    color: toastWindow.theme ? toastWindow.theme.getColor("onSurface") : "#f0dede"
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
@@ -168,7 +169,7 @@ PanelWindow {
                     text: toastWindow.bodyText
                     font.family: "Google Sans Flex, sans-serif"
                     font.pixelSize: 11
-                    color: toastWindow.theme.getColor("onSurfaceVariant")
+                    color: toastWindow.theme ? toastWindow.theme.getColor("onSurfaceVariant") : "#8f8f9f"
                     elide: Text.ElideRight
                     maximumLineCount: 2
                     wrapMode: Text.Wrap
@@ -182,9 +183,9 @@ PanelWindow {
             id: progressBarCanvas
             anchors.fill: parent
             antialiasing: true
-            
+
             property real progress: 0.0
-            
+
             onProgressChanged: requestPaint()
 
             onPaint: {
@@ -196,18 +197,18 @@ PanelWindow {
                 var totalLength = arcLength + (400 - 16);
                 var L = progress * totalLength;
 
-                ctx.strokeStyle = toastWindow.theme.getColor("primary");
+                ctx.strokeStyle = toastWindow.theme ? toastWindow.theme.getColor("primary") : "#ffb3b4";
                 ctx.lineCap = "round";
 
                 var activeAngle = L / 14.5;
                 var taperLimit = Math.min(Math.PI / 2, activeAngle);
                 var steps = 15;
                 var stepSize = taperLimit / steps;
-                
+
                 for (var i = 0; i < steps; i++) {
                     var a1 = Math.PI - (i * stepSize);
                     var a2 = Math.PI - ((i + 1) * stepSize);
-                    
+
                     ctx.lineWidth = 3.0 * ((i + 0.5) / steps);
                     ctx.beginPath();
                     ctx.arc(16, contentRect.height - 16, 14.5, a1, a2, true);
@@ -321,7 +322,8 @@ PanelWindow {
         x: contentRect.x - 16
         y: contentRect.y + toastWindow.topOverlap
         alignRight: true
-        color: toastWindow.theme.getColor("surface")
+        cornerRadius: 16
+        color: toastWindow.theme ? toastWindow.theme.getColor("surface") : "#1b1b1b"
         opacity: contentRect.opacity
         transform: Translate {
             x: toastTranslate.x
@@ -332,6 +334,7 @@ PanelWindow {
         width: 16
         height: 16
         antialiasing: true
+        renderTarget: Canvas.FramebufferObject
         x: contentRect.x + contentRect.width - 16
         y: contentRect.y + contentRect.height
         opacity: contentRect.opacity
@@ -342,12 +345,13 @@ PanelWindow {
         onPaint: {
             var ctx = getContext("2d");
             ctx.reset();
-            ctx.fillStyle = toastWindow.theme.getColor("surface");
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = toastWindow.theme ? toastWindow.theme.getColor("surface") : "#1b1b1b";
             ctx.beginPath();
-            ctx.moveTo(16, 0);
-            ctx.lineTo(16, 16);
-            ctx.lineTo(0, 16);
-            ctx.arc(0, 0, 16, Math.PI * 0.5, 0, false);
+            ctx.moveTo(width, height);
+            ctx.lineTo(width, 0);
+            ctx.lineTo(0, 0);
+            ctx.arc(0, height, width, Math.PI * 1.5, 0, false);
             ctx.closePath();
             ctx.fill();
         }

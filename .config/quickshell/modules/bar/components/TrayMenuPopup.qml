@@ -13,7 +13,6 @@ Popup {
 
     popupWidth: 230
     popupHeight: Math.min(480, Math.max(50, mainLayout.implicitHeight + 8))
-    topOverlap: 14
 
     showCorners: true
     closeOnHoverOutside: true

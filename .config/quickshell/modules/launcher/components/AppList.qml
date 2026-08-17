@@ -8,9 +8,8 @@ UI.AnimatedListView {
     Layout.fillWidth: true
     Layout.fillHeight: true
     Layout.preferredHeight: Math.min(380, count * 54)
-    pillColor: appListRoot.theme.getColor("surfaceVariant")
+    pillColor: appListRoot.theme ? appListRoot.theme.getColor("surfaceVariant") : "#2b2a27"
 
-    property var theme
     property var appsModel: []
     onAppsModelChanged: syncListModel(dynamicAppModel, appsModel, "name", 12)
 
@@ -41,35 +40,6 @@ UI.AnimatedListView {
 
         readonly property var appInfo: ({ "name": name, "exec": exec, "icon": icon, "comment": comment })
         readonly property bool isHighlighted: appListRoot.isItemHighlighted(index)
-
-        transform: Translate {
-            id: slideTrans
-            y: 28
-        }
-        opacity: 0.0
-
-        Component.onCompleted: {
-            entranceAnim.start();
-        }
-
-        ParallelAnimation {
-            id: entranceAnim
-            NumberAnimation {
-                target: slideTrans
-                property: "y"
-                to: 0
-                duration: 280
-                easing.type: Easing.OutBack
-                easing.overshoot: 1.4
-            }
-            NumberAnimation {
-                target: delegateWrapper
-                property: "opacity"
-                to: 1.0
-                duration: 220
-                easing.type: Easing.OutQuad
-            }
-        }
 
         MouseArea {
             id: mouseArea

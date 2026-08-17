@@ -1,7 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Effects
 import Quickshell
+import Quickshell.Widgets
 import "../components/containers"
 
 Popup {
@@ -9,10 +11,9 @@ Popup {
 
     popupWidth: 420
     popupHeight: Math.min(500, mainLayout.implicitHeight + 44)
-    topOverlap: 14
-    
+
     contentRectX: 30
-    
+
     closeOnHoverOutside: false
     showCorners: true
 
@@ -21,7 +22,7 @@ Popup {
 
     Connections {
         target: Quickshell
-        
+
         function onReloadFailed(error) {
             Quickshell.inhibitReloadPopup();
             errorWindow.errorText = error || "Failed to load configuration.";
@@ -52,7 +53,7 @@ Popup {
         RowLayout {
             Layout.fillWidth: true
             spacing: 12
-            
+
             Rectangle {
                 width: 32
                 height: 32
@@ -60,12 +61,16 @@ Popup {
                 color: Qt.rgba(errorWindow.theme.getColor("error").r, errorWindow.theme.getColor("error").g, errorWindow.theme.getColor("error").b, 0.15)
                 Layout.alignment: Qt.AlignVCenter
 
-                Text {
+                IconImage {
                     anchors.centerIn: parent
-                    text: "󰀦"
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: 15
-                    color: errorWindow.theme.getColor("error")
+                    width: 16
+                    height: 16
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("alert.svg")
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        colorization: 1.0
+                        colorizationColor: errorWindow.theme.getColor("error")
+                    }
                 }
             }
 
@@ -98,13 +103,16 @@ Popup {
                 Layout.alignment: Qt.AlignTop
                 Behavior on color { ColorAnimation { duration: 150 } }
 
-                Text {
+                IconImage {
                     anchors.centerIn: parent
-                    text: "󰅖"
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: 12
-                    color: errorWindow.theme.getColor("outline")
-                    font.bold: true
+                    width: 12
+                    height: 12
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("dismiss.svg")
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        colorization: 1.0
+                        colorizationColor: errorWindow.theme.getColor("outline")
+                    }
                 }
 
                 MouseArea {
@@ -154,20 +162,35 @@ Popup {
                 Layout.fillWidth: true
                 height: 34
                 radius: 8
-                color: copyBtnHover.containsMouse 
-                    ? Qt.rgba(errorWindow.theme.getColor("surfaceVariant").r, errorWindow.theme.getColor("surfaceVariant").g, errorWindow.theme.getColor("surfaceVariant").b, 0.8) 
+                color: copyBtnHover.containsMouse
+                    ? Qt.rgba(errorWindow.theme.getColor("surfaceVariant").r, errorWindow.theme.getColor("surfaceVariant").g, errorWindow.theme.getColor("surfaceVariant").b, 0.8)
                     : errorWindow.theme.getColor("surfaceVariant")
                 border.width: 1
                 border.color: errorWindow.theme.getColor("outline")
                 Behavior on color { ColorAnimation { duration: 150 } }
 
-                Text {
+                RowLayout {
                     anchors.centerIn: parent
-                    text: errorWindow.isCopied ? "󰄬 Copied!" : "󰆏 Copy Error"
-                    font.family: "Noto Sans"
-                    font.pixelSize: 11
-                    font.bold: true
-                    color: errorWindow.isCopied ? errorWindow.theme.getColor("primary") : errorWindow.theme.getColor("onSurface")
+                    spacing: 6
+
+                    IconImage {
+                        width: 14
+                        height: 14
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon(errorWindow.isCopied ? "check.svg" : "image-copy.svg")
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: errorWindow.isCopied ? errorWindow.theme.getColor("primary") : errorWindow.theme.getColor("onSurface")
+                        }
+                    }
+
+                    Text {
+                        text: errorWindow.isCopied ? "Copied!" : "Copy Error"
+                        font.family: "Noto Sans"
+                        font.pixelSize: 11
+                        font.bold: true
+                        color: errorWindow.isCopied ? errorWindow.theme.getColor("primary") : errorWindow.theme.getColor("onSurface")
+                    }
                 }
 
                 MouseArea {

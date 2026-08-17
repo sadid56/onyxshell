@@ -1,16 +1,16 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 import Quickshell
+import Quickshell.Widgets
 import Quickshell.Wayland
 import Quickshell.Io
 import "../components/containers"
 
 Popup {
     id: wallpaperWindow
-    
-    popupWidth: Screen.width * 0.8
-    popupHeight: 240
+
+    popupWidth: Screen.width * 0.82
+    popupHeight: 250
     topOverlap: 10
     showCorners: false
 
@@ -40,7 +40,8 @@ Popup {
 
     function getScrollTarget(index) {
         if (!wallpapersList || wallpapersList.length === 0) return 0;
-        var targetX = index * (280 + 28) - (wallpapersListInst.width - 280) / 2;
+        var cardTotalWidth = 280 + 32;
+        var targetX = index * cardTotalWidth - (wallpapersListInst.width - 280) / 2;
         var maxScroll = wallpapersListInst.contentWidth - wallpapersListInst.width;
         if (maxScroll > 0) {
             return Math.max(0, Math.min(targetX, maxScroll));
@@ -50,7 +51,7 @@ Popup {
 
     function selectCurrentWallpaper() {
         if (!wallpapersList || wallpapersList.length === 0) return;
-        
+
         var currentPath = "";
         var fileText = (typeof currentWallpaperFile.text === "function") ? currentWallpaperFile.text() : currentWallpaperFile.text;
         if (fileText) {
@@ -64,15 +65,14 @@ Popup {
                 break;
             }
         }
-        
+
         wallpapersListInst.currentIndex = indexToSelect;
-        
         wallpapersListInst.contentX = getScrollTarget(indexToSelect);
     }
 
     property var wallpaperFetcher: Process {
         id: wallpaperFetcher
-        command: ["find", root.shellConfig.homeDir + "/Pictures/Images", "-maxdepth", "2", "-type", "f", "-and", "(", "-name", "*.jpg", "-o", "-name", "*.png", "-o", "-name", "*.jpeg", "-o", "-name", "*.gif", ")"]
+        command: ["find", root.shellConfig.homeDir + "/Pictures/wallpapers", "-maxdepth", "2", "-type", "f", "-and", "(", "-name", "*.jpg", "-o", "-name", "*.png", "-o", "-name", "*.jpeg", "-o", "-name", "*.gif", ")"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var lines = this.text.split("\n");
@@ -84,7 +84,7 @@ Popup {
                     }
                 }
                 wallpaperWindow.wallpapersList = list;
-                
+
                 Qt.callLater(() => {
                     selectCurrentWallpaper();
                 });
@@ -101,7 +101,7 @@ Popup {
             else if (hour < 18) type = "wipe";
             else type = "outer";
 
-            command = ["sh", "-c", "echo \"" + filePath + "\" > " + root.shellConfig.quickshellDir + "/current_wallpaper && awww img \"" + filePath + "\" --transition-type " + type + " --transition-step 90 --transition-fps 60 && matugen image \"" + filePath + "\" --source-color-index 0 -m dark"];
+            command = ["sh", "-c", "echo \"" + filePath + "\" > " + root.shellConfig.quickshellDir + "/current_wallpaper && awww img \"" + filePath + "\" --transition-type " + type + " --transition-step 90 --transition-fps 60 && matugen image \"" + filePath + "\" --source-color-index 0 -t scheme-content -m dark"];
             running = false;
             running = true;
         }
@@ -121,8 +121,8 @@ Popup {
         id: scrollAnimation
         target: wallpapersListInst
         property: "contentX"
-        duration: 380
-        easing.type: Easing.OutCubic
+        duration: 320
+        easing.type: Easing.OutExpo
     }
 
     Item {
@@ -135,82 +135,70 @@ Popup {
             id: wallpapersListInst
             anchors.fill: parent
             orientation: ListView.Horizontal
-            spacing: 28
+            spacing: 32
             clip: true
             model: wallpaperWindow.wallpapersList
             focus: true
 
+            boundsBehavior: Flickable.StopAtBounds
             highlightRangeMode: ListView.NoHighlightRange
             highlightFollowsCurrentItem: false
+
+            WheelHandler {
+                orientation: Qt.Horizontal
+                acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                onWheel: event => {
+                    var step = (event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x) / 120 * 120;
+                    var maxScroll = wallpapersListInst.contentWidth - wallpapersListInst.width;
+                    var nextX = Math.max(0, Math.min(maxScroll, wallpapersListInst.contentX - step));
+                    scrollAnimation.to = nextX;
+                    scrollAnimation.start();
+                }
+            }
 
             delegate: Item {
                 id: delegateRoot
                 width: 280
-                height: 190
+                height: 200
 
                 property bool isCurrent: ListView.isCurrentItem
 
-                Item {
+                ClippingRectangle {
                     id: cardContainer
                     width: 280
                     height: 158
+                    radius: 18
+                    color: wallpaperWindow.theme ? wallpaperWindow.theme.getColor("surfaceVariant") : "#2b2a27"
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    scale: delegateRoot.isCurrent ? 1.12 : (hoverArea.containsMouse ? 1.03 : 1.0)
-                    Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+                    scale: delegateRoot.isCurrent ? 1.10 : (hoverArea.containsMouse ? 1.03 : 0.96)
+                    opacity: delegateRoot.isCurrent ? 1.0 : (hoverArea.containsMouse ? 0.90 : 0.65)
 
-                    Item {
-                        id: contentContainer
-                        width: 280
-                        height: 158
+                    Behavior on scale { NumberAnimation { duration: 240; easing.type: Easing.OutExpo } }
+                    Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
 
-                        Image {
-                            id: imgSource
-                            anchors.fill: parent
-                            source: "file://" + modelData.path
-                            fillMode: Image.PreserveAspectCrop
-                            asynchronous: true
-                            cache: true
-                            sourceSize.width: 280
-                            sourceSize.height: 158
-
-                            onStatusChanged: {
-                                if (status === Image.Ready) {
-                                    Qt.callLater(() => {
-                                        contentSource.scheduleUpdate();
-                                    });
-                                }
-                            }
-                        }
+                    Image {
+                        id: imgSource
+                        anchors.fill: parent
+                        source: "file://" + modelData.path
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                        cache: true
+                        sourceSize.width: 320
+                        sourceSize.height: 180
                     }
 
                     Rectangle {
-                        id: maskRect
-                        width: 280
-                        height: 158
-                        radius: 16
-                    }
-
-                    ShaderEffectSource {
-                        id: contentSource
-                        sourceItem: contentContainer
-                        hideSource: true
-                        live: true
-                    }
-
-                    ShaderEffectSource {
-                        id: maskSourceItem
-                        sourceItem: maskRect
-                        hideSource: true
-                        live: true
-                    }
-
-                    MultiEffect {
                         anchors.fill: parent
-                        source: contentSource
-                        maskEnabled: true
-                        maskSource: maskSourceItem
+                        radius: 18
+                        color: "transparent"
+                        border.color: delegateRoot.isCurrent ?
+                                      (wallpaperWindow.theme ? wallpaperWindow.theme.getColor("primary") : "#ffb3b4") :
+                                      "transparent"
+                        border.width: delegateRoot.isCurrent ? 2.5 : 0
+
+                        Behavior on border.color { ColorAnimation { duration: 160 } }
                     }
 
                     MouseArea {
@@ -254,7 +242,7 @@ Popup {
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: 200
+            width: 180
             z: 10
             gradient: Gradient {
                 orientation: Gradient.Horizontal
@@ -267,7 +255,7 @@ Popup {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: 200
+            width: 180
             z: 10
             gradient: Gradient {
                 orientation: Gradient.Horizontal

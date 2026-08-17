@@ -1,13 +1,27 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
+import Quickshell.Widgets
 
-Text {
-    id: logoText
-    text: ""
-    font.pixelSize: 16
-    color: barWindow.theme.getColor("primary")
-    font.family: "Noto Sans"
-    font.bold: true
+Item {
+    id: distroRoot
+    width: 22
+    height: 22
     Layout.alignment: Qt.AlignVCenter
+
+    property string distroId: (typeof shellConfig !== "undefined" ? shellConfig.currentDistro : "arch")
+
+    IconImage {
+        id: distroIconImage
+        anchors.centerIn: parent
+        width: 18
+        height: 18
+        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getDistroIcon(distroRoot.distroId)
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            colorization: 1.0
+            colorizationColor: (typeof barWindow !== "undefined" && barWindow.theme) ? barWindow.theme.getColor("primary") : "#ffb3b4"
+        }
+    }
 }

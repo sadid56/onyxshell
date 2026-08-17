@@ -5,8 +5,8 @@ import Quickshell.Hyprland
 
 Row {
     id: workspacesRoot
-    spacing: 6 
-    
+    spacing: 6
+
     property var theme
 
     property int highestUsedWs: {
@@ -30,49 +30,49 @@ Row {
         if (!cls) return "";
         cls = cls.toLowerCase();
         title = (title || "").toLowerCase();
-        
+
         if (title.indexOf("nvim") !== -1) return "";
         if (title.indexOf("vim") !== -1) return "";
         if (title.indexOf("btop") !== -1 || title.indexOf("htop") !== -1) return "";
         if (title.indexOf("yazi") !== -1) return "󰇥";
         if (title.indexOf("spotify") !== -1) return "";
-        
+
         if (cls === "kitty" || cls === "alacritty" || cls === "wezterm") return "";
         if (cls === "code" || cls === "code-url-handler" || cls.indexOf("cursor") === 0) return "󰨞";
         if (cls.indexOf("jetbrains-") === 0) return "";
         if (cls === "emacs") return "";
-        
+
         if (cls === "firefox") return "";
         if (cls === "google-chrome" || cls === "chromium" || cls === "vivaldi-stable") return "";
         if (cls.indexOf("brave") !== -1) return "🦁";
         if (cls === "zen-alpha") return "󰈹";
-        
+
         if (cls === "postman" || cls === "insomnia") return "󰛦";
         if (cls.indexOf("docker") === 0) return "";
         if (cls === "github-desktop") return "";
         if (cls === "dbeaver") return "";
         if (cls === "mongodb compass") return "";
-        
+
         if (cls === "vlc") return "󰕔";
         if (cls === "mpv") return "";
         if (cls === "com.obsproject.studio") return "󰑋";
         if (cls === "steam") return "";
-        
+
         if (cls === "discord" || cls === "vesktop" || cls === "webcord") return "";
         if (cls === "org.telegram.desktop") return "";
         if (cls === "slack") return "";
         if (cls === "teams-for-linux") return "󰊻";
         if (cls === "zoom") return "";
-        
+
         if (cls === "obsidian") return "󰠮";
         if (cls === "notion-app") return "󰎚";
         if (cls === "thunar" || cls === "org.kde.dolphin" || cls === "org.gnome.nautilus") return "";
-        
+
         if (cls === "org.pulseaudio.pavucontrol") return "󰕾";
         if (cls === "blueman-manager") return "";
         if (cls === "nm-connection-editor") return "󰤨";
         if (cls === "antigravity-ide") return "";
-        
+
         return "";
     }
 
@@ -121,30 +121,30 @@ Row {
             }
 
             height: 24
-            
-            width: isActive 
-                   ? Math.max(50, iconsRow.implicitWidth + 36) 
+
+            width: isActive
+                   ? Math.max(50, iconsRow.implicitWidth + 36)
                    : (windowIcons.length > 0 ? Math.max(30, iconsRow.implicitWidth + 22) : 24)
-            
+
             radius: height / 2
 
-            color: isActive 
-                   ? (workspacesRoot.theme ? workspacesRoot.theme.getColor("primary") : "#D0BCFF") 
+            color: isActive
+                   ? (workspacesRoot.theme ? workspacesRoot.theme.getColor("primary") : "#D0BCFF")
                    : (workspacesRoot.theme ? workspacesRoot.theme.getColor("surfaceVariant") : "#2AFFFFFF")
 
-            Behavior on width { 
-                NumberAnimation { 
-                    duration: 400; 
-                    easing.type: Easing.OutBack; 
-                    easing.overshoot: 2.0 
-                } 
+            Behavior on width {
+                NumberAnimation {
+                    duration: 400;
+                    easing.type: Easing.OutBack;
+                    easing.overshoot: 2.0
+                }
             }
-            
-            Behavior on color { 
-                ColorAnimation { 
-                    duration: 300; 
-                    easing.type: Easing.OutQuad 
-                } 
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: 300;
+                    easing.type: Easing.OutQuad
+                }
             }
 
             Rectangle {
@@ -153,7 +153,7 @@ Row {
                 width: dot.isActive ? 8 : 6
                 height: dot.isActive ? 8 : 6
                 radius: width / 2
-                color: dot.isActive 
+                color: dot.isActive
                     ? (workspacesRoot.theme ? workspacesRoot.theme.getColor("onPrimary") : "#381E72")
                     : (workspacesRoot.theme ? workspacesRoot.theme.getColor("onSurface") : "#E6E1E5")
                 opacity: dot.isActive ? 1.0 : 0.4
@@ -172,12 +172,12 @@ Row {
                         font.family: "Noto Sans"
                         font.pixelSize: 14
                         Layout.alignment: Qt.AlignVCenter
-                        color: dot.isActive 
+                        color: dot.isActive
                             ? (workspacesRoot.theme ? workspacesRoot.theme.getColor("onPrimary") : "#381E72")
                             : (workspacesRoot.theme ? workspacesRoot.theme.getColor("onSurface") : "#E6E1E5")
-                        
-                        Behavior on color { 
-                            ColorAnimation { duration: 300 } 
+
+                        Behavior on color {
+                            ColorAnimation { duration: 300 }
                         }
                     }
                 }

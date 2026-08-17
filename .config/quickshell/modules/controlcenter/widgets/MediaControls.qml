@@ -1,38 +1,55 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
+import Quickshell
+import Quickshell.Widgets
 
-Rectangle {
+ClippingRectangle {
     id: mediaRoot
     Layout.fillWidth: true
     height: 120
-    radius: 16
-    color: mediaRoot.theme.getColor("surfaceVariant")
+    radius: 18
+    color: mediaRoot.theme ? mediaRoot.theme.getColor("surfaceVariant") : "#2b2a27"
 
     property var theme
-    property string mediaStatus: "Stopped"
-    property string mediaTitle: "No media playing"
-    property string mediaArtist: ""
-    property int mediaPosition: 0
-    property int mediaLength: 0
+    property var mediaService: null
+
+    property string mediaStatus: mediaService ? mediaService.mediaStatus : "Stopped"
+    property bool optimisticPlaying: mediaStatus === "Playing"
+    onMediaStatusChanged: optimisticPlaying = (mediaStatus === "Playing")
+
+    property string mediaTitle: mediaService ? mediaService.mediaTitle : "No media playing"
+    property string mediaArtist: mediaService ? mediaService.mediaArtist : ""
+    property string mediaArtUrl: mediaService ? mediaService.mediaArtUrl : ""
+    property int mediaPosition: mediaService ? mediaService.mediaPosition : 0
+    property int mediaLength: mediaService ? mediaService.mediaLength : 0
+
+    readonly property bool isPlaying: optimisticPlaying
+    readonly property bool hasMedia: mediaStatus !== "Stopped" && mediaTitle !== "" && mediaTitle !== "No media playing"
+
     signal controlAction(string action)
 
     function formatTime(secs) {
-        if (isNaN(secs) || secs < 0) return "00:00";
+        if (isNaN(secs) || secs < 0) return "0:00";
         var m = Math.floor(secs / 60);
         var s = secs % 60;
-        return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+        return m + ":" + (s < 10 ? "0" : "") + s;
     }
 
-    Timer {
-        id: progressTicker
-        interval: 1000
-        running: mediaRoot.mediaStatus === "Playing"
-        repeat: true
-        onTriggered: {
-            if (mediaRoot.mediaPosition < mediaRoot.mediaLength) {
-                mediaRoot.mediaPosition += 1;
-            }
-        }
+    Image {
+        id: bgCoverArt
+        anchors.fill: parent
+        source: mediaRoot.mediaArtUrl
+        fillMode: Image.PreserveAspectCrop
+        opacity: 0.18
+        visible: mediaRoot.hasMedia && mediaRoot.mediaArtUrl !== ""
+        asynchronous: true
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: mediaRoot.theme ? mediaRoot.theme.getColor("surfaceVariant") : "#2b2a27"
+        opacity: (mediaRoot.hasMedia && mediaRoot.mediaArtUrl !== "") ? 0.65 : 0.0
     }
 
     RowLayout {
@@ -40,87 +57,183 @@ Rectangle {
         anchors.margins: 14
         spacing: 14
 
-        Rectangle {
-            width: 44
-            height: 44
-            radius: 22
-            color: mediaRoot.theme.getColor("surface")
+        ClippingRectangle {
+            id: albumArtRect
+            width: 78
+            height: 78
+            radius: 14
+            color: mediaRoot.theme ? mediaRoot.theme.getColor("surface") : "#1b1b1b"
             Layout.alignment: Qt.AlignVCenter
 
-            Text {
-                id: discIcon
-                anchors.centerIn: parent
-                text: "󰎆"
-                font.family: "Noto Sans"
-                font.pixelSize: 22
-                color: mediaRoot.theme.getColor("primary")
+            Image {
+                id: albumArtImage
+                anchors.fill: parent
+                source: mediaRoot.mediaArtUrl
+                fillMode: Image.PreserveAspectCrop
+                visible: mediaRoot.hasMedia && mediaRoot.mediaArtUrl !== "" && status === Image.Ready
+                asynchronous: true
+            }
 
-                RotationAnimation on rotation {
-                    id: discAnim
-                    from: 0
-                    to: 360
-                    duration: 6000
-                    loops: Animation.Infinite
-                    running: mediaRoot.mediaStatus === "Playing"
+            IconImage {
+                anchors.centerIn: parent
+                width: 32
+                height: 32
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("music.svg")
+                visible: !albumArtImage.visible
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: mediaRoot.theme ? mediaRoot.theme.getColor("primary") : "#a8c88e"
                 }
             }
         }
 
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 8
+            Layout.fillHeight: true
+            spacing: 6
             Layout.alignment: Qt.AlignVCenter
 
-            ColumnLayout {
+            RowLayout {
                 Layout.fillWidth: true
-                spacing: 1
+                spacing: 8
 
-                Text {
-                    text: mediaRoot.mediaTitle
-                    font.family: "Google Sans Flex, sans-serif"
-                    font.pixelSize: 13
-                    font.bold: true
-                    color: mediaRoot.theme.getColor("onSurface")
-                    elide: Text.ElideRight
+                ColumnLayout {
                     Layout.fillWidth: true
+                    spacing: 2
+                    Layout.alignment: Qt.AlignVCenter
+
+                    Text {
+                        text: mediaRoot.mediaTitle
+                        font.family: "Google Sans Flex, sans-serif"
+                        font.pixelSize: 14
+                        font.bold: true
+                        color: mediaRoot.theme ? mediaRoot.theme.getColor("onSurface") : "#ffffff"
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+
+                    Text {
+                        text: mediaRoot.mediaArtist !== "" ? mediaRoot.mediaArtist : (mediaRoot.hasMedia ? "Unknown Artist" : "")
+                        font.family: "Google Sans Flex, sans-serif"
+                        font.pixelSize: 11
+                        color: mediaRoot.theme ? mediaRoot.theme.getColor("outline") : "#9e9e9e"
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+
+                    Text {
+                        text: mediaRoot.mediaLength > 0 ?
+                              mediaRoot.formatTime(mediaRoot.mediaPosition) + " / " + mediaRoot.formatTime(mediaRoot.mediaLength) :
+                              (mediaRoot.hasMedia ? "0:00 / 0:00" : "")
+                        font.family: "Google Sans Flex, sans-serif"
+                        font.pixelSize: 11
+                        font.bold: true
+                        color: mediaRoot.theme ? mediaRoot.theme.getColor("outline") : "#8e8e8e"
+                        Layout.topMargin: 2
+                    }
                 }
 
-                Text {
-                    text: mediaRoot.mediaArtist !== "" ? mediaRoot.mediaArtist : "Unknown Artist"
-                    font.family: "Google Sans Flex, sans-serif"
-                    font.pixelSize: 10
-                    color: mediaRoot.theme.getColor("outline")
-                    elide: Text.ElideRight
-                    Layout.fillWidth: true
+                Rectangle {
+                    width: 46
+                    height: 46
+                    radius: 16
+                    color: mediaRoot.theme ? mediaRoot.theme.getColor("primary") : "#a8c88e"
+                    Layout.alignment: Qt.AlignVCenter
+
+                    IconImage {
+                        anchors.centerIn: parent
+                        width: 18
+                        height: 18
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon(mediaRoot.isPlaying ? "pause.svg" : "play.svg")
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: mediaRoot.theme ? mediaRoot.theme.getColor("onPrimary") : "#1b2e11"
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: parent.scale = 1.08
+                        onExited: parent.scale = 1.0
+                        onClicked: {
+                            mediaRoot.optimisticPlaying = !mediaRoot.optimisticPlaying;
+                            if (mediaRoot.mediaService) {
+                                mediaRoot.mediaService.playPause();
+                            }
+                            mediaRoot.controlAction("play-pause");
+                        }
+                    }
+                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
                 }
             }
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 10
+                spacing: 8
+                Layout.alignment: Qt.AlignVCenter
+
+                IconImage {
+                    width: 16
+                    height: 16
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("skip-back.svg")
+                    opacity: 0.85
+                    Layout.alignment: Qt.AlignVCenter
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        colorization: 1.0
+                        colorizationColor: mediaRoot.theme ? mediaRoot.theme.getColor("onSurface") : "#ffffff"
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: {
+                            parent.scale = 1.25;
+                            parent.opacity = 1.0;
+                        }
+                        onExited: {
+                            parent.scale = 1.0;
+                            parent.opacity = 0.85;
+                        }
+                        onClicked: {
+                            if (mediaRoot.mediaService) {
+                                mediaRoot.mediaService.previous();
+                            }
+                            mediaRoot.controlAction("previous");
+                        }
+                    }
+                    Behavior on scale { NumberAnimation { duration: 120 } }
+                }
 
                 Canvas {
                     id: waveCanvas
                     Layout.fillWidth: true
-                    height: 12
-                    
+                    height: 14
+                    Layout.alignment: Qt.AlignVCenter
+
                     property real phase: 0
-                    property real progressWidth: mediaRoot.mediaLength > 0 ? 
-                                                     width * (mediaRoot.mediaPosition / mediaRoot.mediaLength) : 0
+                    property real progressRatio: mediaRoot.mediaLength > 0 ?
+                                                 Math.min(1.0, Math.max(0.0, mediaRoot.mediaPosition / mediaRoot.mediaLength)) : 0
+                    property real progressX: width * progressRatio
 
-                    onProgressWidthChanged: requestPaint()
+                    onProgressXChanged: requestPaint()
 
-                    Behavior on progressWidth {
+                    Behavior on progressRatio {
                         NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
                     }
 
                     Timer {
-                        id: waveTimer
+                        id: waveAnimTimer
                         interval: 33
-                        running: mediaRoot.mediaStatus === "Playing"
+                        running: mediaRoot.isPlaying
                         repeat: true
                         onTriggered: {
-                            waveCanvas.phase += 0.15;
+                            waveCanvas.phase += 0.14;
                             waveCanvas.requestPaint();
                         }
                     }
@@ -131,101 +244,93 @@ Rectangle {
                         ctx.clearRect(0, 0, width, height);
 
                         var midY = height / 2;
+                        var pX = Math.min(width, Math.max(0, width * progressRatio));
 
-                        ctx.beginPath();
-                        ctx.lineWidth = 2.5;
-                        ctx.strokeStyle = mediaRoot.theme.getColor("primary");
+                        var waveColor = mediaRoot.theme ? mediaRoot.theme.getColor("primary") : "#a8c88e";
+                        var trackColor = mediaRoot.theme ? mediaRoot.theme.getColor("outline") : "#555555";
 
-                        if (progressWidth > 0) {
+                        if (pX > 2) {
+                            ctx.beginPath();
+                            ctx.lineWidth = 2.5;
+                            ctx.lineCap = "round";
+                            ctx.strokeStyle = waveColor;
+
                             ctx.moveTo(0, midY);
-                            for (var x = 0; x <= progressWidth; x++) {
-                                var y = midY + Math.sin(x * 0.08 - phase) * 2.5;
-                                ctx.lineTo(x, y);
+                            var step = 2;
+                            for (var x = 0; x <= pX; x += step) {
+                                var wave = Math.sin(x * 0.12 - waveCanvas.phase) * 2.8;
+                                ctx.lineTo(x, midY + wave);
                             }
+                            ctx.stroke();
+
+                            ctx.beginPath();
+                            ctx.lineWidth = 2.5;
+                            ctx.strokeStyle = waveColor;
+                            ctx.moveTo(pX, midY - 5);
+                            ctx.lineTo(pX, midY + 5);
                             ctx.stroke();
                         }
 
-                        ctx.beginPath();
-                        ctx.lineWidth = 2;
-                        ctx.strokeStyle = mediaRoot.theme.getColor("surface");
-                        ctx.moveTo(progressWidth, midY);
-                        ctx.lineTo(width, midY);
-                        ctx.stroke();
+                        if (pX < width) {
+                            ctx.beginPath();
+                            ctx.lineWidth = 2.0;
+                            ctx.strokeStyle = trackColor;
+                            ctx.moveTo(Math.max(pX + 3, 0), midY);
+                            ctx.lineTo(width - 4, midY);
+                            ctx.stroke();
+
+                            ctx.beginPath();
+                            ctx.fillStyle = trackColor;
+                            ctx.arc(width - 2, midY, 2, 0, 2 * Math.PI);
+                            ctx.fill();
+                        }
                     }
-                }
 
-                Text {
-                    text: mediaRoot.mediaLength > 0 ? 
-                              mediaRoot.formatTime(mediaRoot.mediaPosition) + " / " + mediaRoot.formatTime(mediaRoot.mediaLength) : 
-                              "00:00 / 00:00"
-                    font.family: "Google Sans Flex, sans-serif"
-                    font.pixelSize: 9
-                    font.bold: true
-                    color: mediaRoot.theme.getColor("outline")
-                }
-            }
-
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
-                spacing: 20
-
-                Text {
-                    text: "󰒮"
-                    font.family: "Noto Sans"
-                    font.pixelSize: 18
-                    color: mediaRoot.theme.getColor("primary")
-                    
                     MouseArea {
                         anchors.fill: parent
-                        hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onEntered: parent.scale = 1.2
-                        onExited: parent.scale = 1.0
-                        onClicked: mediaRoot.controlAction("previous")
+                        onClicked: mouse => {
+                            if (mediaRoot.mediaLength > 0 && mediaRoot.mediaService) {
+                                var ratio = Math.max(0, Math.min(1, mouse.x / waveCanvas.width));
+                                var seekSec = Math.round(ratio * mediaRoot.mediaLength);
+                                mediaRoot.mediaService.seek(seekSec);
+                            }
+                        }
                     }
-                    Behavior on scale { NumberAnimation { duration: 150 } }
                 }
 
-                Rectangle {
-                    width: 32
-                    height: 32
-                    radius: 16
-                    color: mediaRoot.theme.getColor("primary")
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: mediaRoot.mediaStatus === "Playing" ? "󰏤" : "󰐊"
-                        font.family: "Noto Sans"
-                        font.pixelSize: 16
-                        color: mediaRoot.theme.getColor("onPrimary")
+                IconImage {
+                    width: 16
+                    height: 16
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("skip-forward.svg")
+                    opacity: 0.85
+                    Layout.alignment: Qt.AlignVCenter
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        colorization: 1.0
+                        colorizationColor: mediaRoot.theme ? mediaRoot.theme.getColor("onSurface") : "#ffffff"
                     }
 
                     MouseArea {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onEntered: parent.scale = 1.15
-                        onExited: parent.scale = 1.0
-                        onClicked: mediaRoot.controlAction("play-pause")
+                        onEntered: {
+                            parent.scale = 1.25;
+                            parent.opacity = 1.0;
+                        }
+                        onExited: {
+                            parent.scale = 1.0;
+                            parent.opacity = 0.85;
+                        }
+                        onClicked: {
+                            if (mediaRoot.mediaService) {
+                                mediaRoot.mediaService.next();
+                            }
+                            mediaRoot.controlAction("next");
+                        }
                     }
-                    Behavior on scale { NumberAnimation { duration: 150 } }
-                }
-
-                Text {
-                    text: "󰒭"
-                    font.family: "Noto Sans"
-                    font.pixelSize: 18
-                    color: mediaRoot.theme.getColor("primary")
-                    
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onEntered: parent.scale = 1.2
-                        onExited: parent.scale = 1.0
-                        onClicked: mediaRoot.controlAction("next")
-                    }
-                    Behavior on scale { NumberAnimation { duration: 150 } }
+                    Behavior on scale { NumberAnimation { duration: 120 } }
                 }
             }
         }

@@ -10,7 +10,6 @@ dirs = [
     os.path.expanduser("~/.local/share/applications")
 ]
 
-# Fast path: Return cached app list if valid
 if os.path.exists(CACHE_FILE):
     try:
         cache_mtime = os.path.getmtime(CACHE_FILE)
@@ -50,7 +49,6 @@ def build_icon_cache():
                     if name not in icon_cache:
                         icon_cache[name] = os.path.join(root, f)
 
-# Build the cache once
 build_icon_cache()
 
 def resolve_icon(name):
@@ -73,36 +71,36 @@ for d in dirs:
         try:
             with open(path, "r", encoding="utf-8", errors="ignore") as file:
                 content = file.read()
-                
+
                 type_match = re.search(r"^Type=(.+)$", content, re.MULTILINE)
                 if type_match and type_match.group(1).strip() != "Application":
                     continue
-                
+
                 name_match = re.search(r"^Name=(.+)$", content, re.MULTILINE)
                 exec_match = re.search(r"^Exec=(.+)$", content, re.MULTILINE)
                 icon_match = re.search(r"^Icon=(.+)$", content, re.MULTILINE)
                 comment_match = re.search(r"^Comment=(.+)$", content, re.MULTILINE)
                 nodisplay_match = re.search(r"^NoDisplay=(true|1)$", content, re.MULTILINE | re.IGNORECASE)
-                
+
                 if name_match and exec_match and not nodisplay_match:
                     name = name_match.group(1).strip()
                     exec_cmd = exec_match.group(1).strip()
                     exec_cmd = re.sub(r"%[fFuuNodDiks]", "", exec_cmd).strip()
-                    
+
                     if name in seen_names:
                         continue
                     seen_names.add(name)
-                    
+
                     icon_name = icon_match.group(1).strip() if icon_match else "application-x-executable"
                     icon_path = resolve_icon(icon_name)
-                    
+
                     if not icon_path:
                         icon_path = resolve_icon("application-x-executable")
                     if not icon_path:
                         icon_path = resolve_icon("system-run")
-                    
+
                     comment = comment_match.group(1).strip() if comment_match else ""
-                    
+
                     apps.append({
                         "name": name,
                         "exec": exec_cmd,

@@ -1,23 +1,28 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
+import Quickshell.Widgets
 
 ColumnLayout {
     id: emptyStateRoot
     Layout.fillWidth: true
-    spacing: 8
+    spacing: 10
     Layout.topMargin: 20
     Layout.bottomMargin: 20
-    
+
     property var theme
     property string searchQuery
 
-    Text {
-        text: "󱉬"
-        font.family: "Noto Sans"
-        font.pixelSize: 32
-        color: emptyStateRoot.theme.getColor("outline")
-        Layout.fillWidth: true
-        horizontalAlignment: Text.AlignHCenter
+    IconImage {
+        width: 32
+        height: 32
+        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon(emptyStateRoot.searchQuery === "" ? "image-copy.svg" : "search.svg")
+        Layout.alignment: Qt.AlignHCenter
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            colorization: 1.0
+            colorizationColor: emptyStateRoot.theme ? emptyStateRoot.theme.getColor("outline") : "#757680"
+        }
     }
 
     Text {

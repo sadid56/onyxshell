@@ -1,7 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Effects
 import Quickshell
+import Quickshell.Widgets
 import Quickshell.Io
 import "../../../components/containers"
 import "../../../components/ui" as UI
@@ -16,12 +18,11 @@ Popup {
         var listHeight = listCount > 0 ? (listCount * 48 + 12) : 100;
         return 24 + 10 + 30 + 1 + 12 + listHeight + 20;
     }
-    topOverlap: 14
 
     property var wifiList: []
     property var savedSsids: ({})
     property bool isScanning: wifiScanner.running
-    
+
     property string selectedSsid: ""
     property string selectedSecurity: ""
     property bool showPasswordPrompt: false
@@ -61,7 +62,7 @@ Popup {
                     var signal = parseInt(parts[1]) || 0;
                     var security = parts[2];
                     var active = parts[3] === "yes";
-                    
+
                     if (ssid !== "" && !ssidsSeen[ssid]) {
                         ssidsSeen[ssid] = true;
                         list.push({
@@ -140,7 +141,7 @@ Popup {
 
         RowLayout {
             Layout.fillWidth: true
-            
+
             Text {
                 text: "Wi-Fi Networks"
                 font.family: "Noto Sans"
@@ -150,13 +151,24 @@ Popup {
                 Layout.fillWidth: true
             }
 
-            Text {
-                text: wifiWindow.isScanning ? "󱑂" : "󰑐"
-                font.family: "Noto Sans"
-                font.pixelSize: 15
-                color: wifiWindow.theme.getColor("primary")
-                font.bold: true
-                
+            IconImage {
+                width: 16
+                height: 16
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("arrow-clockwise-filled.svg")
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: wifiWindow.theme.getColor("primary")
+                }
+
+                RotationAnimation on rotation {
+                    running: wifiWindow.isScanning
+                    from: 0
+                    to: 360
+                    duration: 1000
+                    loops: Animation.Infinite
+                }
+
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -177,13 +189,16 @@ Popup {
             spacing: 8
             Layout.topMargin: 12
 
-            Text {
-                text: "󰤯"
-                font.family: "Noto Sans"
-                font.pixelSize: 32
-                color: wifiWindow.theme.getColor("outline")
-                Layout.fillWidth: true
-                horizontalAlignment: Text.AlignHCenter
+            IconImage {
+                width: 32
+                height: 32
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("wifi-off.svg")
+                Layout.alignment: Qt.AlignHCenter
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: wifiWindow.theme.getColor("outline")
+                }
             }
 
             Text {
@@ -199,11 +214,12 @@ Popup {
 
         UI.AnimatedListView {
             id: wifiListView
+            theme: wifiWindow.theme
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: wifiWindow.wifiList.length > 0
             clip: true
-            pillColor: wifiWindow.theme.getColor("surfaceVariant")
+            pillColor: wifiWindow.theme ? wifiWindow.theme.getColor("surfaceVariant") : "#2b2a27"
             pillRadius: 10
             pillMargin: 4
             spacing: 4
@@ -249,20 +265,16 @@ Popup {
                     anchors.rightMargin: 12
                     spacing: 10
 
-                    Text {
-                        text: {
-                            var sig = delegateWrapper.netInfo.signal;
-                            if (sig > 75) return "󰤨";
-                            if (sig > 50) return "󰤥";
-                            if (sig > 25) return "󰤢";
-                            return "󰤟";
-                        }
-                        font.family: "Noto Sans"
-                        font.pixelSize: 15
-                        color: delegateWrapper.netInfo.active ? wifiWindow.theme.getColor("primary") : (delegateWrapper.isHighlighted ? wifiWindow.theme.getColor("primary") : wifiWindow.theme.getColor("onSurface"))
+                    IconImage {
+                        width: 14
+                        height: 14
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getWifiIcon(delegateWrapper.netInfo.signal, true, true)
                         Layout.alignment: Qt.AlignVCenter
-
-                        Behavior on color { ColorAnimation { duration: 120 } }
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: delegateWrapper.netInfo.active ? wifiWindow.theme.getColor("primary") : (delegateWrapper.isHighlighted ? wifiWindow.theme.getColor("primary") : wifiWindow.theme.getColor("onSurface"))
+                        }
                     }
 
                     Text {
@@ -278,18 +290,36 @@ Popup {
                         Behavior on color { ColorAnimation { duration: 120 } }
                     }
 
-                    Text {
-                        text: {
-                            if (delegateWrapper.netInfo.active) return "Connected";
-                            if (delegateWrapper.netInfo.saved) return "Saved";
-                            if (delegateWrapper.netInfo.security !== "") return "󰌾";
-                            return "";
-                        }
-                        font.family: (delegateWrapper.netInfo.active || delegateWrapper.netInfo.saved) ? "Google Sans Flex, sans-serif" : "Noto Sans"
-                        font.pixelSize: (delegateWrapper.netInfo.active || delegateWrapper.netInfo.saved) ? 10 : 12
-                        font.bold: delegateWrapper.netInfo.active || delegateWrapper.netInfo.saved
-                        color: delegateWrapper.netInfo.active ? wifiWindow.theme.getColor("primary") : (delegateWrapper.netInfo.saved ? wifiWindow.theme.getColor("primary") : wifiWindow.theme.getColor("outline"))
+                    RowLayout {
+                        spacing: 4
                         Layout.alignment: Qt.AlignVCenter
+
+                        Text {
+                            text: {
+                                if (delegateWrapper.netInfo.active) return "Connected";
+                                if (delegateWrapper.netInfo.saved) return "Saved";
+                                return "";
+                            }
+                            font.family: "Google Sans Flex, sans-serif"
+                            font.pixelSize: 10
+                            font.bold: true
+                            color: delegateWrapper.netInfo.active ? wifiWindow.theme.getColor("primary") : (delegateWrapper.netInfo.saved ? wifiWindow.theme.getColor("primary") : wifiWindow.theme.getColor("outline"))
+                            visible: delegateWrapper.netInfo.active || delegateWrapper.netInfo.saved
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+
+                        IconImage {
+                            width: 12
+                            height: 12
+                            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("lock-closed.svg")
+                            visible: !delegateWrapper.netInfo.active && !delegateWrapper.netInfo.saved && delegateWrapper.netInfo.security !== ""
+                            Layout.alignment: Qt.AlignVCenter
+                            layer.enabled: true
+                            layer.effect: MultiEffect {
+                                colorization: 1.0
+                                colorizationColor: wifiWindow.theme.getColor("outline")
+                            }
+                        }
                     }
                 }
             }
@@ -321,7 +351,7 @@ Popup {
             id: passwordInput
             theme: wifiWindow.theme
             placeholder: "Enter password..."
-            icon: "󰌾"
+            icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("lock-closed.svg")
             echoMode: TextInput.Password
             onEscapePressed: {
                 wifiWindow.showPasswordPrompt = false;
@@ -342,7 +372,7 @@ Popup {
                 height: 36
                 radius: 8
                 color: wifiWindow.theme.getColor("surfaceVariant")
-                
+
                 Text {
                     anchors.centerIn: parent
                     text: "Cancel"
@@ -367,7 +397,7 @@ Popup {
                 height: 36
                 radius: 8
                 color: wifiWindow.theme.getColor("primary")
-                
+
                 Text {
                     anchors.centerIn: parent
                     text: "Connect"

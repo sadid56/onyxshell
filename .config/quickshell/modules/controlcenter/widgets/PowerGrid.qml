@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
+import Quickshell.Widgets
 
 ColumnLayout {
     id: powerRoot
@@ -43,11 +45,15 @@ ColumnLayout {
                 RowLayout {
                     anchors.centerIn: parent
                     spacing: 8
-                    Text {
-                        text: "󰌾"
-                        font.family: "Noto Sans"
-                        font.pixelSize: 13
-                        color: powerRoot.theme.getColor("primary")
+                    IconImage {
+                        width: 14
+                        height: 14
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("lock-closed.svg")
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: powerRoot.theme.getColor("primary")
+                        }
                     }
                     Text {
                         text: "Lock"
@@ -80,11 +86,15 @@ ColumnLayout {
                 RowLayout {
                     anchors.centerIn: parent
                     spacing: 8
-                    Text {
-                        text: "󰍃"
-                        font.family: "Noto Sans"
-                        font.pixelSize: 13
-                        color: powerRoot.theme.getColor("primary")
+                    IconImage {
+                        width: 14
+                        height: 14
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("open-filled.svg")
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: powerRoot.theme.getColor("primary")
+                        }
                     }
                     Text {
                         text: "Logout"
@@ -117,11 +127,15 @@ ColumnLayout {
                 RowLayout {
                     anchors.centerIn: parent
                     spacing: 8
-                    Text {
-                        text: "󰜉"
-                        font.family: "Noto Sans"
-                        font.pixelSize: 13
-                        color: powerRoot.theme.getColor("primary")
+                    IconImage {
+                        width: 14
+                        height: 14
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("arrow-clockwise-filled.svg")
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: powerRoot.theme.getColor("primary")
+                        }
                     }
                     Text {
                         text: "Reboot"
@@ -154,11 +168,15 @@ ColumnLayout {
                 RowLayout {
                     anchors.centerIn: parent
                     spacing: 8
-                    Text {
-                        text: ""
-                        font.family: "Noto Sans"
-                        font.pixelSize: 13
-                        color: powerRoot.theme.getColor("error")
+                    IconImage {
+                        width: 14
+                        height: 14
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("power.svg")
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: powerRoot.theme.getColor("error")
+                        }
                     }
                     Text {
                         text: "Power Off"
@@ -195,11 +213,15 @@ ColumnLayout {
             anchors.leftMargin: 16
             anchors.rightMargin: 16
 
-            Text {
-                text: ""
-                font.family: "Noto Sans"
-                font.pixelSize: 14
-                color: powerRoot.theme.getColor("error")
+            IconImage {
+                width: 16
+                height: 16
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("power.svg")
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: powerRoot.theme.getColor("error")
+                }
             }
 
             Text {
@@ -211,11 +233,17 @@ ColumnLayout {
                 Layout.fillWidth: true
             }
 
-            Text {
-                text: powerRoot.expanded ? "󰅃" : "󰅀"
-                font.family: "Noto Sans"
-                font.pixelSize: 16
-                color: powerRoot.theme.getColor("primary")
+            IconImage {
+                width: 14
+                height: 14
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("chevron-down.svg")
+                rotation: powerRoot.expanded ? 180 : 0
+                Behavior on rotation { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: powerRoot.theme.getColor("primary")
+                }
             }
         }
 

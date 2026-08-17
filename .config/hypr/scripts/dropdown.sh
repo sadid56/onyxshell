@@ -17,6 +17,5 @@ if [ "$spawned" = true ]; then
         hyprctl dispatch "hl.dsp.workspace.toggle_special('dropdown')"
     fi
 else
-    # If it was already running, toggle its state
     hyprctl dispatch "hl.dsp.workspace.toggle_special('dropdown')"
 fi

@@ -206,7 +206,7 @@
      d="m 4.0610759,2.168314 6.5887001,3.6879 2.1127,-3.6528 z"
      fill="#00aa88"
      id="path7"
-     style="fill:#000000" />
+     style="fill:#FFFFFF" />
   <path
      d="m 6.1499759,12.423014 -1.9125,3.7456 h 8.5747001 l 2.1664,-3.7456 z"
      fill="#00aa88"
@@ -226,7 +226,7 @@
      d="m 6.1236759,5.856214 6.6388001,-3.6528 -2.1127,3.6528 z"
      fill="#00aa88"
      id="path13"
-     style="fill:#000000" />
+     style="fill:#FFFFFF" />
   <path
      d="m 0.10057593,9.015814 6.02309997,-3.1596 -1.8859,3.2605 z"
      fill="#00aa88"
@@ -288,21 +288,21 @@
   <g
      transform="matrix(0.14699,0,0,0.14672,-0.08243407,-0.04714599)"
      id="g30"
-     style="fill:#000000">
+     style="fill:#FFFFFF">
     <circle
        cx="103.06"
        cy="26.657"
        r="3.7876999"
        fill="#00ccff"
        id="circle29"
-       style="fill:#000000" />
+       style="fill:#FFFFFF" />
     <circle
        cx="103.11"
        cy="26.618"
        r="3.7876999"
        fill="url(#linearGradient18659)"
        id="circle30"
-       style="fill:#000000" />
+       style="fill:#FFFFFF" />
   </g>
   <path
      d="m 6.1236759,5.856214 -2.0626,-3.6879 0.52544,-0.0074 1.9387,3.4465 z"

@@ -70,4 +70,3 @@ Item {
         colorsFile.path = root.shellConfig.quickshellDir + "/colors.json";
     }
 }
-

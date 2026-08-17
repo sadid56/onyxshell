@@ -5,7 +5,7 @@ import Quickshell.Wayland
 Item {
     id: root
 
-    property int radius: 16
+    property int radius: (typeof shellConfig !== "undefined" && shellConfig) ? shellConfig.cornerRadius : 16
     property color color: "black"
 
     PanelWindow {
@@ -17,10 +17,20 @@ Item {
         WlrLayershell.layer: WlrLayer.Overlay
 
         Canvas {
+            id: leftCanvas
             anchors.fill: parent
+            renderTarget: Canvas.FramebufferObject
+
+            Connections {
+                target: root
+                function onRadiusChanged() { leftCanvas.requestPaint(); }
+                function onColorChanged() { leftCanvas.requestPaint(); }
+            }
+
             onPaint: {
                 var ctx = getContext("2d");
                 ctx.reset();
+                ctx.clearRect(0, 0, width, height);
                 ctx.fillStyle = root.color;
                 ctx.beginPath();
                 ctx.moveTo(0, 0);
@@ -42,10 +52,20 @@ Item {
         WlrLayershell.layer: WlrLayer.Overlay
 
         Canvas {
+            id: rightCanvas
             anchors.fill: parent
+            renderTarget: Canvas.FramebufferObject
+
+            Connections {
+                target: root
+                function onRadiusChanged() { rightCanvas.requestPaint(); }
+                function onColorChanged() { rightCanvas.requestPaint(); }
+            }
+
             onPaint: {
                 var ctx = getContext("2d");
                 ctx.reset();
+                ctx.clearRect(0, 0, width, height);
                 ctx.fillStyle = root.color;
                 ctx.beginPath();
                 ctx.moveTo(root.radius, 0);

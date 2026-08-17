@@ -3,33 +3,41 @@ import QtQuick.Layouts
 import Quickshell
 import "./widgets"
 import "../../core"
+import "../../components/ui" as UI
 
 PanelWindow {
     id: barWindow
     anchors { top: true; left: true; right: true }
     implicitHeight: 56
     color: "transparent"
-    
+
     margins {
         top: 0
         left: 0
         right: 0
     }
-    
+
     exclusiveZone: 40
- 
+
     property var theme
     property var sysStats
-    
+    property var mediaService
+
     property var toggleLauncher
     property var toggleNotifications
     property var toggleCalendar
     property var toggleWifi
+    property var toggleMedia
     property int notifCount: 0
 
     function getClockX() {
         var pos = clockItem.mapToItem(null, 0, 0);
         return pos.x + clockItem.width / 2;
+    }
+
+    function getMediaX() {
+        var pos = mediaBarItem.mapToItem(null, 0, 0);
+        return pos.x + mediaBarItem.width / 2;
     }
 
     function getWifiX() {
@@ -61,7 +69,7 @@ PanelWindow {
                 DistroLogo {
                     id: distroLogoItem
                     Layout.alignment: Qt.AlignVCenter
-                    
+
                     MouseArea {
                         anchors.fill: parent
                         hoverEnabled: true
@@ -80,8 +88,15 @@ PanelWindow {
                 }
             }
 
-            ActiveWindowTitle {
+            UI.Divider {
                 theme: barWindow.theme
+            }
+
+            MediaBarWidget {
+                id: mediaBarItem
+                theme: barWindow.theme
+                mediaService: barWindow.mediaService
+                toggleMedia: barWindow.toggleMedia
                 Layout.alignment: Qt.AlignVCenter
             }
 

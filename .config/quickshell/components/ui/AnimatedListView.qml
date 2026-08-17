@@ -3,68 +3,71 @@ import QtQuick.Layouts
 
 ListView {
     id: listViewRoot
-    clip: true
-    spacing: 8
 
-    property bool enableGlidingPill: true
-    property color pillColor: "#e2e1ec"
-    property int pillRadius: 12
-    property int pillMargin: 6
-
+    property var theme
+    property color pillColor: (listViewRoot.theme && typeof listViewRoot.theme.getColor === "function") 
+        ? listViewRoot.theme.getColor("surfaceVariant") 
+        : ((typeof root !== "undefined" && root.theme) ? root.theme.getColor("surfaceVariant") : "#2b2a27")
+    property real pillRadius: 12
+    property real pillMargin: 6
     property int hoveredIndex: -1
-    property real targetPillY: -100
-    property real targetPillHeight: 48
-    readonly property bool isPillActive: enableGlidingPill && (hoveredIndex >= 0 || (listViewRoot.activeFocus && currentIndex >= 0))
+    property int activeTargetIndex: currentIndex >= 0 ? currentIndex : hoveredIndex
 
-    function hoverItem(index, itemY, itemHeight) {
-        hoveredIndex = index;
-        targetPillY = itemY;
-        if (itemHeight !== undefined && itemHeight > 0) {
-            targetPillHeight = itemHeight;
+    clip: true
+    spacing: 4
+    boundsBehavior: Flickable.StopAtBounds
+
+    function hoverItem(idx, targetY, targetHeight) {
+        hoveredIndex = idx;
+        if (targetY !== undefined && targetHeight !== undefined) {
+            selectionPill.targetY = targetY;
+            selectionPill.targetHeight = targetHeight;
         }
     }
 
-    function unhoverItem(index) {
-        if (hoveredIndex === index) {
+    function unhoverItem(idx) {
+        if (hoveredIndex === idx) {
             hoveredIndex = -1;
+            if (currentIndex >= 0 && currentItem) {
+                selectionPill.targetY = currentItem.y;
+                selectionPill.targetHeight = currentItem.height;
+            }
         }
     }
 
-    function isItemHighlighted(index) {
-        return hoveredIndex === index || (listViewRoot.activeFocus && currentIndex === index);
-    }
-
-    onActiveFocusChanged: {
-        if (!activeFocus) {
-            currentIndex = -1;
+    function isItemHighlighted(idx) {
+        if (hoveredIndex !== -1) {
+            return hoveredIndex === idx;
         }
+        return currentIndex === idx;
     }
 
     onCurrentIndexChanged: {
         if (currentIndex >= 0 && currentItem) {
-            targetPillY = currentItem.y;
-            targetPillHeight = currentItem.height;
+            selectionPill.targetY = currentItem.y;
+            selectionPill.targetHeight = currentItem.height;
         }
     }
 
     Rectangle {
-        id: glidingPill
+        id: selectionPill
         parent: listViewRoot.contentItem
-        visible: listViewRoot.enableGlidingPill
+        z: 0
         x: listViewRoot.pillMargin
         width: Math.max(0, listViewRoot.width - (listViewRoot.pillMargin * 2))
-        height: listViewRoot.targetPillHeight
         radius: listViewRoot.pillRadius
         color: listViewRoot.pillColor
-        border.width: 0
-        z: 0
-        opacity: listViewRoot.isPillActive ? 1.0 : 0.0
 
-        y: listViewRoot.targetPillY
+        property real targetY: 0
+        property real targetHeight: 0
+
+        y: targetY
+        height: targetHeight
+        opacity: (listViewRoot.activeTargetIndex >= 0 && listViewRoot.count > 0) ? 1.0 : 0.0
 
         Behavior on y {
             NumberAnimation {
-                duration: 140
+                duration: 160
                 easing.type: Easing.OutCubic
             }
         }
@@ -76,51 +79,75 @@ ListView {
         }
         Behavior on opacity {
             NumberAnimation {
-                duration: 160
+                duration: 140
                 easing.type: Easing.OutQuad
             }
         }
     }
 
     Behavior on Layout.preferredHeight {
-        NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
     }
 
     add: Transition {
         ParallelAnimation {
-            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 220; easing.type: Easing.OutQuad }
-            NumberAnimation { property: "scale"; from: 0.94; to: 1.0; duration: 240; easing.type: Easing.OutCubic }
-            NumberAnimation { property: "x"; from: -14; to: 0; duration: 240; easing.type: Easing.OutCubic }
+            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 200; easing.type: Easing.OutQuad }
+            NumberAnimation { property: "scale"; from: 0.95; to: 1.0; duration: 220; easing.type: Easing.OutCubic }
         }
     }
 
     remove: Transition {
         ParallelAnimation {
             NumberAnimation { property: "opacity"; to: 0.0; duration: 160; easing.type: Easing.OutQuad }
-            NumberAnimation { property: "scale"; to: 0.94; duration: 160; easing.type: Easing.OutCubic }
+            NumberAnimation { property: "scale"; to: 0.95; duration: 160; easing.type: Easing.OutCubic }
+        }
+    }
+
+    move: Transition {
+        NumberAnimation {
+            properties: "x,y"
+            duration: 240
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    moveDisplaced: Transition {
+        NumberAnimation {
+            properties: "x,y"
+            duration: 240
+            easing.type: Easing.OutCubic
         }
     }
 
     displaced: Transition {
         NumberAnimation {
-            properties: "y"
-            duration: 220
+            properties: "x,y"
+            duration: 240
             easing.type: Easing.OutCubic
         }
     }
 
     removeDisplaced: Transition {
         NumberAnimation {
-            properties: "y"
-            duration: 220
+            properties: "x,y"
+            duration: 240
             easing.type: Easing.OutCubic
         }
     }
 
     addDisplaced: Transition {
         NumberAnimation {
-            properties: "y"
-            duration: 220
+            properties: "x,y"
+            duration: 240
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    populate: Transition {
+        NumberAnimation {
+            properties: "opacity,y"
+            from: 0.0
+            duration: 180
             easing.type: Easing.OutCubic
         }
     }
@@ -199,6 +226,32 @@ ListView {
             var currKey = (curr && keyProp && curr[keyProp] !== undefined) ? curr[keyProp] : (curr ? curr.entryData : curr);
             if (!curr || !targetMap[currKey]) {
                 listModel.remove(r);
+            }
+        }
+    }
+
+    Rectangle {
+        id: bottomScrollFadeRect
+        anchors.left: listViewRoot.left
+        anchors.right: listViewRoot.right
+        anchors.bottom: listViewRoot.bottom
+        height: 48
+        z: 10
+        enabled: false
+        visible: listViewRoot.count > 3
+
+        readonly property color surfaceColor: (listViewRoot.theme && typeof listViewRoot.theme.getColor === "function") 
+            ? listViewRoot.theme.getColor("surface") 
+            : ((typeof root !== "undefined" && root.theme) ? root.theme.getColor("surface") : "#1b1b1b")
+
+        gradient: Gradient {
+            GradientStop { 
+                position: 0.0
+                color: Qt.rgba(bottomScrollFadeRect.surfaceColor.r, bottomScrollFadeRect.surfaceColor.g, bottomScrollFadeRect.surfaceColor.b, 0.0) 
+            }
+            GradientStop { 
+                position: 1.0
+                color: bottomScrollFadeRect.surfaceColor 
             }
         }
     }
