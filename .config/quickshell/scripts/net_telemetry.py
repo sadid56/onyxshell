@@ -31,12 +31,24 @@ def get_net_bytes():
         pass
     return rx, tx
 
+def get_wifi_signal():
+    try:
+        res = subprocess.check_output(
+            "nmcli -t -f ACTIVE,SIGNAL device wifi | grep '^yes:' | cut -d: -f2",
+            shell=True, text=True
+        ).strip()
+        if res.isdigit():
+            return int(res)
+        return -1
+    except Exception:
+        return -1
+
 last_rx, last_tx = get_net_bytes()
 last_time = time.time()
 ssid = get_ssid()
 
 # Print initially
-print(json.dumps({"ssid": ssid, "down": "0 B/s", "up": "0 B/s"}), flush=True)
+print(json.dumps({"ssid": ssid, "down": "0 B/s", "up": "0 B/s", "signal": -1}), flush=True)
 
 ssid_counter = 0
 
@@ -68,7 +80,12 @@ while True:
             ssid = get_ssid()
             ssid_counter = 0
             
-        print(json.dumps({"ssid": ssid, "down": format_speed(down_speed), "up": format_speed(up_speed)}), flush=True)
+        print(json.dumps({
+            "ssid": ssid,
+            "down": format_speed(down_speed),
+            "up": format_speed(up_speed),
+            "signal": get_wifi_signal()
+        }), flush=True)
     except KeyboardInterrupt:
         break
     except Exception:

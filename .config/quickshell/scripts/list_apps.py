@@ -1,11 +1,32 @@
 import os
+import sys
 import json
 import re
+
+CACHE_FILE = "/tmp/quickshell_apps_cache.json"
 
 dirs = [
     "/usr/share/applications",
     os.path.expanduser("~/.local/share/applications")
 ]
+
+# Fast path: Return cached app list if valid
+if os.path.exists(CACHE_FILE):
+    try:
+        cache_mtime = os.path.getmtime(CACHE_FILE)
+        valid = True
+        for d in dirs:
+            if os.path.exists(d) and os.path.getmtime(d) > cache_mtime:
+                valid = False
+                break
+        if valid:
+            with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                content = f.read()
+                if content.strip():
+                    print(content)
+                    sys.exit(0)
+    except Exception:
+        pass
 
 icon_cache = {}
 
@@ -92,4 +113,10 @@ for d in dirs:
             pass
 
 apps.sort(key=lambda x: x["name"].lower())
-print(json.dumps(apps))
+output_json = json.dumps(apps)
+try:
+    with open(CACHE_FILE, "w", encoding="utf-8") as f:
+        f.write(output_json)
+except Exception:
+    pass
+print(output_json)

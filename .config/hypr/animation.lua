@@ -20,4 +20,4 @@ hl.animation({ leaf = "border",      enabled = true, speed = 10, bezier = "defau
 hl.animation({ leaf = "fade",        enabled = true, speed = 3, bezier = "md3_decel" })
 hl.animation({ leaf = "workspaces",  enabled = true, speed = 3.5, bezier = "md3_decel", style = "slide" })
 hl.animation({ leaf = "layers",      enabled = true, speed = 2.5, bezier = "md3_decel", style = "fade" })
-hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 5, bezier = "md3_decel", style = "slidevert" })
+hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 5, bezier = "md3_decel", style = "fade" })
