@@ -5,8 +5,8 @@
 hyprctl reload
 
 # Restart Quickshell
-killall quickshell
-quickshell -p /home/sadid/.config/quickshell/shell.qml &
+killall quickshell 2>/dev/null || true
+quickshell &
 
 # Restart Hypridle
 killall hypridle

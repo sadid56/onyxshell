@@ -22,7 +22,7 @@ browser = "brave-origin"
 -------------------
 hl.on("hyprland.start", function()
 	-- hl.exec_cmd("waybar")
-	hl.exec_cmd("quickshell -p /home/sadid/.config/quickshell/shell.qml")
+	hl.exec_cmd("quickshell")
 	hl.exec_cmd("awww-daemon")
 	hl.exec_cmd("hypridle")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")

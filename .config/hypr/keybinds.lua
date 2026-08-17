@@ -12,7 +12,7 @@ hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("~/.config/hypr/scripts/dropdown.sh")
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(
 	secondMod .. " + SPACE",
-	hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleLauncher")
+	hl.dsp.exec_cmd("qs ipc call shell toggleLauncher")
 )
 
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
@@ -21,13 +21,13 @@ hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("~/.config/hypr/scripts/reload.sh"))
 hl.bind(
 	mainMod .. " + SHIFT + B",
-	hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleBar")
+	hl.dsp.exec_cmd("qs ipc call shell toggleBar")
 )
 
 -- Show keybinds cheat sheet
 hl.bind(
 	mainMod .. " + slash",
-	hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleKeybinds")
+	hl.dsp.exec_cmd("qs ipc call shell toggleKeybinds")
 )
 
 ----------------------------------
@@ -36,12 +36,12 @@ hl.bind(
 -- for cliphist
 hl.bind(
 	mainMod .. " + V",
-	hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleClipboard")
+	hl.dsp.exec_cmd("qs ipc call shell toggleClipboard")
 )
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist wipe && notify-send 'Clipboard cleared'"))
 hl.bind(
 	mainMod .. " + N",
-	hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleNotifications")
+	hl.dsp.exec_cmd("qs ipc call shell toggleNotifications")
 )
 
 ---------------------------
@@ -113,11 +113,11 @@ hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("kitty --class floating_mem -e ~/.con
 -- System Controls
 hl.bind(
 	mainMod .. " + M",
-	hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleControlCenter")
+	hl.dsp.exec_cmd("qs ipc call shell toggleControlCenter")
 )
 hl.bind(
 	mainMod .. " + SHIFT + W",
-	hl.dsp.exec_cmd("qs ipc -p /home/sadid/.config/quickshell/shell.qml call shell toggleWallpaperSelector")
+	hl.dsp.exec_cmd("qs ipc call shell toggleWallpaperSelector")
 )
 hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("~/.config/hypr/scripts/shutdown.sh"))
 

@@ -1,19 +1,22 @@
 #!/bin/bash
 
-REPO_DIR="$HOME/onyxshell"
+set -e
 
-# List of all the config folders inside ~/.config/ that you want to back up
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$SCRIPT_DIR"
+
+# List of config folders inside ~/.config/ to sync
 CONFIG_DIRS=(
   "hypr"
-  "cava"
-  "xdg-desktop-portal"
-  "nvim"
+  "quickshell"
   "kitty"
   "fastfetch"
-  "quickshell"
+  "cava"
+  "nvim"
+  "xdg-desktop-portal"
 )
 
-echo "🚀 Starting dotfiles update..."
+echo "🚀 Starting dotfiles update from ~/.config..."
 
 # Check if the repository folder exists
 if [ ! -d "$REPO_DIR" ]; then
@@ -21,53 +24,53 @@ if [ ! -d "$REPO_DIR" ]; then
   exit 1
 fi
 
-echo "📁 Copying configuration folders..."
+echo "📁 Syncing configuration folders..."
 
-# Loop through the list and copy each folder to the repo
 for dir in "${CONFIG_DIRS[@]}"; do
-  # Check if the config directory actually exists on your system
   if [ -d "$HOME/.config/$dir" ]; then
-    # Create the target directory in the repo
     mkdir -p "$REPO_DIR/.config/$dir"
-    # Copy the contents over
-    cp -r "$HOME/.config/$dir/"* "$REPO_DIR/.config/$dir/"
-    echo "  ✔️ Copied $dir"
+    rsync -av --delete "$HOME/.config/$dir/" "$REPO_DIR/.config/$dir/"
+    echo "  ✔️ Synced $dir"
   else
     echo "  ⚠️ Warning: ~/.config/$dir not found on your system, skipping."
   fi
 done
 
-# Copy .zshrc separately
-echo "📁 Copying .zshrc..."
+# Copy .zshrc
+echo "📁 Syncing .zshrc..."
 if [ -f "$HOME/.zshrc" ]; then
   mkdir -p "$REPO_DIR/zsh"
   cp "$HOME/.zshrc" "$REPO_DIR/zsh/.zshrc"
-  echo "  ✔️ Copied .zshrc"
+  echo "  ✔️ Synced .zshrc"
 else
   echo "  ⚠️ Warning: ~/.zshrc not found on your system, skipping."
 fi
 
+# Clean __pycache__ if any
+find "$REPO_DIR" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 
 # Git operations
-echo "🔍 Staging changes..."
+cd "$REPO_DIR"
+echo "🔍 Checking for changes..."
+
+if [ -z "$(git status --porcelain)" ]; then
+  echo "✨ No changes detected. Everything is already up to date!"
+  exit 0
+fi
+
+echo "📝 Staging changes..."
 git add .
 
-echo "📝 Committing changes..."
-# Prompt the user for a commit message
-read -p "Enter commit message (or press Enter for default): " CUSTOM_MESSAGE
-
-# Check if the input is empty
+read -rp "Enter commit message (or press Enter for default): " CUSTOM_MESSAGE
 if [ -z "$CUSTOM_MESSAGE" ]; then
-  # Fallback message if you just press Enter
-  COMMIT_MSG="Update configs - $(date +'%Y-%m-%d %H:%M:%S')"
+  COMMIT_MSG="chore: update configs - $(date +'%Y-%m-%d %H:%M:%S')"
 else
-  # Use your custom message
   COMMIT_MSG="$CUSTOM_MESSAGE"
 fi
 
 git commit -m "$COMMIT_MSG"
 
 echo "☁️ Pushing to GitHub..."
-git push origin main 
+git push origin main
 
-echo "✅ Done! Everything is safely backed up."
+echo "✅ Done! Everything is safely backed up and pushed."
