@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell.Widgets
 import "../../components/containers"
+import "./components"
 
 Popup {
     id: calWindow
@@ -14,7 +15,7 @@ Popup {
     property date selectedDate: new Date()
     property int displayedMonth: today.getMonth()
     property int displayedYear: today.getFullYear()
-    
+
     property var monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     property var dayFullNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
     property var dayNames: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
@@ -42,7 +43,6 @@ Popup {
         var nextMonth = month === 11 ? 0 : month + 1;
         var nextYear = month === 11 ? year + 1 : year;
 
-        // Previous month trailing days
         for (var i = startDay - 1; i >= 0; i--) {
             var dayNumPrev = daysInPrevMonth - i;
             list.push({
@@ -53,7 +53,6 @@ Popup {
             });
         }
 
-        // Current month days
         for (var j = 1; j <= daysInCurrentMonth; j++) {
             list.push({
                 dayNumber: j,
@@ -63,7 +62,6 @@ Popup {
             });
         }
 
-        // Next month leading days
         var remaining = 42 - list.length;
         for (var k = 1; k <= remaining; k++) {
             list.push({
@@ -127,7 +125,6 @@ Popup {
         onActivated: calWindow.active = false
     }
 
-    // Top Header: Clean Full Date Information
     RowLayout {
         Layout.fillWidth: true
         spacing: 12
@@ -136,7 +133,6 @@ Popup {
             Layout.fillWidth: true
             spacing: 2
 
-            // Selected Date Headline: "Monday, 17 August 2026"
             Text {
                 id: selectedFullDateText
                 text: calWindow.dayFullNames[calWindow.selectedDate.getDay()] + ", " + 
@@ -149,7 +145,6 @@ Popup {
                 color: calWindow.theme ? calWindow.theme.getColor("onSurface") : "#f0dede"
             }
 
-            // Browsed Month Indicator
             Text {
                 text: calWindow.monthNames[calWindow.displayedMonth] + " " + calWindow.displayedYear
                 font.family: "Google Sans Flex, sans-serif"
@@ -162,7 +157,6 @@ Popup {
             Layout.fillWidth: true
         }
 
-        // Prev Month Button
         Rectangle {
             width: 34
             height: 34
@@ -196,7 +190,6 @@ Popup {
 
         Item { width: 4 }
 
-        // Next Month Button
         Rectangle {
             width: 34
             height: 34
@@ -235,7 +228,6 @@ Popup {
         color: calWindow.theme ? calWindow.theme.getColor("surfaceVariant") : "#34343c"
     }
 
-    // Days Header Row (Mo, Tu, We, Th, Fr, Sa, Su)
     RowLayout {
         Layout.fillWidth: true
         spacing: 0
@@ -253,7 +245,6 @@ Popup {
         }
     }
 
-    // Fluid Sliding Days Stage
     Item {
         id: stageContainer
         Layout.fillWidth: true
@@ -272,72 +263,12 @@ Popup {
 
                 Repeater {
                     model: calWindow.daysList
-
-                    Rectangle {
-                        id: cellRect
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 38
-                        radius: 19
-
-                        property bool isTodayDate: modelData.dayNumber === calWindow.today.getDate() && 
-                                                  modelData.month === calWindow.today.getMonth() && 
-                                                  modelData.year === calWindow.today.getFullYear()
-
-                        property bool isSelectedDate: modelData.dayNumber === calWindow.selectedDate.getDate() && 
-                                                      modelData.month === calWindow.selectedDate.getMonth() && 
-                                                      modelData.year === calWindow.selectedDate.getFullYear()
-
-                        // Color Logic:
-                        // 1. Today: Solid primary pill
-                        // 2. Selected (Not today): Soft tinted primary pill with border
-                        // 3. Hovered: Surface variant
-                        // 4. Default: Transparent
-                        color: isTodayDate ?
-                               (calWindow.theme ? calWindow.theme.getColor("primary") : "#ffb3b4") :
-                               (isSelectedDate ?
-                                   (calWindow.theme ? calWindow.theme.getColor("surfaceVariant") : "#34343c") :
-                                   (cellHover.hovered ? 
-                                       (calWindow.theme ? calWindow.theme.getColor("surfaceVariant") : "#2b2a27") : 
-                                       "transparent"))
-
-                        border.width: (isSelectedDate && !isTodayDate) ? 1.5 : 0
-                        border.color: calWindow.theme ? calWindow.theme.getColor("primary") : "#ffb3b4"
-
-                        Behavior on color { ColorAnimation { duration: 120 } }
-                        Behavior on border.width { NumberAnimation { duration: 120 } }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: String(modelData.dayNumber)
-                            font.family: "Google Sans Flex, sans-serif"
-                            font.pixelSize: 12
-                            font.bold: cellRect.isTodayDate || cellRect.isSelectedDate || modelData.isCurrentMonth
-                            color: cellRect.isTodayDate ?
-                                       (calWindow.theme ? calWindow.theme.getColor("onPrimary") : "#380d15") :
-                                       (cellRect.isSelectedDate ?
-                                           (calWindow.theme ? calWindow.theme.getColor("primary") : "#ffb3b4") :
-                                           (modelData.isCurrentMonth ?
-                                               (calWindow.theme ? calWindow.theme.getColor("onSurface") : "#f0dede") :
-                                               (calWindow.theme ? calWindow.theme.getColor("outline") : "#757680")))
-                        }
-
-                        HoverHandler {
-                            id: cellHover
-                            cursorShape: Qt.PointingHandCursor
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: calWindow.selectDate(modelData)
-                        }
-                    }
+                    CalendarDayCell {}
                 }
             }
         }
     }
 
-    // Kinetic Fluid Month Slide Animation
     ParallelAnimation {
         id: monthSlideAnim
 

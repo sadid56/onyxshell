@@ -54,7 +54,7 @@ RowLayout {
         theme: headerRoot.theme
         icon: {
             var cfg = (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig);
-            if (headerRoot.currentProfile === "performance") return cfg.getIcon("performance.svg");
+            if (headerRoot.currentProfile === "performance") return cfg.getIcon("zap.svg");
             if (headerRoot.currentProfile === "power-saver") return cfg.getIcon("leaf-two.svg");
             return cfg.getIcon("memory.svg");
         }
@@ -71,7 +71,6 @@ RowLayout {
         theme: headerRoot.theme
         icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("eyedropper-filled.svg")
         onClicked: {
-            headerRoot.closeRequested();
             if (headerRoot.hyprpickerProc) {
                 headerRoot.hyprpickerProc.running = false;
                 headerRoot.hyprpickerProc.running = true;

@@ -13,3 +13,9 @@ post_hook = 'kitty @ --to=unix:@mykitty set-colors -a "$HOME/.config/kitty/kitty
 [templates.fish]
 input_path = '~/.config/matugen/templates/fish-colors.fish'
 output_path = '~/.config/fish/conf.d/matugen_colors.fish'
+
+[templates.hypr]
+input_path = '~/.config/matugen/templates/hypr-colors.lua'
+output_path = '~/.config/hypr/theme/colors.lua'
+post_hook = 'hyprctl reload config-only'
+

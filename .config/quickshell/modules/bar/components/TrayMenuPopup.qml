@@ -22,6 +22,17 @@ Popup {
         menu: trayMenuWindow.activeTrayItem ? trayMenuWindow.activeTrayItem.menu : null
     }
 
+    function focusTrayApp(trayItem) {
+        if (!trayItem) return;
+        var scriptPath = (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getScript("focus_tray_window.py");
+        Quickshell.execDetached([
+            "python", scriptPath,
+            trayItem.id || "",
+            trayItem.title || "",
+            trayItem.icon || ""
+        ]);
+    }
+
     Flickable {
         id: scrollArea
         parent: contentRect
@@ -126,6 +137,9 @@ Popup {
                         onClicked: {
                             if (delegateWrapper.menuItem && typeof delegateWrapper.menuItem.triggered === "function") {
                                 delegateWrapper.menuItem.triggered();
+                            }
+                            if (!delegateWrapper.isQuitOrExit) {
+                                trayMenuWindow.focusTrayApp(trayMenuWindow.activeTrayItem);
                             }
                             trayMenuWindow.active = false;
                         }

@@ -1,16 +1,12 @@
 #!/bin/bash
-# Script to reload Hyprland, Waybar, SwayNC and other services
 
-# Reload Hyprland config
 hyprctl reload
 
-# Restart Quickshell
-killall quickshell 2>/dev/null || true
+killall -9 quickshell 2>/dev/null || true
+while pgrep -x quickshell >/dev/null; do sleep 0.05; done
 quickshell &
 
-# Restart Hypridle
-killall hypridle
-hypridle &
+killall hypridle 2>/dev/null || true
+hypridle -c ~/.config/hypr/config/hypridle.conf &
 
-# Notify user of completion
 notify-send -u low "Desktop Reloaded" "Quickshell, Hypridle, and Hyprland configuration reloaded."

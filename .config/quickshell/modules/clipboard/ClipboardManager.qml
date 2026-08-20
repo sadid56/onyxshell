@@ -10,7 +10,7 @@ Popup {
     id: clipWindow
 
     popupWidth: 480
-    popupHeight: Math.min(520, mainLayout.implicitHeight + 36)
+    popupHeight: Math.min(520, mainLayout.implicitHeight + 48)
     closeOnHoverOutside: false
 
     property var clipService

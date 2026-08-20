@@ -83,8 +83,8 @@ install_packages() {
         arch|cachyos|endeavouros|manjaro)
             echo -e "${BLUE}[*] Installing packages for Arch-based distribution via pacman...${RESET}"
             ARCH_PACKAGES=(
-                hyprland hyprlock hypridle hyprshot hyprpicker quickshell matugen awww
-                kitty neovim fastfetch cava htop fish firefox
+                hyprland hyprlock hypridle hyprshot hyprpicker quickshell matugen
+                kitty neovim fastfetch cava htop fish starship firefox
                 wl-clipboard cliphist grim slurp
                 playerctl brightnessctl wireplumber pipewire pipewire-pulse pipewire-alsa pavucontrol
                 network-manager-applet bluez bluez-utils
@@ -93,14 +93,13 @@ install_packages() {
                 gnome-themes-extra adwaita-icon-theme nwg-look qt6ct qt5ct qt6-svg qt6-declarative
                 nodejs python python-pip fzf jq bc power-profiles-daemon nautilus rsync
                 ttf-jetbrains-mono-nerd noto-fonts-emoji
-                
             )
             sudo pacman -S --needed --noconfirm "${ARCH_PACKAGES[@]}"
             ;;
         fedora)
             echo -e "${BLUE}[*] Installing packages for Fedora...${RESET}"
             FEDORA_PACKAGES=(
-                hyprland hyprlock hypridle hyprpicker kitty neovim fastfetch cava htop fish firefox
+                hyprland hyprlock hypridle hyprpicker kitty neovim fastfetch cava htop fish starship firefox
                 wl-clipboard cliphist grim slurp playerctl brightnessctl wireplumber
                 NetworkManager-applet bluez bluez-tools pavucontrol
                 xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
@@ -113,7 +112,7 @@ install_packages() {
         ubuntu|debian|pop|mint)
             echo -e "${BLUE}[*] Installing packages for Debian/Ubuntu-based distribution...${RESET}"
             DEB_PACKAGES=(
-                hyprland kitty neovim cava htop fish firefox
+                hyprland kitty neovim cava htop fish starship firefox
                 wl-clipboard cliphist grim slurp playerctl brightnessctl wireplumber
                 network-manager-gnome bluez pavucontrol
                 xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
@@ -150,20 +149,29 @@ if confirm "Deploy Onyxshell configuration files to ~/.config?"; then
     mkdir -p "$HOME/.config"
 
     if [ -d "$SCRIPT_DIR/.config" ]; then
-        for SRC_DIR in "$SCRIPT_DIR/.config"/*; do
-            if [ -d "$SRC_DIR" ]; then
-                dir=$(basename "$SRC_DIR")
-                DEST_DIR="$HOME/.config/$dir"
+        for SRC_ITEM in "$SCRIPT_DIR/.config"/*; do
+            item=$(basename "$SRC_ITEM")
+            DEST_ITEM="$HOME/.config/$item"
 
-                if [ -d "$DEST_DIR" ]; then
-                    BACKUP_DIR="${DEST_DIR}_backup_${TIMESTAMP}"
-                    echo -e "${BLUE}[*] Backing up existing $DEST_DIR to $BACKUP_DIR...${RESET}"
-                    cp -r "$DEST_DIR" "$BACKUP_DIR"
+            if [ -d "$SRC_ITEM" ]; then
+                if [ -d "$DEST_ITEM" ]; then
+                    BACKUP_DIR="${DEST_ITEM}_backup_${TIMESTAMP}"
+                    echo -e "${BLUE}[*] Backing up existing $DEST_ITEM to $BACKUP_DIR...${RESET}"
+                    cp -r "$DEST_ITEM" "$BACKUP_DIR"
                 fi
 
-                echo -e "${GREEN}[+] Deploying $dir config to ~/.config/$dir...${RESET}"
-                mkdir -p "$DEST_DIR"
-                rsync -av --delete "$SRC_DIR/" "$DEST_DIR/"
+                echo -e "${GREEN}[+] Deploying $item config to ~/.config/$item...${RESET}"
+                mkdir -p "$DEST_ITEM"
+                rsync -av --delete "$SRC_ITEM/" "$DEST_ITEM/"
+            elif [ -f "$SRC_ITEM" ]; then
+                if [ -f "$DEST_ITEM" ]; then
+                    BACKUP_FILE="${DEST_ITEM}_backup_${TIMESTAMP}"
+                    echo -e "${BLUE}[*] Backing up existing $DEST_ITEM to $BACKUP_FILE...${RESET}"
+                    cp "$DEST_ITEM" "$BACKUP_FILE"
+                fi
+
+                echo -e "${GREEN}[+] Deploying $item to ~/.config/$item...${RESET}"
+                cp "$SRC_ITEM" "$DEST_ITEM"
             fi
         done
     fi

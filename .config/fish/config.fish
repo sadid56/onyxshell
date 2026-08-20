@@ -14,6 +14,11 @@ set -gx VISUAL nvim
 set -gx TERMINAL kitty
 set -gx BROWSER brave-origin
 
+# Starship Prompt Integration
+if command -q starship
+    starship init fish | source
+end
+
 
 
 # Fuzzy Finder (FZF) Integration

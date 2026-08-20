@@ -2,60 +2,81 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-IpcHandler {
-    id: ipcHandler
-    target: "shell"
+QtObject {
+    id: ipcServiceRoot
 
     property var popupManager: null
     property var statusBar: null
     property var theme: null
 
-    function toggleLauncher(): void {
-        if (popupManager) {
-            popupManager.toggleLoaderActive(popupManager.launcherLoader);
-        }
-    }
+    property var handler: IpcHandler {
+        target: "shell"
 
-    function toggleMedia(): void {
-        if (popupManager) {
-            var mediaX = statusBar ? statusBar.getMediaX() : undefined;
-            popupManager.toggleLoaderActive(popupManager.mediaLoader, mediaX);
+        function toggleLauncher(): void {
+            if (ipcServiceRoot.popupManager) {
+                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.launcherLoader);
+            }
         }
-    }
 
-    function toggleNotifications(): void {
-        if (popupManager) {
-            popupManager.toggleLoaderActive(popupManager.notifsLoader);
+        function toggleMedia(): void {
+            if (ipcServiceRoot.popupManager) {
+                var mediaX = ipcServiceRoot.statusBar ? ipcServiceRoot.statusBar.getMediaX() : undefined;
+                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.mediaLoader, mediaX);
+            }
         }
-    }
 
-    function toggleClipboard(): void {
-        if (popupManager) {
-            popupManager.toggleLoaderActive(popupManager.clipboardLoader);
+        function toggleNotifications(): void {
+            if (ipcServiceRoot.popupManager) {
+                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.notifsLoader);
+            }
         }
-    }
 
-    function toggleWallpaperSelector(): void {
-        if (popupManager) {
-            popupManager.toggleLoaderActive(popupManager.wallpaperSelectorLoader);
+        function toggleClipboard(): void {
+            if (ipcServiceRoot.popupManager) {
+                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.clipboardLoader);
+            }
         }
-    }
 
-    function toggleBar(): void {
-        if (statusBar) {
-            statusBar.visible = !statusBar.visible;
+        function toggleEmoji(): void {
+            if (ipcServiceRoot.popupManager) {
+                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.emojiLoader);
+            }
         }
-    }
 
-    function toggleKeybinds(): void {
-        if (popupManager) {
-            popupManager.toggleLoaderActive(popupManager.keybindsLoader);
+        function toggleWallpaperSelector(): void {
+            if (ipcServiceRoot.popupManager) {
+                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.wallpaperSelectorLoader);
+            }
         }
-    }
 
-    function reloadTheme(): void {
-        if (theme && typeof theme.reloadColors === "function") {
-            theme.reloadColors();
+        function toggleBar(): void {
+            if (ipcServiceRoot.statusBar) {
+                ipcServiceRoot.statusBar.visible = !ipcServiceRoot.statusBar.visible;
+            }
+        }
+
+        function toggleKeybinds(): void {
+            if (ipcServiceRoot.popupManager) {
+                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.keybindsLoader);
+            }
+        }
+
+        function toggleAltTab(): void {
+            if (ipcServiceRoot.popupManager) {
+                ipcServiceRoot.popupManager.toggleAltTab();
+            }
+        }
+
+        function closeAltTab(): void {
+            if (ipcServiceRoot.popupManager && ipcServiceRoot.popupManager.altTabLoader && ipcServiceRoot.popupManager.altTabLoader.item) {
+                ipcServiceRoot.popupManager.altTabLoader.item.selectAndClose();
+            }
+        }
+
+        function reloadTheme(): void {
+            if (ipcServiceRoot.theme && typeof ipcServiceRoot.theme.reloadColors === "function") {
+                ipcServiceRoot.theme.reloadColors();
+            }
         }
     }
 }

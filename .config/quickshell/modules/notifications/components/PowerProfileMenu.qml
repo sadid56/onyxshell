@@ -70,7 +70,7 @@ Item {
 
             Repeater {
                 model: [
-                    { profileId: "performance", name: "Performance", icon: "performance.svg" },
+                    { profileId: "performance", name: "Performance", icon: "zap.svg" },
                     { profileId: "balanced", name: "Balanced", icon: "memory.svg" },
                     { profileId: "power-saver", name: "Saver", icon: "leaf-two.svg" }
                 ]

@@ -36,22 +36,25 @@ def get_readable_action(raw_keys, raw_action):
     if "toggleclipboard" in act:
         return "Open Clipboard History", "System", "󰆏"
 
+    if "toggleemoji" in act:
+        return "Open Emoji Picker", "System", "󰞅"
+
     if "cliphist wipe" in act:
         return "Clear Clipboard History", "System", "󰃢"
 
     if "togglenotifications" in act:
         return "Open Notification Center", "System", "󰂚"
 
-    if "togglecontrolcenter" in act:
-        return "Open Control Center", "System", "󰒓"
-
     if "togglewallpaperselector" in act:
         return "Open Wallpaper Selector", "System", "󰸉"
+
+    if "togglealttab" in act or "closealttab" in act:
+        return "Switch Window (Alt-Tab)", "Window", "󰓩"
 
     if "shutdown.sh" in act:
         return "Open Power Menu", "System", ""
 
-    if "hyprshot" in act:
+    if "screenshot.sh" in act or "hyprshot" in act:
         if "window" in act:
             return "Screenshot Active Window", "Screenshot", ""
         if "region" in act:
@@ -63,7 +66,9 @@ def get_readable_action(raw_keys, raw_action):
     if "window.close" in act or "close" in act:
         return "Close Active Window", "Window", "󰅖"
 
-    if "window.float" in act or "float" in act:
+    if "toggle_float.py" in act or "window.float" in act or "float" in act:
+        if "all" in act or "shift" in raw_keys.lower():
+            return "Toggle Workspace Floating (All)", "Window", "󰉈"
         return "Toggle Window Floating", "Window", "󰉈"
 
     if "togglesplit" in act:
@@ -133,7 +138,7 @@ def get_readable_action(raw_keys, raw_action):
     return clean_act if clean_act else "Perform Action", "General", ""
 
 def parse_keybinds():
-    filepath = os.path.expanduser("~/.config/hypr/keybinds.lua")
+    filepath = os.path.expanduser("~/.config/hypr/lua/keybinds.lua")
     if not os.path.exists(filepath):
         return []
 

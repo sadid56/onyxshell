@@ -24,6 +24,14 @@ Item {
         NumberAnimation { duration: 140 }
     }
 
+    function askConfirmation(options) {
+        if (typeof root !== "undefined" && typeof root.confirm === "function") {
+            root.confirm(options);
+        } else if (typeof popupManager !== "undefined" && popupManager.confirmationModal) {
+            popupManager.confirmationModal.ask(options);
+        }
+    }
+
     Item {
         id: cardWrapper
         anchors.top: parent.top
@@ -121,13 +129,41 @@ Item {
                         onClicked: {
                             powerRoot.closed();
                             if (modelData.id === "lock") {
-                                Quickshell.execDetached(["hyprlock"]);
+                                var home = (typeof shellConfig !== "undefined" && shellConfig) ? shellConfig.homeDir : "/home/sadid";
+                                Quickshell.execDetached(["sh", "-c", "pidof hyprlock || hyprlock -c " + home + "/.config/hypr/config/hyprlock.conf"]);
                             } else if (modelData.id === "logout") {
-                                Quickshell.execDetached(["loginctl", "terminate-session", "self"]);
+                                powerRoot.askConfirmation({
+                                    title: "Log Out",
+                                    message: "Are you sure you want to end your current session?",
+                                    icon: "open-filled.svg",
+                                    confirmText: "Log Out",
+                                    isDanger: false,
+                                    onConfirm: () => {
+                                        Quickshell.execDetached(["loginctl", "terminate-session", "self"]);
+                                    }
+                                });
                             } else if (modelData.id === "reboot") {
-                                Quickshell.execDetached(["systemctl", "reboot"]);
+                                powerRoot.askConfirmation({
+                                    title: "Restart",
+                                    message: "Are you sure you want to restart your computer?",
+                                    icon: "arrow-clockwise-filled.svg",
+                                    confirmText: "Restart",
+                                    isDanger: false,
+                                    onConfirm: () => {
+                                        Quickshell.execDetached(["systemctl", "reboot"]);
+                                    }
+                                });
                             } else if (modelData.id === "poweroff") {
-                                Quickshell.execDetached(["systemctl", "poweroff"]);
+                                powerRoot.askConfirmation({
+                                    title: "Power Off",
+                                    message: "Are you sure you want to power off the system?",
+                                    icon: "power.svg",
+                                    confirmText: "Power Off",
+                                    isDanger: true,
+                                    onConfirm: () => {
+                                        Quickshell.execDetached(["systemctl", "poweroff"]);
+                                    }
+                                });
                             }
                         }
                     }

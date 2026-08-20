@@ -6,9 +6,9 @@ import Quickshell.Widgets
 Rectangle {
     id: inputRoot
     Layout.fillWidth: true
-    implicitHeight: 48
-    height: 48
-    radius: 24
+    implicitHeight: 40
+    height: 40
+    radius: 20
     color: inputRoot.theme.getColor("surfaceVariant")
     border.color: textInput.activeFocus ? inputRoot.theme.getColor("primary") : "transparent"
     border.width: textInput.activeFocus ? 1.5 : 0

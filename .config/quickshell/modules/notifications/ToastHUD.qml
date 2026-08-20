@@ -4,18 +4,16 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Widgets
 import "../bar/widgets"
+import "./components"
 
 PanelWindow {
     id: toastWindow
-
     anchors { top: true; bottom: true; left: false; right: true }
     implicitWidth: 416
     color: "transparent"
-
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
     exclusiveZone: 0
-
     mask: Region { item: contentRect }
 
     property var theme
@@ -32,38 +30,22 @@ PanelWindow {
         if (!currentNotification) return "file://" + shellConfig.defaultAppIcon;
         var ic = currentNotification.appIcon || currentNotification.icon || "";
         if (!ic) return "file://" + shellConfig.defaultAppIcon;
-        if (ic.indexOf("/") === 0) return "file://" + ic;
-        return ic;
+        return ic.indexOf("/") === 0 ? ("file://" + ic) : ic;
     }
 
     visible: active || hideTimer.running
-
     onActiveChanged: {
-        if (!active) {
-            hideTimer.start();
-        } else {
-            hideTimer.stop();
-            toastTranslate.x = 0;
-        }
+        if (!active) hideTimer.start();
+        else { hideTimer.stop(); toastTranslate.x = 0; }
     }
 
-    Timer {
-        id: hideTimer
-        interval: 250
-        running: false
-        repeat: false
-    }
-
+    Timer { id: hideTimer; interval: 250; running: false; repeat: false }
     Timer {
         id: dismissTimer
         interval: 3500
         running: false
         repeat: false
-        onTriggered: {
-            if (!toastMouseArea.containsMouse) {
-                toastWindow.active = false;
-            }
-        }
+        onTriggered: { if (!toastMouseArea.containsMouse) toastWindow.active = false; }
     }
 
     function showToast(notification) {
@@ -71,11 +53,9 @@ PanelWindow {
         toastTranslate.x = 0;
         dismissTimer.stop();
         active = true;
-
-        progressAnim.stop();
-        progressBarCanvas.progress = 1.0;
-        progressAnim.start();
-
+        progressBar.progressAnim.stop();
+        progressBar.progress = 1.0;
+        progressBar.progressAnim.start();
         dismissTimer.start();
     }
 
@@ -87,43 +67,28 @@ PanelWindow {
         height: Math.max(84, notifRow.implicitHeight + toastWindow.topOverlap + 18)
         radius: toastWindow.toastRadius
         clip: true
-
         color: toastWindow.theme ? toastWindow.theme.getColor("surface") : "#1b1b1b"
         border.width: 0
-
         opacity: toastWindow.active ? Math.max(0.0, 1.0 - Math.abs(toastTranslate.x) / 250.0) : 0.0
-
-        transform: Translate {
-            id: toastTranslate
-            x: 0
-        }
-
+        transform: Translate { id: toastTranslate; x: 0 }
         Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
         Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
         Behavior on y { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
 
         Rectangle {
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
+            anchors { top: parent.top; right: parent.right; bottom: parent.bottom }
             width: parent.radius
             color: parent.color
         }
 
         RowLayout {
             id: notifRow
-            anchors.fill: parent
-            anchors.topMargin: toastWindow.topOverlap + 8
-            anchors.leftMargin: 14
-            anchors.rightMargin: 16
-            anchors.bottomMargin: 12
+            anchors { fill: parent; topMargin: toastWindow.topOverlap + 8; leftMargin: 14; rightMargin: 16; bottomMargin: 12 }
             spacing: 12
 
             Rectangle {
                 id: iconWrapper
-                width: 38
-                height: 38
-                radius: 19
+                width: 44; height: 44; radius: 22
                 color: toastWindow.theme ? toastWindow.theme.getColor("surfaceVariant") : "#34343c"
                 clip: true
                 Layout.alignment: Qt.AlignVCenter
@@ -131,11 +96,7 @@ PanelWindow {
                 IconImage {
                     anchors.fill: parent
                     source: toastWindow.getNotifIcon()
-                    onStatusChanged: {
-                        if (status === Image.Error) {
-                            source = "file://" + shellConfig.defaultAppIcon;
-                        }
-                    }
+                    onStatusChanged: { if (status === Image.Error) source = "file://" + shellConfig.defaultAppIcon; }
                 }
             }
 
@@ -147,165 +108,54 @@ PanelWindow {
                 Text {
                     text: toastWindow.appName
                     font.family: "Google Sans Flex, sans-serif"
-                    font.pixelSize: 10
-                    font.bold: true
+                    font.pixelSize: 10; font.bold: true
                     color: toastWindow.theme ? toastWindow.theme.getColor("primary") : "#ffb3b4"
-                    elide: Text.ElideRight
-                    Layout.fillWidth: true
+                    elide: Text.ElideRight; Layout.fillWidth: true
                     visible: toastWindow.appName !== "" && toastWindow.appName !== toastWindow.summaryText
                 }
-
                 Text {
                     text: toastWindow.summaryText
                     font.family: "Google Sans Flex, sans-serif"
-                    font.pixelSize: 12
-                    font.bold: true
+                    font.pixelSize: 12; font.bold: true
                     color: toastWindow.theme ? toastWindow.theme.getColor("onSurface") : "#f0dede"
-                    elide: Text.ElideRight
-                    Layout.fillWidth: true
+                    elide: Text.ElideRight; Layout.fillWidth: true
                 }
-
                 Text {
                     text: toastWindow.bodyText
                     font.family: "Google Sans Flex, sans-serif"
                     font.pixelSize: 11
                     color: toastWindow.theme ? toastWindow.theme.getColor("onSurfaceVariant") : "#8f8f9f"
-                    elide: Text.ElideRight
-                    maximumLineCount: 2
-                    wrapMode: Text.Wrap
-                    Layout.fillWidth: true
-                    visible: toastWindow.bodyText !== ""
+                    elide: Text.ElideRight; maximumLineCount: 2; wrapMode: Text.Wrap
+                    Layout.fillWidth: true; visible: toastWindow.bodyText !== ""
                 }
             }
         }
 
-        Canvas {
-            id: progressBarCanvas
-            anchors.fill: parent
-            antialiasing: true
-
-            property real progress: 0.0
-
-            onProgressChanged: requestPaint()
-
-            onPaint: {
-                var ctx = getContext("2d");
-                ctx.reset();
-                if (progress <= 0) return;
-
-                var arcLength = Math.PI * 14.5 / 2;
-                var totalLength = arcLength + (400 - 16);
-                var L = progress * totalLength;
-
-                ctx.strokeStyle = toastWindow.theme ? toastWindow.theme.getColor("primary") : "#ffb3b4";
-                ctx.lineCap = "round";
-
-                var activeAngle = L / 14.5;
-                var taperLimit = Math.min(Math.PI / 2, activeAngle);
-                var steps = 15;
-                var stepSize = taperLimit / steps;
-
-                for (var i = 0; i < steps; i++) {
-                    var a1 = Math.PI - (i * stepSize);
-                    var a2 = Math.PI - ((i + 1) * stepSize);
-
-                    ctx.lineWidth = 3.0 * ((i + 0.5) / steps);
-                    ctx.beginPath();
-                    ctx.arc(16, contentRect.height - 16, 14.5, a1, a2, true);
-                    ctx.stroke();
-                }
-
-                if (activeAngle > Math.PI / 2) {
-                    ctx.lineWidth = 3.0;
-                    ctx.beginPath();
-                    ctx.moveTo(16, contentRect.height - 1.5);
-                    ctx.lineTo(16 + (L - arcLength), contentRect.height - 1.5);
-                    ctx.stroke();
-                }
-            }
-
-            NumberAnimation on progress {
-                id: progressAnim
-                from: 1.0
-                to: 0.0
-                duration: 3500
-                running: false
-                easing.type: Easing.Linear
-            }
-        }
+        ToastProgressCanvas { id: progressBar; theme: toastWindow.theme }
 
         MouseArea {
             id: toastMouseArea
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-
             property real startX: 0
             property bool isDragging: false
-
-            onEntered: {
-                dismissTimer.stop();
-                progressAnim.pause();
-            }
-
-            onExited: {
-                if (!isDragging) {
-                    progressAnim.resume();
-                    dismissTimer.restart();
-                }
-            }
-
-            onPressed: mouse => {
-                startX = mouse.x;
-                isDragging = true;
-                dismissTimer.stop();
-                progressAnim.pause();
-            }
-
-            onPositionChanged: mouse => {
-                if (isDragging) {
-                    var deltaX = mouse.x - startX;
-                    if (deltaX > 0) {
-                        toastTranslate.x = deltaX;
-                    } else {
-                        toastTranslate.x = 0;
-                    }
-                }
-            }
-
+            onEntered: { dismissTimer.stop(); progressBar.progressAnim.pause(); }
+            onExited: { if (!isDragging) { progressBar.progressAnim.resume(); dismissTimer.restart(); } }
+            onPressed: mouse => { startX = mouse.x; isDragging = true; dismissTimer.stop(); progressBar.progressAnim.pause(); }
+            onPositionChanged: mouse => { if (isDragging) { var deltaX = mouse.x - startX; toastTranslate.x = deltaX > 0 ? deltaX : 0; } }
             onReleased: mouse => {
                 if (isDragging) {
                     isDragging = false;
-                    if (toastTranslate.x > 70) {
-                        toastDismissAnim.start();
-                    } else {
-                        snapBackAnim.start();
-                        progressAnim.resume();
-                        dismissTimer.restart();
-                    }
+                    if (toastTranslate.x > 70) toastDismissAnim.start();
+                    else { snapBackAnim.start(); progressBar.progressAnim.resume(); dismissTimer.restart(); }
                 }
             }
-
-            onCanceled: {
-                if (isDragging) {
-                    isDragging = false;
-                    snapBackAnim.start();
-                    progressAnim.resume();
-                    dismissTimer.restart();
-                }
-            }
+            onCanceled: { if (isDragging) { isDragging = false; snapBackAnim.start(); progressBar.progressAnim.resume(); dismissTimer.restart(); } }
         }
     }
 
-    NumberAnimation {
-        id: snapBackAnim
-        target: toastTranslate
-        property: "x"
-        to: 0
-        duration: 200
-        easing.type: Easing.OutCubic
-    }
-
+    NumberAnimation { id: snapBackAnim; target: toastTranslate; property: "x"; to: 0; duration: 200; easing.type: Easing.OutCubic }
     NumberAnimation {
         id: toastDismissAnim
         target: toastTranslate
@@ -313,9 +163,7 @@ PanelWindow {
         to: contentRect.width + 50
         duration: 180
         easing.type: Easing.OutCubic
-        onStopped: {
-            toastWindow.active = false;
-        }
+        onStopped: toastWindow.active = false
     }
 
     Corner {
@@ -325,23 +173,15 @@ PanelWindow {
         cornerRadius: 16
         color: toastWindow.theme ? toastWindow.theme.getColor("surface") : "#1b1b1b"
         opacity: contentRect.opacity
-        transform: Translate {
-            x: toastTranslate.x
-        }
+        transform: Translate { x: toastTranslate.x }
     }
 
     Canvas {
-        width: 16
-        height: 16
-        antialiasing: true
-        renderTarget: Canvas.FramebufferObject
+        width: 16; height: 16; antialiasing: true; renderTarget: Canvas.FramebufferObject
         x: contentRect.x + contentRect.width - 16
         y: contentRect.y + contentRect.height
         opacity: contentRect.opacity
-        transform: Translate {
-            x: toastTranslate.x
-        }
-
+        transform: Translate { x: toastTranslate.x }
         onPaint: {
             var ctx = getContext("2d");
             ctx.reset();

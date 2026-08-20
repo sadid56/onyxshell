@@ -63,16 +63,17 @@ QtObject {
 
     function getWifiIcon(signal, isConnected, isEnabled) {
         if (isEnabled === false) return getIcon("wifi-off.svg");
-        if (isConnected === false) return getIcon("wifi-warning.svg");
-        if (signal >= 75 || signal < 0) return getIcon("wifi-1.svg");
+        if (isConnected === false || signal < 0) return getIcon("wifi-warning.svg");
+        if (signal >= 75) return getIcon("wifi-1.svg");
         if (signal >= 50) return getIcon("wifi-2.svg");
         if (signal >= 25) return getIcon("wifi-3.svg");
         return getIcon("wifi-4.svg");
     }
 
-    function getNotificationIcon(isDnd) {
-        if (isDnd) return getIcon("alert-off.svg");
-        return getIcon("alert.svg");
+    function getNotificationIcon(isDnd, hasNotifs) {
+        if (isDnd) return getIcon("bell-off.svg");
+        if (hasNotifs) return getIcon("bell-dot.svg");
+        return getIcon("bell.svg");
     }
 
     function getCpuIcon() {
@@ -81,6 +82,10 @@ QtObject {
 
     function getMemoryIcon() {
         return getIcon("memory.svg");
+    }
+
+    function getSwapIcon() {
+        return getIcon("swap.svg");
     }
 
     function getBluetoothIcon(enabled) {

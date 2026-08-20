@@ -16,14 +16,13 @@ hl.bind(
 )
 
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
-hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock -c ~/.config/hypr/config/hyprlock.conf"))
 
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("~/.config/hypr/scripts/reload.sh"))
 hl.bind(
 	mainMod .. " + SHIFT + B",
 	hl.dsp.exec_cmd("qs ipc call shell toggleBar")
 )
-
 -- Show keybinds cheat sheet
 hl.bind(
 	mainMod .. " + slash",
@@ -38,6 +37,10 @@ hl.bind(
 	mainMod .. " + V",
 	hl.dsp.exec_cmd("qs ipc call shell toggleClipboard")
 )
+hl.bind(
+	mainMod .. " + comma",
+	hl.dsp.exec_cmd("qs ipc call shell toggleEmoji")
+)
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist wipe && notify-send 'Clipboard cleared'"))
 hl.bind(
 	mainMod .. " + N",
@@ -50,13 +53,22 @@ hl.bind(
 
 -- Basic Window Actions
 hl.bind(mainMod .. " + X", hl.dsp.window.close())
-hl.bind(mainMod .. " + SPACE", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_float.py single"))
+hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_float.py all"))
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
 
 -- Cycle & Move Focus
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
-hl.bind(secondMod .. " + Tab", hl.dsp.group.next())
-hl.bind(mainMod .. " + G", hl.dsp.group.toggle())
+hl.bind(
+	secondMod .. " + Tab",
+	hl.dsp.exec_cmd("qs ipc call shell toggleAltTab")
+)
+hl.bind(
+	secondMod .. " + Alt_L",
+	hl.dsp.exec_cmd("qs ipc call shell closeAltTab"),
+	{ release = true }
+)
+hl.bind(mainMod .. " + G", hl.dsp.group.toggle())		
 
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "l" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "r" }))
@@ -108,13 +120,8 @@ hl.bind(mainMod .. " + CTRL + down", hl.dsp.window.move({ direction = "d" }))
 ------------------------
 ---- SYSTEM & MEDIA ----
 ------------------------
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("kitty --class floating_mem -e ~/.config/hypr/scripts/sysmon.sh"))
 
 -- System Controls
-hl.bind(
-	mainMod .. " + M",
-	hl.dsp.exec_cmd("qs ipc call shell toggleControlCenter")
-)
 hl.bind(
 	mainMod .. " + SHIFT + W",
 	hl.dsp.exec_cmd("qs ipc call shell toggleWallpaperSelector")

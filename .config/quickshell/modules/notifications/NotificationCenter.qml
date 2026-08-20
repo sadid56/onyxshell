@@ -6,34 +6,48 @@ import Quickshell.Io
 import "../../components/containers"
 import "../../components/ui" as UI
 import "./components"
-
 Popup {
     id: notifWindow
-
-    popupWidth: 480
+    popupWidth: 450
     popupHeight: notifWindow.height > 0 ? (notifWindow.height + topOverlap) : 1080
     flatBottom: true
     slideFromRight: true
-
     readonly property var activeNotifs: (typeof root !== "undefined" && root.activeNotifs) ? root.activeNotifs : ((typeof popupManager !== "undefined" && popupManager.activeNotifs) ? popupManager.activeNotifs : [])
     property int notifCount: activeNotifs.length
-
     property int volumeValue: 50
+    property int micValue: 50
     property int brightnessValue: 50
+    property int nightLightValue: 0
     property bool powerMenuExpanded: false
     property bool powerProfileExpanded: false
-
+    property bool micExpanded: false
     property string currentProfile: "performance"
     property string uptimeStr: "Up 0m"
     property bool wifiEnabled: true
-    property bool bluetoothEnabled: true
     property bool isMuted: false
+    property int lastUnmutedVolume: 50
     property bool isMicMuted: false
-
     Process { id: wifiToggleProc }
-    Process { id: bluetoothToggleProc }
-    Process { id: muteToggleProc }
-    Process { id: micToggleProc }
+    Process {
+        id: muteToggleProc
+        function toggleMute() {
+            if (!notifWindow.isMuted) {
+                if (notifWindow.volumeValue > 0) {
+                    notifWindow.lastUnmutedVolume = notifWindow.volumeValue;
+                }
+                notifWindow.isMuted = true;
+                notifWindow.volumeValue = 0;
+                command = ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "1"];
+            } else {
+                notifWindow.isMuted = false;
+                var targetVol = notifWindow.lastUnmutedVolume > 0 ? notifWindow.lastUnmutedVolume : 50;
+                notifWindow.volumeValue = targetVol;
+                command = ["sh", "-c", "wpctl set-mute @DEFAULT_AUDIO_SINK@ 0; wpctl set-volume @DEFAULT_AUDIO_SINK@ " + (targetVol / 100).toFixed(2)];
+            }
+            running = false;
+            Qt.callLater(() => running = true);
+        }
+    }
     Process { id: setProfileProc }
     Process {
         id: hyprpickerProc
@@ -43,108 +57,62 @@ Popup {
         id: screenshotProc
         command: ["hyprshot", "-m", "region", "-o", shellConfig.homeDir + "/Pictures/Screenshots"]
     }
-
+    NotifStatsFetcher {
+        id: statsService
+        notifWindow: notifWindow
+    }
     onActiveChanged: {
         if (active) {
-            statsFetcher.running = false;
-            statsFetcher.running = true;
+            statsService.fetch();
         } else {
             notifWindow.powerMenuExpanded = false;
             notifWindow.powerProfileExpanded = false;
         }
     }
-
-    Timer {
-        id: refreshTimer
-        interval: 2000
-        running: notifWindow.active
-        repeat: true
-        onTriggered: {
-            statsFetcher.running = false;
-            statsFetcher.running = true;
-        }
-    }
-
-    Process {
-        id: statsFetcher
-        command: ["sh", "-c", "echo \"VOL: $(wpctl get-volume @DEFAULT_AUDIO_SINK@)\"; echo \"MIC: $(wpctl get-volume @DEFAULT_AUDIO_SOURCE@)\"; echo \"BRI: $(brightnessctl -m)\"; echo \"WIFI: $(nmcli radio wifi 2>/dev/null)\"; echo \"BT: $(rfkill list bluetooth | grep 'Soft blocked')\"; echo \"PPD: $(powerprofilesctl get 2>/dev/null)\"; echo \"UP: $(uptime -p 2>/dev/null)\""]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var lines = this.text.split('\n');
-                for (var i = 0; i < lines.length; i++) {
-                    var line = lines[i].trim();
-                    if (line.indexOf("VOL:") === 0) {
-                        var vStr = line.substring(4).trim();
-                        var match = vStr.match(/Volume:\s+([0-9.]+)/);
-                        if (match) {
-                            notifWindow.volumeValue = Math.round(parseFloat(match[1]) * 100);
-                        }
-                        notifWindow.isMuted = vStr.indexOf("[MUTED]") !== -1;
-                    } else if (line.indexOf("MIC:") === 0) {
-                        var mStr = line.substring(4).trim();
-                        notifWindow.isMicMuted = mStr.indexOf("[MUTED]") !== -1;
-                    } else if (line.indexOf("BRI:") === 0) {
-                        var bStr = line.substring(4).trim();
-                        var parts = bStr.split(',');
-                        if (parts.length >= 4) {
-                            var percentStr = parts[3].replace('%', '');
-                            var val = parseInt(percentStr);
-                            if (!isNaN(val)) {
-                                notifWindow.brightnessValue = val;
-                            }
-                        }
-                    } else if (line.indexOf("WIFI:") === 0) {
-                        var wStr = line.substring(5).trim();
-                        notifWindow.wifiEnabled = (wStr.indexOf("enabled") !== -1);
-                    } else if (line.indexOf("BT:") === 0) {
-                        var btStr = line.substring(3).trim();
-                        notifWindow.bluetoothEnabled = (btStr.indexOf("no") !== -1);
-                    } else if (line.indexOf("PPD:") === 0) {
-                        var ppd = line.substring(4).trim();
-                        if (ppd !== "") {
-                            notifWindow.currentProfile = ppd;
-                        }
-                    } else if (line.indexOf("UP:") === 0) {
-                        var up = line.substring(3).trim();
-                        if (up !== "") {
-                            var str = up.replace(/^up\s+/i, "").trim();
-                            str = str.replace(/,\s*/g, " ");
-                            str = str.replace(/\bhours?\b/gi, "h");
-                            str = str.replace(/\bminutes?\b/gi, "m");
-                            str = str.replace(/\bdays?\b/gi, "d");
-                            str = str.replace(/(\d+)\s+([hmd])/gi, "$1$2");
-                            notifWindow.uptimeStr = "Up " + str.trim();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     Process {
         id: volumeSetter
-        function startProc() {
-            volumeSetter.running = true;
-        }
         function setVolume(val) {
-            command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", (val / 100).toFixed(2)];
+            if (val > 0) {
+                notifWindow.lastUnmutedVolume = val;
+                notifWindow.isMuted = false;
+                command = ["sh", "-c", "wpctl set-mute @DEFAULT_AUDIO_SINK@ 0; wpctl set-volume @DEFAULT_AUDIO_SINK@ " + (val / 100).toFixed(2)];
+            } else {
+                notifWindow.isMuted = true;
+                command = ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "1"];
+            }
             running = false;
-            Qt.callLater(startProc);
+            Qt.callLater(() => running = true);
         }
     }
-
+    Process {
+        id: micSetter
+        function setMic(val) {
+            command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SOURCE@", (val / 100).toFixed(2)];
+            running = false;
+            Qt.callLater(() => running = true);
+        }
+    }
     Process {
         id: brightnessSetter
-        function startProc() {
-            brightnessSetter.running = true;
-        }
         function setBrightness(val) {
             command = ["brightnessctl", "set", val + "%"];
             running = false;
-            Qt.callLater(startProc);
+            Qt.callLater(() => running = true);
         }
     }
-
+    Process {
+        id: nightLightSetter
+        function setNightLight(val) {
+            if (val <= 0) {
+                command = ["sh", "-c", "pgrep -x hyprsunset >/dev/null || (hyprsunset >/dev/null 2>&1 & sleep 0.2); hyprctl hyprsunset identity 2>/dev/null || true"];
+            } else {
+                var temp = Math.round(6500 - (val / 100) * 3500);
+                command = ["sh", "-c", "pgrep -x hyprsunset >/dev/null || (hyprsunset >/dev/null 2>&1 & sleep 0.2); hyprctl hyprsunset temperature " + temp + " 2>/dev/null || true"];
+            }
+            running = false;
+            Qt.callLater(() => running = true);
+        }
+    }
     PanelHeader {
         theme: notifWindow.theme
         uptimeStr: notifWindow.uptimeStr
@@ -163,33 +131,30 @@ Popup {
         }
         onCloseRequested: notifWindow.active = false
     }
-
     PowerProfileMenu {
         theme: notifWindow.theme
         expanded: notifWindow.powerProfileExpanded
         currentProfile: notifWindow.currentProfile
         setProfileProc: setProfileProc
-        onProfileSelected: profileId => {
-            notifWindow.currentProfile = profileId;
-        }
+        onProfileSelected: profileId => notifWindow.currentProfile = profileId
     }
-
     PowerMenu {
         theme: notifWindow.theme
         expanded: notifWindow.powerMenuExpanded
         onClosed: notifWindow.active = false
     }
-
     QuickSliders {
         theme: notifWindow.theme
         volumeValue: notifWindow.volumeValue
         brightnessValue: notifWindow.brightnessValue
+        nightLightValue: notifWindow.nightLightValue
         volumeSetter: volumeSetter
         brightnessSetter: brightnessSetter
-        onVolumeValueChanged: notifWindow.volumeValue = volumeValue
-        onBrightnessValueChanged: notifWindow.brightnessValue = brightnessValue
+        nightLightSetter: nightLightSetter
+        onVolumeMoved: val => notifWindow.volumeValue = val
+        onBrightnessMoved: val => notifWindow.brightnessValue = val
+        onNightLightMoved: val => notifWindow.nightLightValue = val
     }
-
     UI.Divider {
         theme: notifWindow.theme
         horizontal: true
@@ -197,32 +162,44 @@ Popup {
         Layout.topMargin: 2
         Layout.bottomMargin: 2
     }
-
     NotifSection {
         theme: notifWindow.theme
     }
-
     UI.Divider {
         theme: notifWindow.theme
         horizontal: true
         Layout.fillWidth: true
-        Layout.topMargin: 2
-        Layout.bottomMargin: 2
+        Layout.topMargin: notifWindow.micExpanded ? 0 : 2
+        Layout.bottomMargin: notifWindow.micExpanded ? 4 : 2
     }
-
+    UI.Slider {
+        id: bottomMicSlider
+        Layout.fillWidth: true
+        Layout.preferredHeight: notifWindow.micExpanded ? 32 : 0
+        implicitHeight: notifWindow.micExpanded ? 32 : 0
+        visible: notifWindow.micExpanded || opacity > 0.0
+        opacity: notifWindow.micExpanded ? 1.0 : 0.0
+        clip: true
+        theme: notifWindow.theme
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getMicIcon(notifWindow.micValue === 0)
+        value: notifWindow.micValue
+        onMoved: val => {
+            notifWindow.micValue = val;
+            if (micSetter) micSetter.setMic(val);
+        }
+        Behavior on Layout.preferredHeight { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: 180 } }
+    }
     QuickActions {
         theme: notifWindow.theme
         wifiEnabled: notifWindow.wifiEnabled
-        bluetoothEnabled: notifWindow.bluetoothEnabled
         isMuted: notifWindow.isMuted
         isMicMuted: notifWindow.isMicMuted
+        micExpanded: notifWindow.micExpanded
         wifiToggleProc: wifiToggleProc
-        bluetoothToggleProc: bluetoothToggleProc
         muteToggleProc: muteToggleProc
-        micToggleProc: micToggleProc
         onWifiEnabledChanged: notifWindow.wifiEnabled = wifiEnabled
-        onBluetoothEnabledChanged: notifWindow.bluetoothEnabled = bluetoothEnabled
         onIsMutedChanged: notifWindow.isMuted = isMuted
-        onIsMicMutedChanged: notifWindow.isMicMuted = isMicMuted
+        onToggleMicExpanded: notifWindow.micExpanded = !notifWindow.micExpanded
     }
 }

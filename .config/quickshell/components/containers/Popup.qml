@@ -76,8 +76,8 @@ PanelWindow {
     Rectangle {
         id: contentRect
         anchors.right: popupWindow.slideFromRight ? parent.right : undefined
-        x: popupWindow.slideFromRight ? undefined : popupWindow.contentRectX
-        y: popupWindow.slideFromRight ? -popupWindow.topOverlap : popupWindow.contentRectY
+        x: popupWindow.slideFromRight ? 0 : (popupWindow.contentRectX !== undefined ? popupWindow.contentRectX : 0)
+        y: popupWindow.slideFromRight ? -popupWindow.topOverlap : (popupWindow.contentRectY !== undefined ? popupWindow.contentRectY : 0)
 
         width: popupWindow.popupWidth
         height: popupWindow.popupHeight

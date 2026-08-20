@@ -24,6 +24,11 @@ CONFIG_DIRS=(
   "htop"
 )
 
+# List of standalone config files inside ~/.config/ to sync
+CONFIG_FILES=(
+  "starship.toml"
+)
+
 echo "🚀 Starting dotfiles update from ~/.config..."
 
 # Check if the repository folder exists
@@ -32,7 +37,7 @@ if [ ! -d "$REPO_DIR" ]; then
   exit 1
 fi
 
-echo "📁 Syncing configuration folders..."
+echo "📁 Syncing configuration folders and files..."
 
 for dir in "${CONFIG_DIRS[@]}"; do
   if [ -d "$HOME/.config/$dir" ]; then
@@ -41,6 +46,16 @@ for dir in "${CONFIG_DIRS[@]}"; do
     echo "  ✔️ Synced $dir"
   else
     echo "  ⚠️ Warning: ~/.config/$dir not found on your system, skipping."
+  fi
+done
+
+for file in "${CONFIG_FILES[@]}"; do
+  if [ -f "$HOME/.config/$file" ]; then
+    mkdir -p "$REPO_DIR/.config"
+    cp "$HOME/.config/$file" "$REPO_DIR/.config/$file"
+    echo "  ✔️ Synced $file"
+  else
+    echo "  ⚠️ Warning: ~/.config/$file not found on your system, skipping."
   fi
 done
 

@@ -44,6 +44,10 @@ PanelWindow {
         return sysStatsItem.getWifiX();
     }
 
+    function getResourcesX() {
+        return sysStatsItem.getResourcesX();
+    }
+
     function getNotifX() {
         return sysStatsItem.getNotifX();
     }

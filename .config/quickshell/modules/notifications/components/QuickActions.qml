@@ -13,10 +13,14 @@ RowLayout {
     property bool isMuted: false
     property bool isMicMuted: false
 
+    property bool bluetoothExpanded: false
+    property bool micExpanded: false
+
     property var wifiToggleProc
-    property var bluetoothToggleProc
     property var muteToggleProc
-    property var micToggleProc
+
+    signal toggleBluetoothExpanded()
+    signal toggleMicExpanded()
 
     UIButtons.Button {
         Layout.fillWidth: true
@@ -24,7 +28,7 @@ RowLayout {
         theme: quickActionsRoot.theme
         iconSize: 20
         icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getWifiIcon(100, quickActionsRoot.wifiEnabled, quickActionsRoot.wifiEnabled)
-        active: quickActionsRoot.wifiEnabled
+        active: true
         onClicked: {
             quickActionsRoot.wifiEnabled = !quickActionsRoot.wifiEnabled;
             if (quickActionsRoot.wifiToggleProc) {
@@ -40,14 +44,14 @@ RowLayout {
         height: 44
         theme: quickActionsRoot.theme
         iconSize: 20
-        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getBluetoothIcon(quickActionsRoot.bluetoothEnabled)
-        active: quickActionsRoot.bluetoothEnabled
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getNotificationIcon(
+            (typeof root !== "undefined" && root.dndEnabled),
+            false
+        )
+        active: true
         onClicked: {
-            quickActionsRoot.bluetoothEnabled = !quickActionsRoot.bluetoothEnabled;
-            if (quickActionsRoot.bluetoothToggleProc) {
-                quickActionsRoot.bluetoothToggleProc.command = ["sh", "-c", quickActionsRoot.bluetoothEnabled ? "rfkill unblock bluetooth && (bluetoothctl power on 2>/dev/null || true)" : "rfkill block bluetooth"];
-                quickActionsRoot.bluetoothToggleProc.running = false;
-                quickActionsRoot.bluetoothToggleProc.running = true;
+            if (typeof root !== "undefined") {
+                root.dndEnabled = !root.dndEnabled;
             }
         }
     }
@@ -58,13 +62,12 @@ RowLayout {
         theme: quickActionsRoot.theme
         iconSize: 20
         icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getSpeakerIcon(quickActionsRoot.isMuted)
-        active: !quickActionsRoot.isMuted
+        active: true
         onClicked: {
-            quickActionsRoot.isMuted = !quickActionsRoot.isMuted;
-            if (quickActionsRoot.muteToggleProc) {
-                quickActionsRoot.muteToggleProc.command = ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"];
-                quickActionsRoot.muteToggleProc.running = false;
-                quickActionsRoot.muteToggleProc.running = true;
+            if (quickActionsRoot.muteToggleProc && typeof quickActionsRoot.muteToggleProc.toggleMute === "function") {
+                quickActionsRoot.muteToggleProc.toggleMute();
+            } else {
+                quickActionsRoot.isMuted = !quickActionsRoot.isMuted;
             }
         }
     }
@@ -75,14 +78,9 @@ RowLayout {
         theme: quickActionsRoot.theme
         iconSize: 20
         icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getMicIcon(quickActionsRoot.isMicMuted)
-        active: !quickActionsRoot.isMicMuted
+        active: true
         onClicked: {
-            quickActionsRoot.isMicMuted = !quickActionsRoot.isMicMuted;
-            if (quickActionsRoot.micToggleProc) {
-                quickActionsRoot.micToggleProc.command = ["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"];
-                quickActionsRoot.micToggleProc.running = false;
-                quickActionsRoot.micToggleProc.running = true;
-            }
+            quickActionsRoot.toggleMicExpanded();
         }
     }
 }

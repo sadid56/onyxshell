@@ -35,6 +35,11 @@ Item {
             color: sliderRoot.theme.getColor("primary")
             opacity: sliderMouse.containsMouse ? 0.95 : 0.85
 
+            Behavior on width {
+                enabled: !sliderMouse.pressed
+                NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
+            }
+
             Behavior on opacity { NumberAnimation { duration: 150 } }
         }
 
@@ -53,8 +58,8 @@ Item {
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     colorization: 1.0
-                    colorizationColor: fillBar.width > 36 
-                        ? (sliderRoot.theme ? sliderRoot.theme.getColor("onPrimary") : "#000000") 
+                    colorizationColor: fillBar.width > 36
+                        ? (sliderRoot.theme ? sliderRoot.theme.getColor("onPrimary") : "#000000")
                         : (sliderRoot.theme ? sliderRoot.theme.getColor("primary") : "#FFFFFF")
                 }
             }
@@ -102,7 +107,6 @@ Item {
                 var ratio = Math.max(0.0, Math.min(1.0, mouseX / track.width));
                 var newVal = Math.round(sliderRoot.min + ratio * (sliderRoot.max - sliderRoot.min));
                 if (newVal !== sliderRoot.value) {
-                    sliderRoot.value = newVal;
                     sliderRoot.moved(newVal);
                 }
             }

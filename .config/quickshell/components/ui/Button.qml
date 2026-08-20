@@ -5,20 +5,20 @@ import Quickshell.Widgets
 
 Rectangle {
     id: buttonRoot
-    implicitWidth: buttonRoot.text !== "" ? (btnRow.implicitWidth + 24) : 40
-    implicitHeight: 40
-    radius: 12
+    implicitWidth: buttonRoot.text !== "" ? (btnRow.implicitWidth + 20) : 32
+    implicitHeight: 32
+    radius: 10
     color: active
         ? buttonRoot.theme.getColor("primary")
         : (hoverArea.containsMouse ? buttonRoot.theme.getColor("surfaceVariant") : buttonRoot.theme.getColor("surfaceVariant"))
-    opacity: active ? 1.0 : (hoverArea.containsMouse ? 1.0 : 0.85)
+    opacity: 1.0
     border.width: 0
 
     property var theme
     property string icon: ""
     property string text: ""
     property bool active: false
-    property int iconSize: 20
+    property int iconSize: 16
 
     signal clicked()
 
@@ -43,7 +43,7 @@ Rectangle {
                 colorization: 1.0
                 colorizationColor: buttonRoot.active
                     ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#000000")
-                    : (buttonRoot.theme ? buttonRoot.theme.getColor("onSurface") : "#FFFFFF")
+                    : "#FFFFFF"
             }
         }
 
@@ -54,7 +54,7 @@ Rectangle {
             font.bold: true
             color: buttonRoot.active
                 ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#000000")
-                : (buttonRoot.theme ? buttonRoot.theme.getColor("onSurface") : "#FFFFFF")
+                : "#FFFFFF"
             visible: buttonRoot.icon !== "" && buttonRoot.icon.length <= 2
             Layout.alignment: Qt.AlignVCenter
         }
@@ -66,7 +66,7 @@ Rectangle {
             font.bold: true
             color: buttonRoot.active
                 ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#000000")
-                : (buttonRoot.theme ? buttonRoot.theme.getColor("onSurface") : "#FFFFFF")
+                : "#FFFFFF"
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
             horizontalAlignment: Text.AlignLeft
@@ -88,7 +88,7 @@ Rectangle {
                 colorization: 1.0
                 colorizationColor: buttonRoot.active
                     ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#000000")
-                    : (buttonRoot.theme ? buttonRoot.theme.getColor("onSurface") : "#FFFFFF")
+                    : "#FFFFFF"
             }
         }
 
@@ -100,7 +100,7 @@ Rectangle {
             font.bold: true
             color: buttonRoot.active
                 ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#000000")
-                : (buttonRoot.theme ? buttonRoot.theme.getColor("onSurface") : "#FFFFFF")
+                : "#FFFFFF"
             visible: buttonRoot.icon !== "" && buttonRoot.icon.length <= 2
         }
     }

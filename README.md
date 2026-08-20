@@ -55,9 +55,9 @@
   - 🖼️ **Wallpaper Selector:** Visual thumbnail wallpaper gallery with automatic [Matugen](https://github.com/InioX/matugen) dynamic palette generation (`Super + Shift + W`).
   - ⌨️ **Keybinds Cheat Sheet HUD:** Instant search popup displaying all configured keybindings (`Super + /`).
 - **Terminal:** [Kitty](https://sw.kovidgoyal.net/kitty/) with dropdown terminal scratchpad (`Super + Q`).
-- **Shell & Prompt:** [Fish Shell](https://fishshell.com/) with fuzzy finding (`fzf`), Matugen live colors, productivity aliases, and custom prompt.
-- **Wallpaper Engine:** `awww` (`awww-daemon`) with smooth transitions.
-- **Dynamic Theming:** `matugen` material color palette extraction synchronized across Quickshell, Kitty, Fish, and desktop components.
+- **Shell & Prompt:** [Fish Shell](https://fishshell.com/) & [Starship Prompt](https://starship.rs/) with fuzzy finding (`fzf`), Matugen live colors, and productivity aliases.
+- **Wallpaper Engine:** Native [Quickshell](https://git.outfoxxed.me/quickshell/quickshell) background renderer with fluid animated crossfades and live Matugen theming.
+- **Dynamic Theming:** `matugen` material color palette extraction synchronized across Quickshell, Hyprland Lua, Kitty, Fish, and desktop components.
 - **Screen Locker & Idle:** `hyprlock` & `hypridle`.
 - **Screenshots:** `hyprshot` with region, window, and full-screen capture (`Super + Shift + S`).
 

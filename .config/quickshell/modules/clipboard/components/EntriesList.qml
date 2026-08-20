@@ -22,18 +22,13 @@ UI.AnimatedListView {
         var res = [];
         for (var i = 0; i < src.length; i++) {
             var item = src[i];
-            if (typeof item === "object" && item.entryData !== undefined) {
-                res.push(item);
-            } else {
-                res.push({ "entryData": String(item) });
-            }
+            res.push((typeof item === "object" && item.entryData !== undefined) ? item : { "entryData": String(item) });
         }
         return res;
     }
 
     onEntriesModelChanged: {
-        var processed = normalizeEntries(entriesModel);
-        syncListModel(dynamicClipModel, processed, "entryData", 25);
+        syncListModel(dynamicClipModel, normalizeEntries(entriesModel), "entryData", 25);
     }
 
     signal entryClicked(string entryText)
@@ -41,9 +36,15 @@ UI.AnimatedListView {
     signal upPressedAtStart()
     signal escapePressed()
 
-    ListModel {
-        id: dynamicClipModel
+    function removeEntryOptimistically(idx, entryText) {
+        if (idx >= 0 && idx < dynamicClipModel.count) {
+            unhoverItem(idx);
+            dynamicClipModel.remove(idx);
+        }
+        deleteClicked(entryText);
     }
+
+    ListModel { id: dynamicClipModel }
 
     model: dynamicClipModel
     currentIndex: -1
@@ -65,15 +66,13 @@ UI.AnimatedListView {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onEntered: {
-                entriesListRoot.hoverItem(index, delegateWrapper.y, delegateWrapper.height);
-            }
+            onEntered: entriesListRoot.hoverItem(index, delegateWrapper.y, delegateWrapper.height)
             onExited: {
-                entriesListRoot.unhoverItem(index);
+                if (!deleteMouse.containsMouse) {
+                    entriesListRoot.unhoverItem(index);
+                }
             }
-            onClicked: {
-                entriesListRoot.entryClicked(delegateWrapper.entryText);
-            }
+            onClicked: entriesListRoot.entryClicked(delegateWrapper.entryText)
         }
 
         RowLayout {
@@ -125,21 +124,20 @@ UI.AnimatedListView {
                 maximumLineCount: 1
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
-
                 Behavior on color { ColorAnimation { duration: 140 } }
             }
 
             Rectangle {
                 id: deleteBtn
-                width: 26
-                height: 26
-                radius: 13
-                color: deleteMouse.containsMouse ?
-                       (entriesListRoot.theme ? entriesListRoot.theme.getColor("errorContainer") : "#93000a") :
-                       "transparent"
+                width: 28
+                height: 28
+                radius: 14
                 Layout.alignment: Qt.AlignVCenter
-                visible: mouseArea.containsMouse
-
+                color: deleteMouse.containsMouse
+                    ? (entriesListRoot.theme ? entriesListRoot.theme.getColor("errorContainer") : "#93000a")
+                    : (delegateWrapper.isHighlighted ? (entriesListRoot.theme ? entriesListRoot.theme.getColor("surface") : "#1b1b1b") : "transparent")
+                opacity: (delegateWrapper.isHighlighted || deleteMouse.containsMouse) ? 1.0 : 0.0
+                Behavior on opacity { NumberAnimation { duration: 140 } }
                 Behavior on color { ColorAnimation { duration: 120 } }
 
                 IconImage {
@@ -150,9 +148,9 @@ UI.AnimatedListView {
                     layer.enabled: true
                     layer.effect: MultiEffect {
                         colorization: 1.0
-                        colorizationColor: deleteMouse.containsMouse ?
-                               (entriesListRoot.theme ? entriesListRoot.theme.getColor("error") : "#ffb4ab") :
-                               (entriesListRoot.theme ? entriesListRoot.theme.getColor("outline") : "#757680")
+                        colorizationColor: deleteMouse.containsMouse
+                            ? (entriesListRoot.theme ? entriesListRoot.theme.getColor("error") : "#ffb4ab")
+                            : (entriesListRoot.theme ? entriesListRoot.theme.getColor("outline") : "#757680")
                     }
                 }
 
@@ -161,8 +159,15 @@ UI.AnimatedListView {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        entriesListRoot.deleteClicked(delegateWrapper.entryText);
+                    onEntered: entriesListRoot.hoverItem(index, delegateWrapper.y, delegateWrapper.height)
+                    onExited: {
+                        if (!mouseArea.containsMouse) {
+                            entriesListRoot.unhoverItem(index);
+                        }
+                    }
+                    onClicked: mouse => {
+                        mouse.accepted = true;
+                        entriesListRoot.removeEntryOptimistically(index, delegateWrapper.entryText);
                     }
                 }
             }
@@ -171,25 +176,16 @@ UI.AnimatedListView {
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Down) {
-            if (currentIndex < count - 1) {
-                currentIndex++;
-            }
+            if (currentIndex < count - 1) currentIndex++;
             event.accepted = true;
         } else if (event.key === Qt.Key_Up) {
-            if (currentIndex > 0) {
-                currentIndex--;
-            } else if (currentIndex === 0) {
-                currentIndex = -1;
-                entriesListRoot.upPressedAtStart();
-            }
+            if (currentIndex > 0) currentIndex--;
+            else if (currentIndex === 0) { currentIndex = -1; entriesListRoot.upPressedAtStart(); }
             event.accepted = true;
         } else if (event.key === Qt.Key_Return) {
             if (currentIndex >= 0 && currentIndex < count) {
                 var itm = dynamicClipModel.get(currentIndex);
-                if (itm) {
-                    var str = itm.entryData !== undefined ? itm.entryData : itm;
-                    entriesListRoot.entryClicked(str);
-                }
+                if (itm) entriesListRoot.entryClicked(itm.entryData !== undefined ? itm.entryData : itm);
             }
             event.accepted = true;
         } else if (event.key === Qt.Key_Escape) {

@@ -5,6 +5,7 @@ import Quickshell.Widgets
 import Quickshell.Wayland
 import Quickshell.Io
 import "../components/containers"
+import "./components"
 
 Popup {
     id: wallpaperWindow
@@ -23,8 +24,13 @@ Popup {
         path: root.shellConfig.quickshellDir + "/current_wallpaper"
     }
 
+    Component.onCompleted: {
+        refreshWallpapers();
+    }
+
     onActiveChanged: {
         if (active) {
+            selectCurrentWallpaper();
             refreshWallpapers();
             Qt.callLater(() => {
                 selectCurrentWallpaper();
@@ -41,21 +47,20 @@ Popup {
     function getScrollTarget(index) {
         if (!wallpapersList || wallpapersList.length === 0) return 0;
         var cardTotalWidth = 280 + 32;
+        var totalW = wallpapersList.length * cardTotalWidth - 32;
         var targetX = index * cardTotalWidth - (wallpapersListInst.width - 280) / 2;
-        var maxScroll = wallpapersListInst.contentWidth - wallpapersListInst.width;
-        if (maxScroll > 0) {
-            return Math.max(0, Math.min(targetX, maxScroll));
-        }
-        return 0;
+        var maxScroll = totalW - wallpapersListInst.width;
+        return maxScroll > 0 ? Math.max(0, Math.min(targetX, maxScroll)) : 0;
     }
 
     function selectCurrentWallpaper() {
         if (!wallpapersList || wallpapersList.length === 0) return;
-
         var currentPath = "";
-        var fileText = (typeof currentWallpaperFile.text === "function") ? currentWallpaperFile.text() : currentWallpaperFile.text;
-        if (fileText) {
-            currentPath = fileText.trim();
+        if (typeof wallpaperBackground !== "undefined" && wallpaperBackground && wallpaperBackground.currentWallpaperPath) {
+            currentPath = wallpaperBackground.currentWallpaperPath;
+        } else {
+            var fileText = (typeof currentWallpaperFile.text === "function") ? currentWallpaperFile.text() : currentWallpaperFile.text;
+            if (fileText) currentPath = fileText.trim();
         }
 
         var indexToSelect = 0;
@@ -65,9 +70,10 @@ Popup {
                 break;
             }
         }
-
         wallpapersListInst.currentIndex = indexToSelect;
-        wallpapersListInst.contentX = getScrollTarget(indexToSelect);
+        var targetX = getScrollTarget(indexToSelect);
+        wallpapersListInst.contentX = targetX;
+        wallpapersListInst.forceActiveFocus();
     }
 
     property var wallpaperFetcher: Process {
@@ -79,34 +85,43 @@ Popup {
                 var list = [];
                 for (var i = 0; i < lines.length; i++) {
                     var path = lines[i].trim();
-                    if (path !== "") {
-                        list.push({ path: path, name: path.substring(path.lastIndexOf("/") + 1) });
-                    }
+                    if (path !== "") list.push({ path: path, name: path.substring(path.lastIndexOf("/") + 1) });
                 }
                 wallpaperWindow.wallpapersList = list;
+                Qt.callLater(selectCurrentWallpaper);
+            }
+        }
+    }
 
-                Qt.callLater(() => {
-                    selectCurrentWallpaper();
-                });
+    Timer {
+        id: autoApplyTimer
+        interval: 80
+        repeat: false
+        property string pendingPath: ""
+        onTriggered: {
+            if (pendingPath !== "") {
+                wallpaperSetter.applyWallpaper(pendingPath, false);
             }
         }
     }
 
     property var wallpaperSetter: Process {
         id: wallpaperSetter
-        function applyWallpaper(filePath) {
-            var hour = new Date().getHours();
-            var type = "wipe";
-            if (hour < 12) type = "grow";
-            else if (hour < 18) type = "wipe";
-            else type = "outer";
+        property bool shouldClose: false
 
-            command = ["sh", "-c", "echo \"" + filePath + "\" > " + root.shellConfig.quickshellDir + "/current_wallpaper && awww img \"" + filePath + "\" --transition-type " + type + " --transition-step 90 --transition-fps 60 && matugen image \"" + filePath + "\" --source-color-index 0 -t scheme-content -m dark"];
+        function applyWallpaper(filePath, closeWindow) {
+            shouldClose = (closeWindow === true);
+            if (typeof root !== "undefined" && root && typeof root.setWallpaper === "function") {
+                root.setWallpaper(filePath);
+            }
+            command = ["sh", "-c", "echo \"" + filePath + "\" > " + root.shellConfig.quickshellDir + "/current_wallpaper && matugen image \"" + filePath + "\" --source-color-index 0 -t scheme-content -m dark"];
             running = false;
             running = true;
         }
         onExited: {
-            wallpaperWindow.active = false;
+            if (shouldClose) {
+                wallpaperWindow.active = false;
+            }
             rootTheme.reloadColors();
         }
     }
@@ -117,19 +132,11 @@ Popup {
         onActivated: wallpaperWindow.active = false
     }
 
-    NumberAnimation {
-        id: scrollAnimation
-        target: wallpapersListInst
-        property: "contentX"
-        duration: 320
-        easing.type: Easing.OutExpo
-    }
-
     Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        readonly property color themeSurface: wallpaperWindow.theme.getColor("surface")
+        readonly property color themeSurface: (wallpaperWindow && wallpaperWindow.theme) ? wallpaperWindow.theme.getColor("surface") : "#1b1b1b"
 
         ListView {
             id: wallpapersListInst
@@ -139,10 +146,16 @@ Popup {
             clip: true
             model: wallpaperWindow.wallpapersList
             focus: true
-
             boundsBehavior: Flickable.StopAtBounds
             highlightRangeMode: ListView.NoHighlightRange
             highlightFollowsCurrentItem: false
+
+            Behavior on contentX {
+                NumberAnimation {
+                    duration: 480
+                    easing.type: Easing.OutQuint
+                }
+            }
 
             WheelHandler {
                 orientation: Qt.Horizontal
@@ -150,90 +163,42 @@ Popup {
                 onWheel: event => {
                     var step = (event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x) / 120 * 120;
                     var maxScroll = wallpapersListInst.contentWidth - wallpapersListInst.width;
-                    var nextX = Math.max(0, Math.min(maxScroll, wallpapersListInst.contentX - step));
-                    scrollAnimation.to = nextX;
-                    scrollAnimation.start();
+                    wallpapersListInst.contentX = Math.max(0, Math.min(maxScroll, wallpapersListInst.contentX - step));
                 }
             }
 
-            delegate: Item {
-                id: delegateRoot
-                width: 280
-                height: 200
-
-                property bool isCurrent: ListView.isCurrentItem
-
-                ClippingRectangle {
-                    id: cardContainer
-                    width: 280
-                    height: 158
-                    radius: 18
-                    color: wallpaperWindow.theme ? wallpaperWindow.theme.getColor("surfaceVariant") : "#2b2a27"
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    scale: delegateRoot.isCurrent ? 1.10 : (hoverArea.containsMouse ? 1.03 : 0.96)
-                    opacity: delegateRoot.isCurrent ? 1.0 : (hoverArea.containsMouse ? 0.90 : 0.65)
-
-                    Behavior on scale { NumberAnimation { duration: 240; easing.type: Easing.OutExpo } }
-                    Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
-
-                    Image {
-                        id: imgSource
-                        anchors.fill: parent
-                        source: "file://" + modelData.path
-                        fillMode: Image.PreserveAspectCrop
-                        asynchronous: true
-                        cache: true
-                        sourceSize.width: 320
-                        sourceSize.height: 180
-                    }
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: 18
-                        color: "transparent"
-                        border.color: delegateRoot.isCurrent ?
-                                      (wallpaperWindow.theme ? wallpaperWindow.theme.getColor("primary") : "#ffb3b4") :
-                                      "transparent"
-                        border.width: delegateRoot.isCurrent ? 2.5 : 0
-
-                        Behavior on border.color { ColorAnimation { duration: 160 } }
-                    }
-
-                    MouseArea {
-                        id: hoverArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            wallpapersListInst.currentIndex = index;
-                            scrollAnimation.to = getScrollTarget(index);
-                            scrollAnimation.start();
-                            wallpaperWindow.wallpaperSetter.applyWallpaper(modelData.path);
-                        }
-                    }
-                }
+            delegate: WallpaperCard {
+                wallpaperWindow: wallpaperWindow
+                wallpapersListInst: wallpapersListInst
             }
 
             Keys.onLeftPressed: {
                 if (currentIndex > 0) {
                     currentIndex--;
-                    scrollAnimation.to = getScrollTarget(currentIndex);
-                    scrollAnimation.start();
+                    wallpapersListInst.contentX = getScrollTarget(currentIndex);
+                    var wp = model[currentIndex];
+                    if (wp) {
+                        autoApplyTimer.pendingPath = wp.path;
+                        autoApplyTimer.restart();
+                    }
                 }
             }
             Keys.onRightPressed: {
                 if (currentIndex < count - 1) {
                     currentIndex++;
-                    scrollAnimation.to = getScrollTarget(currentIndex);
-                    scrollAnimation.start();
+                    wallpapersListInst.contentX = getScrollTarget(currentIndex);
+                    var wp = model[currentIndex];
+                    if (wp) {
+                        autoApplyTimer.pendingPath = wp.path;
+                        autoApplyTimer.restart();
+                    }
                 }
             }
             Keys.onReturnPressed: {
                 var wp = model[currentIndex];
                 if (wp) {
-                    wallpaperWindow.wallpaperSetter.applyWallpaper(wp.path);
+                    autoApplyTimer.stop();
+                    wallpaperWindow.wallpaperSetter.applyWallpaper(wp.path, true);
                 }
             }
         }
@@ -246,7 +211,7 @@ Popup {
             z: 10
             gradient: Gradient {
                 orientation: Gradient.Horizontal
-                GradientStop { position: 0.0; color: wallpaperWindow.theme.getColor("surface") }
+                GradientStop { position: 0.0; color: (wallpaperWindow && wallpaperWindow.theme) ? wallpaperWindow.theme.getColor("surface") : "#1b1b1b" }
                 GradientStop { position: 1.0; color: "transparent" }
             }
         }
@@ -260,7 +225,7 @@ Popup {
             gradient: Gradient {
                 orientation: Gradient.Horizontal
                 GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 1.0; color: wallpaperWindow.theme.getColor("surface") }
+                GradientStop { position: 1.0; color: (wallpaperWindow && wallpaperWindow.theme) ? wallpaperWindow.theme.getColor("surface") : "#1b1b1b" }
             }
         }
     }

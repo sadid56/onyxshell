@@ -1,4 +1,3 @@
--- Reference: https://wiki.hypr.land/Configuring/Start/
 
 ------------------
 ---- MONITORS ----
@@ -21,10 +20,8 @@ browser = "brave-origin"
 ---- AUTOSTART ----
 -------------------
 hl.on("hyprland.start", function()
-	-- hl.exec_cmd("waybar")
 	hl.exec_cmd("quickshell")
-	hl.exec_cmd("awww-daemon")
-	hl.exec_cmd("hypridle")
+	hl.exec_cmd("hypridle -c ~/.config/hypr/config/hypridle.conf")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
 	hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
@@ -40,17 +37,13 @@ hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
-hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
-hl.env("XDG_SESSION_TYPE", "wayland")
-hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 hl.env("ROUNDED", "16")
 
 
 ------------------------
 ---- IMPORT MODULES ----
 ------------------------
-require("appearance")
-require("keybinds")
-require("windowrules")
-require("settings")
-require("animation")
+require("lua.keybinds")
+require("lua.windowrules")
+require("lua.settings")
+require("lua.animation")

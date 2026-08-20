@@ -7,6 +7,7 @@ Item {
 
     property double cpuUsage: 0.0
     property double memUsage: 0.0
+    property double swapUsage: 0.0
     property int batteryPercentage: 100
     property bool batteryIsCharging: false
 
@@ -36,7 +37,7 @@ Item {
 
     Process {
         id: statsProc
-        command: ["sh", "-c", "cat /proc/meminfo /proc/stat /sys/class/power_supply/BAT0/capacity /sys/class/power_supply/BAT0/status 2>/dev/null"]
+        command: ["cat", "/proc/meminfo", "/proc/stat", "/sys/class/power_supply/BAT0/capacity", "/sys/class/power_supply/BAT0/status"]
 
         stdout: StdioCollector {
             onStreamFinished: {
@@ -45,6 +46,7 @@ Item {
 
                 var lines = text.split('\n');
                 var total = 0, available = 0;
+                var swapTotal = 0, swapFree = 0;
                 var cpuLine = "";
                 var capacityRead = -1;
                 var statusRead = "";
@@ -55,6 +57,10 @@ Item {
                         total = parseInt(line.match(/\d+/)[0]) || 0;
                     } else if (line.indexOf("MemAvailable:") === 0) {
                         available = parseInt(line.match(/\d+/)[0]) || 0;
+                    } else if (line.indexOf("SwapTotal:") === 0) {
+                        swapTotal = parseInt(line.match(/\d+/)[0]) || 0;
+                    } else if (line.indexOf("SwapFree:") === 0) {
+                        swapFree = parseInt(line.match(/\d+/)[0]) || 0;
                     } else if (line.indexOf("cpu ") === 0) {
                         cpuLine = line;
                     } else if (/^\d+$/.test(line)) {
@@ -66,6 +72,12 @@ Item {
 
                 if (total > 0) {
                     sysStats.memUsage = ((total - available) / total) * 100;
+                }
+
+                if (swapTotal > 0) {
+                    sysStats.swapUsage = ((swapTotal - swapFree) / swapTotal) * 100;
+                } else {
+                    sysStats.swapUsage = 0.0;
                 }
 
                 if (cpuLine) {

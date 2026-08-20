@@ -1,18 +1,13 @@
--- Animations and Easing Curves Configuration
--- Reference: https://wiki.hypr.land/Configuring/Advanced-and-Cool/Animations/
-
 hl.config({
     animations = {
         enabled = true,
     },
 })
 
--- Define curves
 hl.curve("md3_standard", { type = "bezier", points = { {0.2, 0.0}, {0.0, 1.0} } })
 hl.curve("md3_decel",    { type = "bezier", points = { {0.05, 0.7}, {0.1, 1.0} } })
 hl.curve("md3_accel",    { type = "bezier", points = { {0.3, 0.0}, {0.8, 0.15} } })
 
--- Define individual animation rules
 hl.animation({ leaf = "windows",     enabled = true, speed = 3, bezier = "md3_decel", style = "popin 60%" })
 hl.animation({ leaf = "windowsIn",   enabled = true, speed = 3, bezier = "md3_decel", style = "popin 60%" })
 hl.animation({ leaf = "windowsOut",  enabled = true, speed = 3, bezier = "md3_accel", style = "popin 60%" })

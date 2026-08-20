@@ -1,0 +1,89 @@
+# Starship Professional Prompt Configuration
+# Reference: https://starship.rs/config/
+
+# Character prompt styling (Single Line Prompt with Right-aligned Duration)
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_status\
+$python\
+$nodejs\
+$rust\
+$golang\
+$lua\
+$docker_context\
+$package\
+$character"""
+
+right_format = """$cmd_duration"""
+
+# Timeout for commands
+command_timeout = 500
+
+# Directory
+[directory]
+truncation_length = 4
+truncation_symbol = "…/"
+style = "bold #adc6ff"
+read_only = " 󰌾"
+read_only_style = "bold red"
+home_symbol = "~"
+
+# Git Branch
+[git_branch]
+symbol = " "
+style = "bold #ffb3b4"
+format = "[$symbol$branch]($style) "
+
+# Git Status
+[git_status]
+style = "bold red"
+format = '([$all_status$ahead_behind]($style) )'
+modified = " "
+untracked = "󰋗 "
+staged = "󰄬 "
+ahead = "⇡${count}"
+behind = "⇣${count}"
+
+# Command execution duration
+[cmd_duration]
+min_time = 2_000
+style = "bold yellow"
+format = "took [$duration]($style) "
+
+# Character Prompt Symbols
+[character]
+success_symbol = "[❯](bold #adc6ff)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold #a6e3a1)"
+
+# Programming Language & Runtimes Context
+[nodejs]
+symbol = " "
+style = "bold green"
+format = "[$symbol($version )]($style)"
+
+[python]
+symbol = " "
+style = "bold yellow"
+format = '[$symbol($version )(\($virtualenv\) )]($style)'
+
+[rust]
+symbol = " "
+style = "bold #fab387"
+format = "[$symbol($version )]($style)"
+
+[golang]
+symbol = " "
+style = "bold #89b4fa"
+format = "[$symbol($version )]($style)"
+
+[docker_context]
+symbol = " "
+style = "bold #89b4fa"
+format = "[$symbol$context]($style) "
+
+[package]
+disabled = true

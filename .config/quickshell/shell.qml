@@ -8,10 +8,12 @@ import "services"
 import "modules/bar"
 import "modules/bar/components"
 import "components/ui"
+import "modules/wallpaper"
 
 QtObject {
     id: root
 
+    property bool dndEnabled: false
     property var activeNotifs: []
     property var clipboardService: clipService
     property MediaService mediaService: MediaService { id: mediaService }
@@ -22,12 +24,22 @@ QtObject {
     property alias notifsLoader: popupManager.notifsLoader
     property alias calendarLoader: popupManager.calendarLoader
     property alias wifiLoader: popupManager.wifiLoader
+    property alias resourcesLoader: popupManager.resourcesLoader
+    property alias emojiLoader: popupManager.emojiLoader
     property alias clipboardLoader: popupManager.clipboardLoader
     property alias wallpaperSelectorLoader: popupManager.wallpaperSelectorLoader
     property alias keybindsLoader: popupManager.keybindsLoader
+    property alias altTabLoader: popupManager.altTabLoader
     property alias toastPopup: popupManager.toastPopup
     property alias errorPopup: popupManager.errorPopup
     property alias trayMenuPopup: popupManager.trayMenuPopup
+    property alias confirmationModal: popupManager.confirmationModal
+
+    function confirm(options) {
+        if (popupManager && popupManager.confirmationModal) {
+            popupManager.confirmationModal.ask(options);
+        }
+    }
 
     function closeAllPopupsExcept(excludeLoader) {
         popupManager.closeAllPopupsExcept(excludeLoader);
@@ -68,6 +80,12 @@ QtObject {
         popupManager.setLoaderInactive(loader);
     }
 
+    function setWallpaper(filePath) {
+        if (wallpaperBackground && typeof wallpaperBackground.setWallpaper === "function") {
+            wallpaperBackground.setWallpaper(filePath);
+        }
+    }
+
     property var reloadConnection: Connections {
         target: Quickshell
 
@@ -84,7 +102,7 @@ QtObject {
 
     property var defaultWallpaperLoader: Process {
         id: defaultWallpaperLoader
-        command: ["sh", "-c", "if [ ! -f " + shellConfig.quickshellDir + "/current_wallpaper ]; then echo \"" + shellConfig.defaultWallpaper + "\" > " + shellConfig.quickshellDir + "/current_wallpaper; fi; awww restore || awww img \"$(cat " + shellConfig.quickshellDir + "/current_wallpaper)\" --transition-type grow"]
+        command: ["sh", "-c", "if [ ! -f " + shellConfig.quickshellDir + "/current_wallpaper ]; then echo \"" + shellConfig.defaultWallpaper + "\" > " + shellConfig.quickshellDir + "/current_wallpaper; fi"]
     }
 
     Component.onCompleted: {
@@ -92,6 +110,10 @@ QtObject {
     }
 
     property list<QtObject> shellObjects: [
+        Wallpaper {
+            id: wallpaperBackground
+        },
+
         Theme {
             id: rootTheme
         },
@@ -152,7 +174,9 @@ QtObject {
                 var arr = root.activeNotifs.slice();
                 arr.push(notification);
                 root.activeNotifs = arr;
-                popupManager.toastPopup.showToast(notification);
+                if (!root.dndEnabled) {
+                    popupManager.toastPopup.showToast(notification);
+                }
 
                 notification.closed.connect(() => {
                     var temp = root.activeNotifs.slice();
@@ -163,6 +187,6 @@ QtObject {
                     }
                 });
             }
-        }
+        },
     ]
 }

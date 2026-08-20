@@ -21,10 +21,18 @@ Item {
     Layout.maximumWidth: 230
     Layout.alignment: Qt.AlignVCenter
 
+    onIsPlayingChanged: {
+        if (!isPlaying) {
+            targetBars = [];
+            smoothBars = [];
+            barVisualizerCanvas.requestPaint();
+        }
+    }
+
     Process {
         id: cavaProcess
         command: ["cava", "-p", shellConfig.quickshellDir + "/scripts/cava_bar.conf"]
-        running: true
+        running: mediaBarRoot.isPlaying && mediaBarRoot.hasMedia
         stdout: SplitParser {
             onRead: data => {
                 var clean = data.trim();
@@ -32,13 +40,9 @@ Item {
                 var parts = clean.split(';');
                 var vals = [];
                 for (var i = 0; i < parts.length; i++) {
-                    if (parts[i] !== "") {
-                        vals.push(parseInt(parts[i]) || 0);
-                    }
+                    if (parts[i] !== "") vals.push(parseInt(parts[i]) || 0);
                 }
-                if (vals.length > 0) {
-                    mediaBarRoot.targetBars = vals;
-                }
+                if (vals.length > 0) mediaBarRoot.targetBars = vals;
             }
         }
     }
@@ -46,7 +50,7 @@ Item {
     Timer {
         id: smoothTimer
         interval: 16
-        running: true
+        running: mediaBarRoot.isPlaying && mediaBarRoot.hasMedia
         repeat: true
         onTriggered: {
             var targets = mediaBarRoot.targetBars;
@@ -93,13 +97,11 @@ Item {
                 root.setLoaderInactive(notifsLoader);
             }
         }
-
         onExited: {
             if (typeof root !== "undefined" && root.restartLoaderTimer && typeof mediaLoader !== "undefined") {
                 root.restartLoaderTimer(mediaLoader);
             }
         }
-
         onClicked: {
             if (mediaBarRoot.toggleMedia) {
                 mediaBarRoot.toggleMedia();
@@ -127,32 +129,25 @@ Item {
             var baselineY = height - 2;
             var primaryColor = mediaBarRoot.theme ? mediaBarRoot.theme.getColor("primary") : "#3574d4";
             var outlineColor = mediaBarRoot.theme ? mediaBarRoot.theme.getColor("outline") : "#757680";
-
             var bars = mediaBarRoot.smoothBars || [];
             var maxAmplitude = height - 4;
 
             var hasSignal = false;
             for (var b = 0; b < bars.length; b++) {
-                if (bars[b] > 1.0) {
-                    hasSignal = true;
-                    break;
-                }
+                if (bars[b] > 1.0) { hasSignal = true; break; }
             }
 
             if (hasSignal && mediaBarRoot.isPlaying && bars.length > 1) {
                 var points = [];
                 var step = (width - 4) / (bars.length - 1);
-
                 for (var i = 0; i < bars.length; i++) {
                     var normalized = Math.min(1.0, Math.max(0.0, (bars[i] || 0) / 100.0));
-                    var yVal = baselineY - (normalized * maxAmplitude);
-                    points.push({ x: 2 + i * step, y: yVal });
+                    points.push({ x: 2 + i * step, y: baselineY - (normalized * maxAmplitude) });
                 }
 
                 ctx.beginPath();
                 ctx.moveTo(points[0].x, baselineY);
                 ctx.lineTo(points[0].x, points[0].y);
-
                 for (var j = 0; j < points.length - 1; j++) {
                     var xc = (points[j].x + points[j + 1].x) / 2;
                     var yc = (points[j].y + points[j + 1].y) / 2;
@@ -175,7 +170,6 @@ Item {
                 ctx.lineJoin = "round";
                 ctx.strokeStyle = primaryColor;
                 ctx.globalAlpha = 1.0;
-
                 ctx.moveTo(points[0].x, points[0].y);
                 for (var k = 0; k < points.length - 1; k++) {
                     var xck = (points[k].x + points[k + 1].x) / 2;
@@ -184,9 +178,7 @@ Item {
                 }
                 ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
                 ctx.stroke();
-
             } else {
-
                 ctx.beginPath();
                 ctx.lineWidth = 2.0;
                 ctx.lineCap = "round";
@@ -196,7 +188,6 @@ Item {
                 ctx.lineTo(width - 2, baselineY);
                 ctx.stroke();
             }
-
             ctx.globalAlpha = 1.0;
         }
     }

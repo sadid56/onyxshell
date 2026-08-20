@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
-import "../../../components/ui" as UI
+import "../../../core"
 
-UI.AnimatedListView {
+ListView {
     id: appNotifsList
     Layout.fillWidth: true
     Layout.fillHeight: true
@@ -12,7 +12,11 @@ UI.AnimatedListView {
     flickDeceleration: 1600
     maximumFlickVelocity: 2800
 
+    property var theme
     property var activeNotifsModel: []
+    property string expandedNotifId: ""
+
+    ListModelUtils { id: modelUtils }
 
     WheelHandler {
         id: wheelHandler
@@ -32,15 +36,12 @@ UI.AnimatedListView {
         var viewBottom = appNotifsList.contentY + appNotifsList.height;
 
         if (cardBottom > viewBottom) {
-            var diff = cardBottom - viewBottom;
-            var targetY = Math.max(0, appNotifsList.contentY + diff);
             smoothScrollAnim.stop();
-            smoothScrollAnim.to = targetY;
+            smoothScrollAnim.to = Math.max(0, appNotifsList.contentY + (cardBottom - viewBottom));
             smoothScrollAnim.start();
         } else if (itemY < appNotifsList.contentY) {
-            var targetY = Math.max(0, itemY - 12);
             smoothScrollAnim.stop();
-            smoothScrollAnim.to = targetY;
+            smoothScrollAnim.to = Math.max(0, itemY - 12);
             smoothScrollAnim.start();
         }
     }
@@ -53,10 +54,25 @@ UI.AnimatedListView {
         easing.type: Easing.OutCubic
     }
 
-    ListModel {
-        id: dynamicNotifModel
+    add: Transition {
+        ParallelAnimation {
+            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 200; easing.type: Easing.OutQuad }
+            NumberAnimation { property: "scale"; from: 0.95; to: 1.0; duration: 220; easing.type: Easing.OutCubic }
+        }
     }
 
+    remove: Transition {
+        ParallelAnimation {
+            NumberAnimation { property: "opacity"; to: 0.0; duration: 160; easing.type: Easing.OutQuad }
+            NumberAnimation { property: "scale"; to: 0.95; duration: 160; easing.type: Easing.OutCubic }
+        }
+    }
+
+    move: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
+    moveDisplaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
+    displaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
+
+    ListModel { id: dynamicNotifModel }
     model: dynamicNotifModel
 
     function buildSerializableNotifs(source) {
@@ -80,16 +96,12 @@ UI.AnimatedListView {
     }
 
     onActiveNotifsModelChanged: {
-        var processed = buildSerializableNotifs(activeNotifsModel);
-        syncListModel(dynamicNotifModel, processed, "notifId", 50);
+        modelUtils.syncListModel(dynamicNotifModel, buildSerializableNotifs(activeNotifsModel), "notifId", 50);
     }
 
     Component.onCompleted: {
-        var processed = buildSerializableNotifs(activeNotifsModel);
-        syncListModel(dynamicNotifModel, processed, "notifId", 50);
+        modelUtils.syncListModel(dynamicNotifModel, buildSerializableNotifs(activeNotifsModel), "notifId", 50);
     }
-
-    property string expandedNotifId: ""
 
     delegate: NotifCard {
         theme: appNotifsList.theme
@@ -97,19 +109,11 @@ UI.AnimatedListView {
         parentList: appNotifsList
         expanded: appNotifsList.expandedNotifId === model.notifId
         onToggleExpandedRequested: {
-            if (appNotifsList.expandedNotifId === model.notifId) {
-                appNotifsList.expandedNotifId = "";
-            } else {
-                appNotifsList.expandedNotifId = model.notifId;
-            }
+            appNotifsList.expandedNotifId = (appNotifsList.expandedNotifId === model.notifId) ? "" : model.notifId;
         }
         onDismissRequested: {
-            if (appNotifsList.expandedNotifId === model.notifId) {
-                appNotifsList.expandedNotifId = "";
-            }
-            if (model.rawNotif && typeof model.rawNotif.dismiss === "function") {
-                model.rawNotif.dismiss();
-            }
+            if (appNotifsList.expandedNotifId === model.notifId) appNotifsList.expandedNotifId = "";
+            if (model.rawNotif && typeof model.rawNotif.dismiss === "function") model.rawNotif.dismiss();
         }
     }
 }
