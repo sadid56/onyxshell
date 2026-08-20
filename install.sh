@@ -87,11 +87,11 @@ install_packages() {
                 kitty neovim fastfetch cava htop fish starship firefox
                 wl-clipboard cliphist grim slurp
                 playerctl brightnessctl wireplumber pipewire pipewire-pulse pipewire-alsa pavucontrol
-                network-manager-applet bluez bluez-utils
+                network-manager-applet
                 xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
                 hyprpolkitagent gnome-keyring libnotify
                 gnome-themes-extra adwaita-icon-theme nwg-look qt6ct qt5ct qt6-svg qt6-declarative
-                nodejs python python-pip fzf jq bc power-profiles-daemon nautilus rsync
+                nodejs python python-pip fzf jq power-profiles-daemon nautilus rsync
                 ttf-jetbrains-mono-nerd noto-fonts-emoji
             )
             sudo pacman -S --needed --noconfirm "${ARCH_PACKAGES[@]}"
@@ -101,10 +101,10 @@ install_packages() {
             FEDORA_PACKAGES=(
                 hyprland hyprlock hypridle hyprpicker kitty neovim fastfetch cava htop fish starship firefox
                 wl-clipboard cliphist grim slurp playerctl brightnessctl wireplumber
-                NetworkManager-applet bluez bluez-tools pavucontrol
+                NetworkManager-applet pavucontrol
                 xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
                 gnome-keyring libnotify gnome-themes-extra adwaita-icon-theme qt6ct qt5ct qt6-qtsvg qt6-qtdeclarative
-                nodejs python3 fzf jq bc power-profiles-daemon nautilus rsync
+                nodejs python3 fzf jq power-profiles-daemon nautilus rsync
                 google-noto-emoji-fonts jetbrains-mono-fonts-all
             )
             sudo dnf install -y "${FEDORA_PACKAGES[@]}"
@@ -114,11 +114,11 @@ install_packages() {
             DEB_PACKAGES=(
                 hyprland kitty neovim cava htop fish starship firefox
                 wl-clipboard cliphist grim slurp playerctl brightnessctl wireplumber
-                network-manager-gnome bluez pavucontrol
+                network-manager-gnome pavucontrol
                 xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
                 gnome-keyring libnotify-bin gnome-themes-extra adwaita-icon-theme
                 qt6-style-plugins qt5-style-plugins qml6-module-qtquick qml6-module-qtquick-controls
-                nodejs python3 fzf jq bc power-profiles-daemon nautilus rsync
+                nodejs python3 fzf jq power-profiles-daemon nautilus rsync
                 fonts-noto-color-emoji fonts-jetbrains-mono
             )
             sudo apt install -y "${DEB_PACKAGES[@]}"
@@ -133,10 +133,9 @@ if confirm "Install desktop environment and core packages?"; then
     install_packages
 fi
 
-if confirm "Enable Power Profiles Daemon, Bluetooth & PipeWire Audio services?"; then
+if confirm "Enable Power Profiles Daemon & PipeWire Audio services?"; then
     echo -e "${BLUE}[*] Enabling system services...${RESET}"
     sudo systemctl enable --now power-profiles-daemon.service 2>/dev/null || true
-    sudo systemctl enable --now bluetooth.service 2>/dev/null || true
 
     echo -e "${BLUE}[*] Enabling PipeWire & WirePlumber audio services for user...${RESET}"
     systemctl --user enable --now pipewire.socket pipewire.service 2>/dev/null || true
