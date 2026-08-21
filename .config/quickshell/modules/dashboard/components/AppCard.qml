@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
+import Quickshell.Widgets
 
 Item {
     id: cardRoot
@@ -38,28 +39,17 @@ Item {
             width: 48
             height: 48
 
-            Image {
+            IconImage {
                 id: iconImg
                 anchors.centerIn: parent
                 width: 44
                 height: 44
-                sourceSize.width: 48
-                sourceSize.height: 48
-                fillMode: Image.PreserveAspectFit
-                asynchronous: true
-                smooth: true
 
                 source: {
                     if (app && app.icon && typeof app.icon === "string" && app.icon.indexOf("/") === 0) {
                         return "file://" + app.icon;
                     }
                     return cardRoot.getDefaultIcon();
-                }
-
-                onStatusChanged: {
-                    if (status === Image.Error) {
-                        source = cardRoot.getDefaultIcon();
-                    }
                 }
             }
         }

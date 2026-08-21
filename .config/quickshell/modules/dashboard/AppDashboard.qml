@@ -44,30 +44,50 @@ Popup {
 
         var scored = [];
         var query = searchQuery.trim().toLowerCase();
+        var queryWords = query.split(/\s+/);
 
         for (var i = 0; i < baseList.length; i++) {
             var app = baseList[i];
             var name = (app.name || "").toLowerCase();
             var comment = (app.comment || "").toLowerCase();
             var exec = (app.exec || "").toLowerCase();
+            // Extract just the binary name from exec (e.g. "org.gnome.Nautilus" -> "nautilus")
+            var execBase = exec.split(/\s/)[0].split("/").pop().split(".").pop().toLowerCase();
 
             var score = 0;
+
+            // Exact name match
             if (name === query) {
-                score += 1000;
-            } else if (name.indexOf(query) === 0) {
-                score += 500;
-            } else if (name.indexOf(" " + query) !== -1 || name.indexOf("-" + query) !== -1) {
-                score += 300;
-            } else if (name.indexOf(query) !== -1) {
-                score += 150;
-            } else if (exec.indexOf(query) !== -1) {
-                score += 80;
-            } else if (comment.indexOf(query) !== -1) {
-                score += 40;
+                score = 10000;
+            }
+            // Name starts with query
+            else if (name.indexOf(query) === 0) {
+                score = 5000;
+            }
+            // Word in name starts with query (e.g. "System Monitor" matches "mon")
+            else if (name.indexOf(" " + query) !== -1 || name.indexOf("-" + query) !== -1) {
+                score = 2000;
+            }
+            // Name contains query substring
+            else if (name.indexOf(query) !== -1) {
+                score = 1000;
+            }
+            // Exec binary name matches
+            else if (execBase === query || execBase.indexOf(query) === 0) {
+                score = 400;
+            }
+            else if (execBase.indexOf(query) !== -1) {
+                score = 200;
+            }
+            // Comment contains query — low priority, only for single meaningful words
+            else if (query.length >= 4 && comment.indexOf(query) !== -1) {
+                score = 30;
             }
 
             if (score > 0) {
-                score += Math.max(0, 50 - Math.abs(name.length - query.length));
+                // Bonus for shorter names (closer match)
+                var lengthBonus = Math.max(0, 20 - Math.abs(name.length - query.length));
+                score += lengthBonus;
                 scored.push({ app: app, score: score });
             }
         }
@@ -83,8 +103,18 @@ Popup {
     function updateAppsModel() {
         var filtered = getFilteredApps();
         modelUtils.syncListModel(dynamicAppsModel, filtered, "name", 0);
-        if (appsGrid && appsGrid.count > 0) {
-            appsGrid.currentIndex = 0;
+        if (appsGrid) {
+            if (dynamicAppsModel.count > 0) {
+                if (appsGrid.currentIndex < 0 || appsGrid.currentIndex >= dynamicAppsModel.count) {
+                    appsGrid.currentIndex = 0;
+                }
+                Qt.callLater(() => appsGrid.updatePillPosition());
+            } else {
+                appsGrid.currentIndex = -1;
+                if (typeof gridHoverPill !== "undefined" && gridHoverPill) {
+                    gridHoverPill.isHovered = false;
+                }
+            }
         }
     }
 
@@ -210,17 +240,18 @@ Popup {
         onActionTriggered: action => dashboardWindow.handlePowerAction(action)
         onEscapePressed: dashboardWindow.active = false
         onReturnPressed: {
-            var filtered = dashboardWindow.getFilteredApps();
-            if (filtered.length > 0) {
-                var targetIdx = (appsGrid.currentIndex >= 0 && appsGrid.currentIndex < filtered.length) ? appsGrid.currentIndex : 0;
-                dashboardWindow.launchApp(filtered[targetIdx]);
+            if (dynamicAppsModel.count > 0) {
+                var targetIdx = (appsGrid.currentIndex >= 0 && appsGrid.currentIndex < dynamicAppsModel.count) ? appsGrid.currentIndex : 0;
+                var appItem = dynamicAppsModel.get(targetIdx);
+                if (appItem) {
+                    dashboardWindow.launchApp(appItem);
+                }
             }
         }
         onDownPressed: {
-            appsGrid.focus = true;
+            appsGrid.forceActiveFocus();
             if (appsGrid.count > 0) {
                 if (appsGrid.currentIndex < 0) appsGrid.currentIndex = 0;
-                appsGrid.updatePillPosition();
             }
         }
         onSearchTextChanged: {
@@ -321,7 +352,6 @@ Popup {
                     if (event.key === Qt.Key_Up) {
                         if (currentIndex < cols) {
                             header.forceSearchFocus();
-                            gridHoverPill.isHovered = false;
                             event.accepted = true;
                             return;
                         }
@@ -341,10 +371,10 @@ Popup {
                         updatePillPosition();
                         event.accepted = true;
                     } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
-                        if (currentIndex >= 0 && currentIndex < count) {
-                            var filtered = dashboardWindow.getFilteredApps();
-                            if (filtered.length > currentIndex) {
-                                dashboardWindow.launchApp(filtered[currentIndex]);
+                        if (currentIndex >= 0 && currentIndex < dynamicAppsModel.count) {
+                            var appToLaunch = dynamicAppsModel.get(currentIndex);
+                            if (appToLaunch) {
+                                dashboardWindow.launchApp(appToLaunch);
                             }
                         }
                         event.accepted = true;
@@ -381,34 +411,28 @@ Popup {
                 }
 
                 populate: Transition {
-                    ParallelAnimation {
-                        NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 280; easing.type: Easing.OutQuad }
-                        NumberAnimation { property: "scale"; from: 0.88; to: 1.0; duration: 320; easing.type: Easing.OutBack; easing.overshoot: 1.12 }
-                    }
+                    NumberAnimation { property: "scale"; from: 0.92; to: 1.0; duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1.05 }
                 }
 
                 add: Transition {
-                    ParallelAnimation {
-                        NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 260; easing.type: Easing.OutQuad }
-                        NumberAnimation { property: "scale"; from: 0.86; to: 1.0; duration: 300; easing.type: Easing.OutBack; easing.overshoot: 1.15 }
-                    }
+                    NumberAnimation { property: "scale"; from: 0.92; to: 1.0; duration: 180; easing.type: Easing.OutBack; easing.overshoot: 1.05 }
                 }
 
-                remove: Transition {
-                    ParallelAnimation {
-                        NumberAnimation { property: "opacity"; to: 0.0; duration: 180; easing.type: Easing.OutQuad }
-                        NumberAnimation { property: "scale"; to: 0.86; duration: 180; easing.type: Easing.OutCubic }
-                    }
+                move: Transition {
+                    NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic }
                 }
 
-                move: Transition { NumberAnimation { properties: "x,y"; duration: 340; easing.type: Easing.OutCubic } }
-                displaced: Transition { NumberAnimation { properties: "x,y"; duration: 340; easing.type: Easing.OutCubic } }
+                displaced: Transition {
+                    NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic }
+                }
 
                 delegate: Item {
                     id: delegateWrapper
                     width: appsGrid.cellWidth
                     height: appsGrid.cellHeight
                     z: 1
+                    opacity: 1.0
+                    scale: 1.0
 
                     readonly property var appItem: ({
                         "name": model.name,
@@ -436,7 +460,7 @@ Popup {
                         }
 
                         onUnhovered: {
-                            if (!appsGrid.activeFocus) {
+                            if (!appsGrid.activeFocus && (!header.searchText || header.searchText.trim().length === 0)) {
                                 gridUnhoverTimer.restart();
                             }
                         }

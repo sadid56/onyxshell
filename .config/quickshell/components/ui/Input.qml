@@ -93,10 +93,10 @@ Rectangle {
                 if (event.key === Qt.Key_Escape) {
                     inputRoot.escapePressed();
                     event.accepted = true;
-                } else if (event.key === Qt.Key_Down) {
+                } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab) {
                     inputRoot.downPressed();
                     event.accepted = true;
-                } else if (event.key === Qt.Key_Return) {
+                } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                     inputRoot.returnPressed();
                     event.accepted = true;
                 }

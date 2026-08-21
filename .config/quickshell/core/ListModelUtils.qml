@@ -19,56 +19,60 @@ QtObject {
             return;
         }
 
-        for (var j = 0; j < limit; j++) {
-            var targetItem = sourceArray[j];
-            var targetKeyVal = (typeof targetItem === "object" && keyProp) ? targetItem[keyProp] : targetItem;
-            var foundIdx = -1;
-
-            for (var k = j; k < listModel.count; k++) {
-                var modelItem = listModel.get(k);
-                var modelKeyVal = (modelItem && keyProp && modelItem[keyProp] !== undefined) ? modelItem[keyProp] : (modelItem ? modelItem.entryData : modelItem);
-                if (modelKeyVal === targetKeyVal) {
-                    foundIdx = k;
-                    break;
-                }
-            }
-
-            if (foundIdx !== -1 && foundIdx !== j) {
-                listModel.move(foundIdx, j, 1);
-            }
-        }
-
-        for (var n = 0; n < limit; n++) {
-            var insertItem = sourceArray[n];
-            var insertKeyVal = (typeof insertItem === "object" && keyProp) ? insertItem[keyProp] : insertItem;
-            var present = false;
-
-            for (var m = 0; m < listModel.count; m++) {
-                var itmCheck = listModel.get(m);
-                var keyCheck = (itmCheck && keyProp && itmCheck[keyProp] !== undefined) ? itmCheck[keyProp] : (itmCheck ? itmCheck.entryData : itmCheck);
-                if (keyCheck === insertKeyVal) {
-                    present = true;
-                    break;
-                }
-            }
-
-            if (!present) {
-                listModel.insert(n, typeof insertItem === "object" ? insertItem : { "entryData": insertItem });
-            }
-        }
-
+        // 1. Build map of target keys for fast lookup
         var targetMap = {};
         for (var t = 0; t < limit; t++) {
             var val = sourceArray[t];
-            targetMap[(typeof val === "object" && keyProp) ? val[keyProp] : val] = true;
+            var kVal = (typeof val === "object" && keyProp) ? val[keyProp] : val;
+            targetMap[kVal] = true;
         }
 
+        // 2. Remove items not present in target array first
         for (var r = listModel.count - 1; r >= 0; r--) {
             var curr = listModel.get(r);
             var currKey = (curr && keyProp && curr[keyProp] !== undefined) ? curr[keyProp] : (curr ? curr.entryData : curr);
             if (!curr || !targetMap[currKey]) {
                 listModel.remove(r);
             }
+        }
+
+        // 3. Reorder existing items and insert new items at the correct position
+        for (var j = 0; j < limit; j++) {
+            var targetItem = sourceArray[j];
+            var targetKeyVal = (typeof targetItem === "object" && keyProp) ? targetItem[keyProp] : targetItem;
+
+            if (j < listModel.count) {
+                var modelItem = listModel.get(j);
+                var modelKeyVal = (modelItem && keyProp && modelItem[keyProp] !== undefined) ? modelItem[keyProp] : (modelItem ? modelItem.entryData : modelItem);
+
+                if (modelKeyVal === targetKeyVal) {
+                    continue; // Already at the right index
+                }
+
+                // Look ahead to see if it's already in the model further down
+                var foundIdx = -1;
+                for (var k = j + 1; k < listModel.count; k++) {
+                    var lookItem = listModel.get(k);
+                    var lookKeyVal = (lookItem && keyProp && lookItem[keyProp] !== undefined) ? lookItem[keyProp] : (lookItem ? lookItem.entryData : lookItem);
+                    if (lookKeyVal === targetKeyVal) {
+                        foundIdx = k;
+                        break;
+                    }
+                }
+
+                if (foundIdx !== -1) {
+                    listModel.move(foundIdx, j, 1);
+                } else {
+                    listModel.insert(j, typeof targetItem === "object" ? targetItem : { "entryData": targetItem });
+                }
+            } else {
+                listModel.append(typeof targetItem === "object" ? targetItem : { "entryData": targetItem });
+            }
+        }
+
+        // 4. Remove any extra items beyond limit
+        while (listModel.count > limit) {
+            listModel.remove(listModel.count - 1);
         }
     }
 }

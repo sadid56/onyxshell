@@ -4,28 +4,82 @@ import json
 import re
 
 CACHE_FILE = "/tmp/quickshell_apps_cache.json"
+MAX_CACHE_AGE = 3600  # 1 hour max, even if nothing changed
 
-dirs = [
+app_dirs = [
     "/usr/share/applications",
     os.path.expanduser("~/.local/share/applications")
 ]
 
-if os.path.exists(CACHE_FILE):
+icon_theme_dirs = [
+    os.path.expanduser("~/.local/share/icons"),
+    os.path.expanduser("~/.icons"),
+    "/usr/share/icons",
+    "/usr/share/pixmaps"
+]
+
+def is_cache_valid():
+    if not os.path.exists(CACHE_FILE):
+        return False
     try:
+        import time
         cache_mtime = os.path.getmtime(CACHE_FILE)
-        valid = True
-        for d in dirs:
+
+        # Max age check
+        if time.time() - cache_mtime > MAX_CACHE_AGE:
+            return False
+
+        # Check if any app directory or its .desktop files changed
+        for d in app_dirs:
+            if not os.path.exists(d):
+                continue
+            if os.path.getmtime(d) > cache_mtime:
+                return False
+            for f in os.listdir(d):
+                if f.endswith(".desktop"):
+                    fp = os.path.join(d, f)
+                    if os.path.getmtime(fp) > cache_mtime:
+                        return False
+
+        # Check if icon theme root dirs changed (theme install/switch)
+        for d in icon_theme_dirs:
             if os.path.exists(d) and os.path.getmtime(d) > cache_mtime:
-                valid = False
-                break
-        if valid:
-            with open(CACHE_FILE, "r", encoding="utf-8") as f:
-                content = f.read()
-                if content.strip():
-                    print(content)
-                    sys.exit(0)
+                return False
+
+        return True
+    except Exception:
+        return False
+
+if is_cache_valid():
+    try:
+        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+            content = f.read()
+            if content.strip():
+                print(content)
+                sys.exit(0)
     except Exception:
         pass
+
+DEFAULT_APP_ICON = os.path.expanduser("~/.config/quickshell/assets/icons/system/default-app.svg")
+
+def icon_score(path):
+    p = path.lower()
+    score = 0
+    if "/apps/" in p or "/pixmaps" in p:
+        score += 100
+    if "/scalable/" in p:
+        score += 50
+    elif "/128x128/" in p or "/256x256/" in p or "/512x512/" in p:
+        score += 40
+    elif "/64x64/" in p or "/48x48/" in p:
+        score += 30
+    elif "/32x32/" in p:
+        score += 20
+    elif "/16x16/" in p or "/22x22/" in p or "/mimes/" in p:
+        score -= 50
+    if path.endswith(".svg"):
+        score += 10
+    return score
 
 icon_cache = {}
 
@@ -40,23 +94,30 @@ def build_icon_cache():
         if not os.path.exists(root_dir):
             continue
         for root, subdirs, files in os.walk(root_dir):
-            is_apps_dir = "apps" in root or "pixmaps" in root or "mimes" in root or "mimetypes" in root or root_dir == "/usr/share/pixmaps"
-            if not is_apps_dir:
-                continue
             for f in files:
                 if f.endswith((".png", ".svg", ".xpm")):
                     name, _ = os.path.splitext(f)
-                    if name not in icon_cache:
-                        icon_cache[name] = os.path.join(root, f)
+                    full_p = os.path.join(root, f)
+                    if name not in icon_cache or icon_score(full_p) > icon_score(icon_cache[name]):
+                        icon_cache[name] = full_p
 
 build_icon_cache()
 
 def resolve_icon(name):
     if not name:
-        return ""
-    if os.path.isabs(name):
+        return DEFAULT_APP_ICON
+    if os.path.isabs(name) and os.path.exists(name):
         return name
-    return icon_cache.get(name, "")
+    if name in icon_cache:
+        return icon_cache[name]
+    # Check if name has an extension
+    base, _ = os.path.splitext(name)
+    if base in icon_cache:
+        return icon_cache[base]
+    for fallback in ["application-x-executable", "system-run", "application-default-icon", "utilities-terminal"]:
+        if fallback in icon_cache:
+            return icon_cache[fallback]
+    return DEFAULT_APP_ICON
 
 def parse_categories(cat_str):
     if not cat_str:
@@ -93,7 +154,7 @@ def parse_categories(cat_str):
 apps = []
 seen_names = set()
 
-for d in dirs:
+for d in app_dirs:
     if not os.path.exists(d):
         continue
     for f in os.listdir(d):
@@ -124,15 +185,11 @@ for d in dirs:
                         continue
                     seen_names.add(name)
 
-                    icon_name = icon_match.group(1).strip() if icon_match else "application-x-executable"
-                    icon_path = resolve_icon(icon_name)
+                    icon_name = icon_match.group(1).strip() if icon_match else ""
+                    icon_path = resolve_icon(icon_name) if icon_name else ""
 
                     if not icon_path or not os.path.exists(icon_path):
-                        icon_path = resolve_icon("application-x-executable")
-                    if not icon_path or not os.path.exists(icon_path):
-                        icon_path = resolve_icon("system-run")
-                    if not icon_path or not os.path.exists(icon_path):
-                        icon_path = ""
+                        icon_path = DEFAULT_APP_ICON
 
                     comment = comment_match.group(1).strip() if comment_match else ""
                     categories = parse_categories(cat_match.group(1).strip() if cat_match else "")

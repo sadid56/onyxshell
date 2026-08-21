@@ -89,7 +89,7 @@ install_packages() {
                 playerctl brightnessctl wireplumber pipewire pipewire-pulse pipewire-alsa pavucontrol
                 network-manager-applet
                 xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
-                hyprpolkitagent gnome-keyring libnotify
+                hyprpolkitagent polkit-gnome gnome-keyring libnotify
                 gnome-themes-extra adwaita-icon-theme nwg-look qt6ct qt5ct qt6-svg qt6-declarative
                 nodejs python python-pip fzf jq power-profiles-daemon nautilus rsync
                 ttf-jetbrains-mono-nerd noto-fonts-emoji
