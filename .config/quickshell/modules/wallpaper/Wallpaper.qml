@@ -7,6 +7,7 @@ Scope {
     id: wallpaperRoot
 
     property string currentWallpaperPath: ""
+    property bool isSplashActive: (typeof root !== "undefined" && root.splashScreen && !root.splashScreen.isFadingOut && !root.splashScreen.isFinished)
 
     function setWallpaper(filePath) {
         if (filePath && filePath !== "") {
@@ -50,7 +51,9 @@ Scope {
             }
             WlrLayershell.layer: WlrLayer.Background
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-            color: "transparent"
+            color: "#1b1111"
+
+            visible: !wallpaperRoot.isSplashActive
 
             property bool isInitialLoad: true
 

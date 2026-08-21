@@ -20,6 +20,8 @@ QtObject {
     property MediaService mediaService: MediaService { id: mediaService }
     property Config shellConfig: Config { id: shellConfig }
 
+    property alias splashScreen: splashScreen
+    property alias wallpaperBackground: wallpaperBackground
     property alias dashboardLoader: popupManager.dashboardLoader
     property alias mediaLoader: popupManager.mediaLoader
     property alias notifsLoader: popupManager.notifsLoader
@@ -67,14 +69,42 @@ QtObject {
     }
 
     function clearAllNotifications() {
-        var temp = root.activeNotifs.slice();
-        for (var i = temp.length - 1; i >= 0; i--) {
-            var n = temp[i];
+        var toDismiss = root.activeNotifs.slice();
+        // Clear UI model atomically in 1 operation (instant 0ms UI update)
+        root.activeNotifs = [];
+        // Dismiss each notification
+        for (var i = 0; i < toDismiss.length; i++) {
+            var n = toDismiss[i];
             if (n && typeof n.dismiss === "function") {
                 n.dismiss();
             }
         }
-        root.activeNotifs = [];
+    }
+
+    function clearNotificationGroup(groupName) {
+        var remaining = [];
+        var toDismiss = [];
+        var source = root.activeNotifs;
+        for (var i = 0; i < source.length; i++) {
+            var n = source[i];
+            if (!n) continue;
+            var notifObj = n.trackedNotification || n;
+            var app = notifObj.appName || notifObj.applicationName || "Other";
+            if (app === groupName) {
+                toDismiss.push(n);
+            } else {
+                remaining.push(n);
+            }
+        }
+        // Atomic UI update
+        root.activeNotifs = remaining;
+        // Dismiss in background
+        for (var j = 0; j < toDismiss.length; j++) {
+            var d = toDismiss[j];
+            if (d && typeof d.dismiss === "function") {
+                d.dismiss();
+            }
+        }
     }
 
     function setLoaderInactive(loader) {
@@ -102,6 +132,10 @@ QtObject {
     }
 
     property list<QtObject> shellObjects: [
+        Theme {
+            id: rootTheme
+        },
+
         SplashScreen {
             id: splashScreen
             theme: rootTheme
@@ -109,10 +143,6 @@ QtObject {
 
         Wallpaper {
             id: wallpaperBackground
-        },
-
-        Theme {
-            id: rootTheme
         },
 
         SysStats {
@@ -176,9 +206,11 @@ QtObject {
                 }
 
                 notification.closed.connect(() => {
-                    var temp = root.activeNotifs.slice();
-                    var idx = temp.indexOf(notification);
+                    var cur = root.activeNotifs;
+                    if (!cur || cur.length === 0) return;
+                    var idx = cur.indexOf(notification);
                     if (idx !== -1) {
+                        var temp = cur.slice();
                         temp.splice(idx, 1);
                         root.activeNotifs = temp;
                     }

@@ -117,11 +117,11 @@ end
 hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }))
 
 -- Special Workspace (Scratchpad)
-hl.bind(mainMod .. " + S", function()
+hl.bind(secondMod .. " + S", function()
 	hl.config({ decoration = { dim_special = 0.65, blur = { special = true } } })
 	hl.dispatch(hl.dsp.workspace.toggle_special("magic"))
 end)
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+hl.bind(secondMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 hl.bind(mainMod .. " + SHIFT + Y", hl.dsp.window.move({ workspace = "+0" }))
 
 -- Scroll Workspaces
@@ -152,6 +152,7 @@ hl.bind(
 hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("~/.config/hypr/scripts/shutdown.sh"))
 
 -- Screenshots
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh -m region"))
 hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh -m window"))
 hl.bind("PRINT", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh -m region"))
 hl.bind(mainMod .. " + SHIFT + PRINT", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh -m output"))

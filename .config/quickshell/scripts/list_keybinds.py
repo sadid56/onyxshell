@@ -1,25 +1,23 @@
-import os
+#!/usr/bin/env python3
 import re
 import json
+import os
 
 def get_readable_action(raw_keys, raw_action):
     act = raw_action.lower()
+    keys_upper = raw_keys.upper()
 
-    if "terminal" in act or "kitty" in act:
-        if "dropdown" in act:
-            return "Toggle Dropdown Terminal", "Applications", ""
-        if "sysmon" in act or "btop" in act or "htop" in act:
-            return "Open System Monitor", "System", "󰾆"
-        return "Open Terminal", "Applications", ""
+    if "terminal" in act:
+        return "Open Terminal", "Apps", ""
+    if "dropdown.sh" in act:
+        return "Toggle Dropdown Terminal", "Apps", ""
+    if "filemanager" in act or "nautilus" in act or "thunar" in act or "dolphin" in act:
+        return "Open File Manager", "Apps", ""
+    if "browser" in act or "zen" in act or "firefox" in act or "chrome" in act or "brave" in act:
+        return "Open Web Browser", "Apps", ""
 
-    if "filemanager" in act or "nautilus" in act or "yazi" in act or "thunar" in act:
-        return "Open File Manager", "Applications", ""
-
-    if "toggledashboard" in act or "togglelauncher" in act or "rofi" in act or "wofi" in act:
-        return "Open App Dashboard", "Applications", "󰍉"
-
-    if "browser" in act or "brave" in act or "chrome" in act or "firefox" in act:
-        return "Open Web Browser", "Applications", ""
+    if "toggledashboard" in act or "rofi" in act or "wofi" in act:
+        return "Toggle App Dashboard", "Launchers", ""
 
     if "hyprlock" in act:
         return "Lock Screen", "System", ""
@@ -57,7 +55,7 @@ def get_readable_action(raw_keys, raw_action):
     if "screenshot.sh" in act or "hyprshot" in act:
         if "window" in act:
             return "Screenshot Active Window", "Screenshot", ""
-        if "region" in act:
+        if "region" in act or "shift + s" in raw_keys.lower():
             return "Screenshot Selected Region", "Screenshot", ""
         if "output" in act:
             return "Screenshot Full Display", "Screenshot", ""
@@ -83,10 +81,10 @@ def get_readable_action(raw_keys, raw_action):
     if "group.toggle" in act:
         return "Toggle Window Grouping", "Window", "󰓩"
 
-    if "workspace.toggle_special" in act or "toggle_special" in act or "dim_special" in act or raw_keys.upper() == "SUPER + S":
+    if "workspace.toggle_special" in act or "toggle_special" in act or "dim_special" in act or keys_upper in ["ALT + S"]:
         return "Toggle Scratchpad (Magic)", "Workspaces", "󰌨"
 
-    if "special:magic" in act:
+    if "special:magic" in act or keys_upper in ["ALT + SHIFT + S"]:
         return "Move Window to Scratchpad", "Workspaces", "󰌨"
 
     if "+0" in act and "workspace" in act:
@@ -101,7 +99,7 @@ def get_readable_action(raw_keys, raw_action):
     if "mouse:272" in raw_keys.lower() or "drag" in act:
         return "Move Window (Drag)", "Window", "󰆂"
 
-    if ("previous" in act and "workspace" in act) or (raw_keys.upper() == "SUPER + TAB"):
+    if ("previous" in act and "workspace" in act) or (keys_upper == "SUPER + TAB"):
         return "Previous Workspace", "Navigation", "󰓩"
 
     if "focus" in act and "direction" in act:

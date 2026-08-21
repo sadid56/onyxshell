@@ -143,10 +143,14 @@ Rectangle {
                         cursorShape: Qt.PointingHandCursor
                         hoverEnabled: true
                         onClicked: {
-                            for (var i = 0; i < groupCardRoot.groupItems.length; i++) {
-                                var it = groupCardRoot.groupItems[i];
-                                if (it && it.rawNotif && typeof it.rawNotif.dismiss === "function") {
-                                    it.rawNotif.dismiss();
+                            if (typeof root !== "undefined" && typeof root.clearNotificationGroup === "function") {
+                                root.clearNotificationGroup(groupCardRoot.groupName);
+                            } else {
+                                for (var i = 0; i < groupCardRoot.groupItems.length; i++) {
+                                    var it = groupCardRoot.groupItems[i];
+                                    if (it && it.rawNotif && typeof it.rawNotif.dismiss === "function") {
+                                        it.rawNotif.dismiss();
+                                    }
                                 }
                             }
                         }

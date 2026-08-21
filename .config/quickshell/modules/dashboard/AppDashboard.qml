@@ -153,15 +153,15 @@ Popup {
                     Quickshell.execDetached(["sh", "-c", "pidof hyprlock || hyprlock -c " + home + "/.config/hypr/config/hyprlock.conf"]);
                 }
             });
-        } else if (action === "suspend") {
+        } else if (action === "logout") {
             askConfirmation({
-                title: "Suspend System",
-                message: "Are you sure you want to put the computer to sleep?",
-                icon: "system/moon.svg",
-                confirmText: "Sleep",
+                title: "Log Out",
+                message: "Are you sure you want to log out of your session?",
+                icon: "system/logout.svg",
+                confirmText: "Log Out",
                 isDanger: false,
                 onConfirm: () => {
-                    Quickshell.execDetached(["systemctl", "suspend"]);
+                    Quickshell.execDetached(["sh", "-c", "hyprctl dispatch exit || loginctl terminate-user $USER || pkill -U $UID -9 -f Hyprland"]);
                 }
             });
         } else if (action === "reboot") {
@@ -207,6 +207,7 @@ Popup {
     DashboardHeader {
         id: header
         theme: dashboardWindow.theme
+        onActionTriggered: action => dashboardWindow.handlePowerAction(action)
         onEscapePressed: dashboardWindow.active = false
         onReturnPressed: {
             var filtered = dashboardWindow.getFilteredApps();
@@ -228,7 +229,6 @@ Popup {
                 dashboardWindow.selectedCategory = "All";
             }
         }
-        onActionTriggered: action => dashboardWindow.handlePowerAction(action)
     }
 
     Rectangle {

@@ -3,13 +3,16 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
+import "../../../core"
 import "../../../components/ui" as UIInputs
 
 Item {
     id: headerRoot
 
-    property var theme: null
+    property var theme
     property alias searchText: searchBox.text
+
+    signal searchChanged(string text)
     signal searchCleared()
     signal actionTriggered(string action)
     signal escapePressed()
@@ -125,12 +128,12 @@ Item {
                 }
             }
 
-            // Suspend Button
+            // Logout Button
             Rectangle {
                 width: 38
                 height: 38
                 radius: 19
-                color: suspendMouse.containsMouse 
+                color: logoutMouse.containsMouse 
                        ? (theme ? theme.getColor("surfaceVariant") : "#33FFFFFF") 
                        : (theme ? Qt.rgba(theme.getColor("surfaceVariant").r, theme.getColor("surfaceVariant").g, theme.getColor("surfaceVariant").b, 0.4) : "#15FFFFFF")
 
@@ -140,7 +143,7 @@ Item {
                     anchors.centerIn: parent
                     width: 16
                     height: 16
-                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/moon.svg")
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/logout.svg")
                     layer.enabled: true
                     layer.effect: MultiEffect {
                         colorization: 1.0
@@ -149,11 +152,11 @@ Item {
                 }
 
                 MouseArea {
-                    id: suspendMouse
+                    id: logoutMouse
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: headerRoot.actionTriggered("suspend")
+                    onClicked: headerRoot.actionTriggered("logout")
                 }
             }
 

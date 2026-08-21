@@ -10,6 +10,7 @@ PanelWindow {
     anchors { top: true; left: true; right: true }
     implicitHeight: 56
     color: "transparent"
+    visible: (typeof root === "undefined" || !root.splashScreen || root.splashScreen.isFadingOut || root.splashScreen.isFinished)
 
     margins {
         top: 0
