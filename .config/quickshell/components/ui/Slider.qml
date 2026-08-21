@@ -11,7 +11,7 @@ Item {
 
     property var theme
     property string title: ""
-    property string icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("brightness.svg")
+    property string icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/brightness.svg")
     property int value: 50
     property int min: 0
     property int max: 100

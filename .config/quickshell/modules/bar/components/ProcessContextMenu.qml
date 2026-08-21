@@ -53,10 +53,10 @@ Rectangle {
 
         Repeater {
             model: [
-                { label: "Kill Process", cmd: "pkill", icon: "dismiss.svg" },
-                { label: "Force Kill", cmd: "pkill-9", icon: "zap.svg" },
-                { label: "Open htop", cmd: "htop", icon: "terminal.svg" },
-                { label: "Copy Name", cmd: "copy", icon: "image-copy.svg" }
+                { label: "Kill Process", cmd: "pkill", icon: "actions/dismiss.svg" },
+                { label: "Force Kill", cmd: "pkill-9", icon: "system/zap.svg" },
+                { label: "Open htop", cmd: "htop", icon: "system/terminal.svg" },
+                { label: "Copy Name", cmd: "copy", icon: "actions/image-copy.svg" }
             ]
 
             delegate: Rectangle {

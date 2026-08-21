@@ -34,7 +34,7 @@ ColumnLayout {
 
     UISliders.Slider {
         theme: quickSlidersRoot.theme
-        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("brightness.svg")
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/brightness.svg")
         value: quickSlidersRoot.brightnessValue
         onMoved: val => {
             quickSlidersRoot.brightnessMoved(val);
@@ -46,7 +46,7 @@ ColumnLayout {
 
     UISliders.Slider {
         theme: quickSlidersRoot.theme
-        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("moon.svg")
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/moon.svg")
         value: quickSlidersRoot.nightLightValue
         onMoved: val => {
             quickSlidersRoot.nightLightMoved(val);

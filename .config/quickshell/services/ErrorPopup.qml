@@ -53,7 +53,7 @@ Popup {
                 Layout.alignment: Qt.AlignVCenter
                 IconImage {
                     anchors.centerIn: parent; width: 16; height: 16
-                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("alert.svg")
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("notifications/alert.svg")
                     layer.enabled: true
                     layer.effect: MultiEffect { colorization: 1.0; colorizationColor: errorWindow.theme.getColor("error") }
                 }
@@ -72,7 +72,7 @@ Popup {
                 Behavior on color { ColorAnimation { duration: 150 } }
                 IconImage {
                     anchors.centerIn: parent; width: 12; height: 12
-                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("dismiss.svg")
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/dismiss.svg")
                     layer.enabled: true
                     layer.effect: MultiEffect { colorization: 1.0; colorizationColor: errorWindow.theme.getColor("outline") }
                 }
@@ -120,7 +120,7 @@ Popup {
                     anchors.centerIn: parent; spacing: 6
                     IconImage {
                         width: 14; height: 14
-                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon(errorWindow.isCopied ? "check.svg" : "image-copy.svg")
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon(errorWindow.isCopied ? "actions/check.svg" : "actions/image-copy.svg")
                         layer.enabled: true
                         layer.effect: MultiEffect { colorization: 1.0; colorizationColor: errorWindow.isCopied ? errorWindow.theme.getColor("primary") : errorWindow.theme.getColor("onSurface") }
                     }

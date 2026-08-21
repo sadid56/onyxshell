@@ -58,6 +58,38 @@ def resolve_icon(name):
         return name
     return icon_cache.get(name, "")
 
+def parse_categories(cat_str):
+    if not cat_str:
+        return ["Utilities"]
+    
+    raw = [c.strip() for c in cat_str.split(";") if c.strip()]
+    cats = set()
+    
+    for c in raw:
+        cl = c.lower()
+        if any(x in cl for x in ["develop", "ide", "debugger", "building", "programming", "code"]):
+            cats.add("Development")
+        elif any(x in cl for x in ["network", "web", "browser", "email", "chat", "irc", "feed", "telephony", "filetransfer"]):
+            cats.add("Internet")
+        elif any(x in cl for x in ["audiovideo", "audio", "video", "player", "recorder", "music", "tv", "mixer", "sound"]):
+            cats.add("Multimedia")
+        elif any(x in cl for x in ["graphics", "2dgraphics", "vector", "raster", "photo", "image", "viewer", "paint", "draw"]):
+            cats.add("Graphics")
+        elif any(x in cl for x in ["office", "word", "spreadsheet", "presentation", "publish", "finance", "calendar", "contact"]):
+            cats.add("Office")
+        elif any(x in cl for x in ["game", "arcade", "puzzle", "action", "simulator"]):
+            cats.add("Games")
+        elif any(x in cl for x in ["setting", "preferences", "control", "hardware", "package"]):
+            cats.add("Settings")
+        elif any(x in cl for x in ["system", "emulator", "terminal", "filemanager", "monitor", "security", "core"]):
+            cats.add("System")
+        elif any(x in cl for x in ["utility", "accessories", "archive", "compression", "calc", "clock", "texteditor", "editor"]):
+            cats.add("Utilities")
+            
+    if not cats:
+        cats.add("Utilities")
+    return sorted(list(cats))
+
 apps = []
 seen_names = set()
 
@@ -80,6 +112,7 @@ for d in dirs:
                 exec_match = re.search(r"^Exec=(.+)$", content, re.MULTILINE)
                 icon_match = re.search(r"^Icon=(.+)$", content, re.MULTILINE)
                 comment_match = re.search(r"^Comment=(.+)$", content, re.MULTILINE)
+                cat_match = re.search(r"^Categories=(.+)$", content, re.MULTILINE)
                 nodisplay_match = re.search(r"^NoDisplay=(true|1)$", content, re.MULTILINE | re.IGNORECASE)
 
                 if name_match and exec_match and not nodisplay_match:
@@ -94,18 +127,22 @@ for d in dirs:
                     icon_name = icon_match.group(1).strip() if icon_match else "application-x-executable"
                     icon_path = resolve_icon(icon_name)
 
-                    if not icon_path:
+                    if not icon_path or not os.path.exists(icon_path):
                         icon_path = resolve_icon("application-x-executable")
-                    if not icon_path:
+                    if not icon_path or not os.path.exists(icon_path):
                         icon_path = resolve_icon("system-run")
+                    if not icon_path or not os.path.exists(icon_path):
+                        icon_path = ""
 
                     comment = comment_match.group(1).strip() if comment_match else ""
+                    categories = parse_categories(cat_match.group(1).strip() if cat_match else "")
 
                     apps.append({
                         "name": name,
                         "exec": exec_cmd,
                         "icon": icon_path,
-                        "comment": comment
+                        "comment": comment,
+                        "categories": categories
                     })
         except Exception:
             pass

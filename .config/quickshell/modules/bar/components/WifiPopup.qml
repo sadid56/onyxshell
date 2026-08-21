@@ -148,7 +148,7 @@ Popup {
             IconImage {
                 width: 16
                 height: 16
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("arrow-clockwise-filled.svg")
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/arrow-clockwise-filled.svg")
                 layer.enabled: true
                 layer.effect: MultiEffect { colorization: 1.0; colorizationColor: wifiWindow.theme.getColor("primary") }
                 RotationAnimation on rotation { running: wifiWindow.isScanning; from: 0; to: 360; duration: 1000; loops: Animation.Infinite }
@@ -167,7 +167,7 @@ Popup {
             IconImage {
                 width: 32
                 height: 32
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("wifi-off.svg")
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("wifi/wifi-off.svg")
                 Layout.alignment: Qt.AlignHCenter
                 layer.enabled: true
                 layer.effect: MultiEffect { colorization: 1.0; colorizationColor: wifiWindow.theme.getColor("outline") }

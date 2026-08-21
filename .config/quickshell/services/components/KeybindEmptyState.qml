@@ -26,7 +26,7 @@ ColumnLayout {
             anchors.centerIn: parent
             width: 24
             height: 24
-            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("keyboard.svg")
+            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/keyboard.svg")
             layer.enabled: true
             layer.effect: MultiEffect {
                 colorization: 1.0

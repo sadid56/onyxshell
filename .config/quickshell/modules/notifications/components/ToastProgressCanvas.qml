@@ -4,6 +4,7 @@ Canvas {
     id: progressBarCanvas
     anchors.fill: parent
     antialiasing: true
+    renderTarget: Canvas.Image
 
     property var theme
     property real progress: 0.0
@@ -47,11 +48,13 @@ Canvas {
         }
     }
 
-    NumberAnimation on progress {
+    NumberAnimation {
         id: progressAnim
+        target: progressBarCanvas
+        property: "progress"
         from: 1.0
         to: 0.0
-        duration: 3500
+        duration: 4000
         running: false
         easing.type: Easing.Linear
     }

@@ -30,6 +30,11 @@ PanelWindow {
     property var toggleMedia
     property int notifCount: 0
 
+    function getDistroX() {
+        var pos = distroLogoItem.mapToItem(null, 0, 0);
+        return pos.x + distroLogoItem.width / 2;
+    }
+
     function getClockX() {
         var pos = clockItem.mapToItem(null, 0, 0);
         return pos.x + clockItem.width / 2;
@@ -77,12 +82,20 @@ PanelWindow {
                     MouseArea {
                         anchors.fill: parent
                         hoverEnabled: true
-                        onClicked: barWindow.toggleLauncher()
-                        onEntered: distroLogoItem.scale = 1.2
-                        onExited: distroLogoItem.scale = 1.0
-                    }
-                    Behavior on scale {
-                        NumberAnimation { duration: 200; easing.type: Easing.OutBack }
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: {
+                            root.stopLoaderTimerAndActivate(dashboardLoader, barWindow.getDistroX());
+                            root.setLoaderInactive(calendarLoader);
+                            root.setLoaderInactive(notifsLoader);
+                            root.setLoaderInactive(wifiLoader);
+                            root.setLoaderInactive(mediaLoader);
+                        }
+                        onExited: {
+                            root.restartLoaderTimer(dashboardLoader);
+                        }
+                        onClicked: {
+                            root.toggleLoaderActive(dashboardLoader, barWindow.getDistroX());
+                        }
                     }
                 }
 

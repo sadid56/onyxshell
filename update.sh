@@ -62,6 +62,7 @@ done
 # Clean cache files
 find "$REPO_DIR" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 find "$REPO_DIR" -name ".DS_Store" -delete 2>/dev/null || true
+rm -f "$REPO_DIR/.config/quickshell/pinned_clips.json" 2>/dev/null || true
 
 # Git operations
 cd "$REPO_DIR"

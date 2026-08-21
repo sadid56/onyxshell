@@ -1,13 +1,22 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
+import Quickshell
 import Quickshell.Widgets
 import "../../../components/ui" as UI
 
 Rectangle {
     id: cardItem
-    width: parent ? parent.width : 400
-    height: Math.max(68, notifMainCol.implicitHeight + 24)
+    width: parent ? parent.width : 360
+    Layout.fillWidth: true
+    implicitHeight: notifMainCol.implicitHeight + 20
+    Layout.preferredHeight: implicitHeight
+    height: implicitHeight
+    radius: 14
+    color: cardItem.theme ? cardItem.theme.getColor("surface") : "#1e1e1e"
+    border.width: 0
+    opacity: 1.0
+    clip: true
 
     property var theme
     property var notifItem: modelData
@@ -18,26 +27,12 @@ Rectangle {
 
     signal dismissRequested()
     signal toggleExpandedRequested()
+    onToggleExpandedRequested: cardItem.expanded = !cardItem.expanded
 
     readonly property string notifId: notifItem ? (notifItem.notifId || "") : ""
     readonly property string appName: notifItem ? (notifItem.appName || "") : ""
     readonly property string summaryText: notifItem ? (notifItem.summary || "Notification") : "Notification"
     readonly property string bodyText: notifItem ? (notifItem.body || "") : ""
-
-    Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-
-    Timer {
-        id: expandScrollTimer
-        interval: 40
-        repeat: false
-        onTriggered: {
-            if (cardItem.expanded && parentList && typeof parentList.ensureVisible === "function") {
-                parentList.ensureVisible(cardItem.y, Math.max(160, notifMainCol.implicitHeight + 24));
-            }
-        }
-    }
-
-    onExpandedChanged: { if (expanded) expandScrollTimer.restart(); }
 
     function getNotifIcon() {
         if (!notifItem) return "file://" + shellConfig.defaultAppIcon;
@@ -46,64 +41,52 @@ Rectangle {
         return ic.indexOf("/") === 0 ? ("file://" + ic) : ic;
     }
 
+    function redirectToApp() {
+        var raw = notifItem ? notifItem.rawNotif : null;
+        if (raw) {
+            var invoked = false;
+            if (raw.actions && raw.actions.length > 0) {
+                for (var i = 0; i < raw.actions.length; i++) {
+                    var act = raw.actions[i];
+                    if (act && (act.id === "default" || act.id === "0" || act.id === "default-action" || act.id === "open" || act.text === "Open" || act.text === "Default")) {
+                        try { act.invoke(); invoked = true; } catch(e) {}
+                        break;
+                    }
+                }
+                if (!invoked && raw.actions[0]) {
+                    try { raw.actions[0].invoke(); invoked = true; } catch(e) {}
+                }
+            }
+            if (!invoked) {
+                if (typeof raw.invokeDefault === "function") {
+                    try { raw.invokeDefault(); } catch(e) {}
+                } else if (typeof raw.invoke === "function") {
+                    try { raw.invoke("default"); } catch(e) {}
+                }
+            }
+        }
+
+        var app = appName || "";
+        var summary = summaryText || "";
+        var body = bodyText || "";
+        var scriptPath = (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getScript("focus_app.sh");
+        Quickshell.execDetached([scriptPath, app, summary, body]);
+    }
+
     function startDismiss() {
         if (!dismissAnim.running) dismissAnim.start();
     }
 
-    radius: 16
-    color: cardItem.theme.getColor("surfaceVariant")
-    border.width: 0
-    opacity: Math.max(0.0, 1.0 - Math.abs(cardTranslate.x) / (cardItem.width * 0.7))
-
     transform: Translate {
         id: cardTranslate
         x: 0
-        y: 14
-    }
-
-    Component.onCompleted: entranceAnim.start()
-
-    NumberAnimation {
-        id: entranceAnim
-        target: cardTranslate
-        property: "y"
-        to: 0
-        duration: 220
-        easing.type: Easing.OutBack
-        easing.overshoot: 1.3
-    }
-
-    ColumnLayout {
-        id: notifMainCol
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 12
-        spacing: 10
-
-        NotifHeaderContent {
-            cardItem: cardItem
-            theme: cardItem.theme
-        }
-
-        NotifActionsRow {
-            cardItem: cardItem
-            theme: cardItem.theme
-        }
-    }
-
-    Timer {
-        id: feedbackTimer
-        interval: 1500
-        onTriggered: cardItem.copiedFeedback = false
     }
 
     MouseArea {
         id: dragArea
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        z: -1
-
+        z: 0
         property real startX: 0
         property real startY: 0
         property bool isDragging: false
@@ -115,21 +98,28 @@ Rectangle {
         }
 
         onPositionChanged: mouse => {
-            var deltaX = mouse.x - startX;
-            var deltaY = mouse.y - startY;
-            if (!isDragging && Math.abs(deltaX) > 12 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
-                isDragging = true;
-                if (cardItem.parentList) cardItem.parentList.interactive = false;
+            if (mouse.buttons & Qt.LeftButton) {
+                var deltaX = mouse.x - startX;
+                var deltaY = mouse.y - startY;
+                if (!isDragging && Math.abs(deltaX) > 8 && Math.abs(deltaX) > Math.abs(deltaY)) {
+                    isDragging = true;
+                    if (cardItem.parentList) cardItem.parentList.interactive = false;
+                }
+                if (isDragging) {
+                    cardTranslate.x = deltaX > 0 ? deltaX : 0;
+                    cardItem.opacity = Math.max(0.0, 1.0 - cardTranslate.x / (cardItem.width * 0.75));
+                }
             }
-            if (isDragging) cardTranslate.x = deltaX > 0 ? deltaX : 0;
         }
 
         onReleased: mouse => {
             if (isDragging) {
                 isDragging = false;
                 if (cardItem.parentList) cardItem.parentList.interactive = true;
-                if (cardTranslate.x > (cardItem.width * 0.30)) cardItem.startDismiss();
+                if (cardTranslate.x > 60) cardItem.startDismiss();
                 else snapBackAnim.start();
+            } else if (Math.abs(cardTranslate.x) < 5) {
+                cardItem.redirectToApp();
             }
         }
 
@@ -142,19 +132,44 @@ Rectangle {
         }
     }
 
-    NumberAnimation {
+    ColumnLayout {
+        id: notifMainCol
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 10
+        spacing: 8
+        z: 1
+
+        NotifHeaderContent {
+            id: headerContent
+            cardItem: cardItem
+            theme: cardItem.theme
+        }
+
+        NotifActionsRow {
+            cardItem: cardItem
+            theme: cardItem.theme
+            z: 2
+        }
+    }
+
+    Timer {
+        id: feedbackTimer
+        interval: 1500
+        onTriggered: cardItem.copiedFeedback = false
+    }
+
+    ParallelAnimation {
         id: snapBackAnim
-        target: cardTranslate
-        property: "x"
-        to: 0
-        duration: 180
-        easing.type: Easing.OutCubic
+        NumberAnimation { target: cardTranslate; property: "x"; to: 0; duration: 180; easing.type: Easing.OutCubic }
+        NumberAnimation { target: cardItem; property: "opacity"; to: 1.0; duration: 180; easing.type: Easing.OutCubic }
     }
 
     ParallelAnimation {
         id: dismissAnim
-        NumberAnimation { target: cardTranslate; property: "x"; to: cardItem.width + 40; duration: 180; easing.type: Easing.OutQuad }
-        NumberAnimation { target: cardItem; property: "opacity"; to: 0.0; duration: 160; easing.type: Easing.OutQuad }
+        NumberAnimation { target: cardTranslate; property: "x"; to: cardItem.width + 30; duration: 150; easing.type: Easing.OutQuad }
+        NumberAnimation { target: cardItem; property: "opacity"; to: 0.0; duration: 120; easing.type: Easing.OutQuad }
         onStopped: cardItem.dismissRequested()
     }
 }

@@ -6,7 +6,7 @@ Canvas {
     width: cornerRadius
     height: cornerRadius
     antialiasing: true
-    renderTarget: Canvas.FramebufferObject
+    renderTarget: Canvas.Image
 
     property bool alignRight: false
     property bool alignBottom: false

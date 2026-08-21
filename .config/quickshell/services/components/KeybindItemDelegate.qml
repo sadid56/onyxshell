@@ -51,7 +51,7 @@ Item {
                 anchors.centerIn: parent
                 width: 14
                 height: 14
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("keyboard.svg")
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/keyboard.svg")
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     colorization: 1.0

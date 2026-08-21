@@ -14,7 +14,7 @@ QtObject {
     readonly property string distrosDir: assetsDir + "/distros"
     readonly property string defaultWallpaper: assetsDir + "/images/default-wallpaper.png"
 
-    readonly property string defaultAppIcon: iconsDir + "/default-app.svg"
+    readonly property string defaultAppIcon: iconsDir + "/system/default-app.svg"
 
     readonly property int cornerRadius: parseInt(Quickshell.env("ROUNDED")) || 16
 
@@ -37,8 +37,9 @@ QtObject {
         return scriptsDir + "/" + scriptName;
     }
 
-    function getIcon(iconName) {
-        return "file://" + iconsDir + "/" + iconName;
+    function getIcon(iconPath) {
+        if (!iconPath) return "";
+        return "file://" + iconsDir + "/" + iconPath;
     }
 
     function getDistroIcon(distroId) {
@@ -47,59 +48,59 @@ QtObject {
     }
 
     function getBatteryIcon(percentage, isCharging) {
-        if (isCharging) return getIcon("battery-charge.svg");
-        if (percentage >= 95) return getIcon("battery-full.svg");
-        if (percentage >= 85) return getIcon("battery-9.svg");
-        if (percentage >= 75) return getIcon("battery-8.svg");
-        if (percentage >= 65) return getIcon("battery-7.svg");
-        if (percentage >= 55) return getIcon("battery-6.svg");
-        if (percentage >= 45) return getIcon("battery-5.svg");
-        if (percentage >= 35) return getIcon("battery-4.svg");
-        if (percentage >= 25) return getIcon("battery-3.svg");
-        if (percentage >= 15) return getIcon("battery-2.svg");
-        if (percentage >= 8)  return getIcon("battery-1.svg");
-        return getIcon("battery-0.svg");
+        if (isCharging) return getIcon("battery/battery-charge.svg");
+        if (percentage >= 95) return getIcon("battery/battery-full.svg");
+        if (percentage >= 85) return getIcon("battery/battery-9.svg");
+        if (percentage >= 75) return getIcon("battery/battery-8.svg");
+        if (percentage >= 65) return getIcon("battery/battery-7.svg");
+        if (percentage >= 55) return getIcon("battery/battery-6.svg");
+        if (percentage >= 45) return getIcon("battery/battery-5.svg");
+        if (percentage >= 35) return getIcon("battery/battery-4.svg");
+        if (percentage >= 25) return getIcon("battery/battery-3.svg");
+        if (percentage >= 15) return getIcon("battery/battery-2.svg");
+        if (percentage >= 8)  return getIcon("battery/battery-1.svg");
+        return getIcon("battery/battery-0.svg");
     }
 
     function getWifiIcon(signal, isConnected, isEnabled) {
-        if (isEnabled === false) return getIcon("wifi-off.svg");
-        if (isConnected === false || signal < 0) return getIcon("wifi-warning.svg");
-        if (signal >= 75) return getIcon("wifi-1.svg");
-        if (signal >= 50) return getIcon("wifi-2.svg");
-        if (signal >= 25) return getIcon("wifi-3.svg");
-        return getIcon("wifi-4.svg");
+        if (isEnabled === false) return getIcon("wifi/wifi-off.svg");
+        if (isConnected === false || signal < 0) return getIcon("wifi/wifi-warning.svg");
+        if (signal >= 75) return getIcon("wifi/wifi-1.svg");
+        if (signal >= 50) return getIcon("wifi/wifi-2.svg");
+        if (signal >= 25) return getIcon("wifi/wifi-3.svg");
+        return getIcon("wifi/wifi-4.svg");
     }
 
     function getNotificationIcon(isDnd, hasNotifs) {
-        if (isDnd) return getIcon("bell-off.svg");
-        if (hasNotifs) return getIcon("bell-dot.svg");
-        return getIcon("bell.svg");
+        if (isDnd) return getIcon("notifications/bell-off.svg");
+        if (hasNotifs) return getIcon("notifications/bell-dot.svg");
+        return getIcon("notifications/bell.svg");
     }
 
     function getCpuIcon() {
-        return getIcon("cpu.svg");
+        return getIcon("system/cpu.svg");
     }
 
     function getMemoryIcon() {
-        return getIcon("memory.svg");
+        return getIcon("system/memory.svg");
     }
 
     function getSwapIcon() {
-        return getIcon("swap.svg");
+        return getIcon("system/swap.svg");
     }
 
     function getBluetoothIcon(enabled) {
-        if (!enabled) return getIcon("bluetooth-disabled.svg");
-        return getIcon("bluetooth.svg");
+        if (!enabled) return getIcon("bluetooth/bluetooth-disabled.svg");
+        return getIcon("bluetooth/bluetooth.svg");
     }
 
     function getSpeakerIcon(isMuted) {
-        if (isMuted) return getIcon("speaker-off.svg");
-        return getIcon("speaker.svg");
+        if (isMuted) return getIcon("audio/speaker-off.svg");
+        return getIcon("audio/speaker.svg");
     }
 
     function getMicIcon(isMuted) {
-        if (isMuted) return getIcon("mic-off.svg");
-        return getIcon("mic.svg");
+        if (isMuted) return getIcon("audio/mic-off.svg");
+        return getIcon("audio/mic.svg");
     }
 }

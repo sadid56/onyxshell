@@ -13,8 +13,13 @@ QtObject {
         target: "shell"
 
         function toggleLauncher(): void {
+            toggleDashboard();
+        }
+
+        function toggleDashboard(): void {
             if (ipcServiceRoot.popupManager) {
-                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.launcherLoader);
+                var distroX = ipcServiceRoot.statusBar ? ipcServiceRoot.statusBar.getDistroX() : undefined;
+                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.dashboardLoader, distroX);
             }
         }
 

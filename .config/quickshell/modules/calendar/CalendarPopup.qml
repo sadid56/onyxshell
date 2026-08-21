@@ -171,7 +171,7 @@ Popup {
                 anchors.centerIn: parent
                 width: 14
                 height: 14
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("chevron-left.svg")
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/chevron-left.svg")
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     colorization: 1.0
@@ -204,7 +204,7 @@ Popup {
                 anchors.centerIn: parent
                 width: 14
                 height: 14
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("chevron-right.svg")
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/chevron-right.svg")
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     colorization: 1.0

@@ -62,7 +62,7 @@ ColumnLayout {
         IconImage {
             width: 32
             height: 32
-            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("alert.svg")
+            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("notifications/alert.svg")
             Layout.alignment: Qt.AlignHCenter
             layer.enabled: true
             layer.effect: MultiEffect {

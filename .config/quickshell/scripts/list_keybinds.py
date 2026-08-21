@@ -15,8 +15,8 @@ def get_readable_action(raw_keys, raw_action):
     if "filemanager" in act or "nautilus" in act or "yazi" in act or "thunar" in act:
         return "Open File Manager", "Applications", ""
 
-    if "togglelauncher" in act or "rofi" in act or "wofi" in act:
-        return "Open App Launcher", "Applications", "󰍉"
+    if "toggledashboard" in act or "togglelauncher" in act or "rofi" in act or "wofi" in act:
+        return "Open App Dashboard", "Applications", "󰍉"
 
     if "browser" in act or "brave" in act or "chrome" in act or "firefox" in act:
         return "Open Web Browser", "Applications", ""
@@ -83,7 +83,7 @@ def get_readable_action(raw_keys, raw_action):
     if "group.toggle" in act:
         return "Toggle Window Grouping", "Window", "󰓩"
 
-    if "workspace.toggle_special" in act:
+    if "workspace.toggle_special" in act or "toggle_special" in act or "dim_special" in act or raw_keys.upper() == "SUPER + S":
         return "Toggle Scratchpad (Magic)", "Workspaces", "󰌨"
 
     if "special:magic" in act:
@@ -91,6 +91,18 @@ def get_readable_action(raw_keys, raw_action):
 
     if "+0" in act and "workspace" in act:
         return "Bring Window from Scratchpad", "Workspaces", "󰌨"
+
+    if "mouse_down" in raw_keys.lower():
+        return "Next Workspace (Scroll)", "Workspaces", "󰎤"
+
+    if "mouse_up" in raw_keys.lower():
+        return "Previous Workspace (Scroll)", "Workspaces", "󰎤"
+
+    if "mouse:272" in raw_keys.lower() or "drag" in act:
+        return "Move Window (Drag)", "Window", "󰆂"
+
+    if ("previous" in act and "workspace" in act) or (raw_keys.upper() == "SUPER + TAB"):
+        return "Previous Workspace", "Navigation", "󰓩"
 
     if "focus" in act and "direction" in act:
         if '"l"' in act or "'l'" in act: return "Focus Window Left", "Navigation", ""

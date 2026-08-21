@@ -6,7 +6,7 @@ ListView {
     id: appNotifsList
     Layout.fillWidth: true
     Layout.fillHeight: true
-    spacing: 8
+    spacing: 10
     clip: true
     boundsBehavior: Flickable.StopAtBounds
     flickDeceleration: 1600
@@ -14,9 +14,72 @@ ListView {
 
     property var theme
     property var activeNotifsModel: []
-    property string expandedNotifId: ""
+    property var expandedGroupsMap: ({})
 
-    ListModelUtils { id: modelUtils }
+    function isGroupExpanded(gName) {
+        if (expandedGroupsMap && expandedGroupsMap[gName] !== undefined) {
+            return expandedGroupsMap[gName];
+        }
+        return false;
+    }
+
+    function setGroupExpanded(gName, exp) {
+        var m = Object.assign({}, expandedGroupsMap);
+        m[gName] = exp;
+        expandedGroupsMap = m;
+    }
+
+    readonly property var groupedNotifs: {
+        var source = activeNotifsModel || [];
+        var groupsMap = {};
+        var groupOrder = [];
+
+        for (var i = 0; i < source.length; i++) {
+            var n = source[i];
+            if (!n) continue;
+            var notifObj = n.trackedNotification || n;
+            var app = notifObj.appName || notifObj.applicationName || "Other";
+            var icon = notifObj.appIcon || notifObj.icon || "";
+            var uid = notifObj._uid || (notifObj.id ? String(notifObj.id) : (notifObj.summary + "_" + notifObj.body + "_" + i));
+
+            if (!groupsMap[app]) {
+                groupsMap[app] = {
+                    "appName": app,
+                    "appIcon": icon,
+                    "items": []
+                };
+                groupOrder.push(app);
+            }
+            if (icon && !groupsMap[app].appIcon) {
+                groupsMap[app].appIcon = icon;
+            }
+
+            groupsMap[app].items.push({
+                "notifId": uid,
+                "summary": notifObj.summary || "Notification",
+                "body": notifObj.body || "",
+                "appName": app,
+                "appIcon": icon,
+                "rawNotif": notifObj
+            });
+        }
+
+        var res = [];
+        for (var j = 0; j < groupOrder.length; j++) {
+            var gName = groupOrder[j];
+            var grp = groupsMap[gName];
+            res.push({
+                "groupId": gName,
+                "appName": grp.appName,
+                "appIcon": grp.appIcon,
+                "count": grp.items.length,
+                "items": grp.items
+            });
+        }
+        return res;
+    }
+
+    model: groupedNotifs
 
     WheelHandler {
         id: wheelHandler
@@ -31,21 +94,6 @@ ListView {
         }
     }
 
-    function ensureVisible(itemY, itemHeight) {
-        var cardBottom = itemY + itemHeight + 60;
-        var viewBottom = appNotifsList.contentY + appNotifsList.height;
-
-        if (cardBottom > viewBottom) {
-            smoothScrollAnim.stop();
-            smoothScrollAnim.to = Math.max(0, appNotifsList.contentY + (cardBottom - viewBottom));
-            smoothScrollAnim.start();
-        } else if (itemY < appNotifsList.contentY) {
-            smoothScrollAnim.stop();
-            smoothScrollAnim.to = Math.max(0, itemY - 12);
-            smoothScrollAnim.start();
-        }
-    }
-
     NumberAnimation {
         id: smoothScrollAnim
         target: appNotifsList
@@ -54,66 +102,9 @@ ListView {
         easing.type: Easing.OutCubic
     }
 
-    add: Transition {
-        ParallelAnimation {
-            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 200; easing.type: Easing.OutQuad }
-            NumberAnimation { property: "scale"; from: 0.95; to: 1.0; duration: 220; easing.type: Easing.OutCubic }
-        }
-    }
-
-    remove: Transition {
-        ParallelAnimation {
-            NumberAnimation { property: "opacity"; to: 0.0; duration: 160; easing.type: Easing.OutQuad }
-            NumberAnimation { property: "scale"; to: 0.95; duration: 160; easing.type: Easing.OutCubic }
-        }
-    }
-
-    move: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
-    moveDisplaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
-    displaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
-
-    ListModel { id: dynamicNotifModel }
-    model: dynamicNotifModel
-
-    function buildSerializableNotifs(source) {
-        if (!source) return [];
-        var res = [];
-        for (var i = 0; i < source.length; i++) {
-            var n = source[i];
-            if (!n) continue;
-            var notifObj = n.trackedNotification || n;
-            var uid = notifObj._uid || (notifObj.id ? String(notifObj.id) : (notifObj.summary + "_" + notifObj.body + "_" + i));
-            res.push({
-                "notifId": uid,
-                "summary": notifObj.summary || "Notification",
-                "body": notifObj.body || "",
-                "appName": notifObj.appName || notifObj.applicationName || "",
-                "appIcon": notifObj.appIcon || notifObj.icon || "",
-                "rawNotif": notifObj
-            });
-        }
-        return res;
-    }
-
-    onActiveNotifsModelChanged: {
-        modelUtils.syncListModel(dynamicNotifModel, buildSerializableNotifs(activeNotifsModel), "notifId", 50);
-    }
-
-    Component.onCompleted: {
-        modelUtils.syncListModel(dynamicNotifModel, buildSerializableNotifs(activeNotifsModel), "notifId", 50);
-    }
-
-    delegate: NotifCard {
+    delegate: NotifGroupCard {
         theme: appNotifsList.theme
-        notifItem: model
+        groupData: modelData
         parentList: appNotifsList
-        expanded: appNotifsList.expandedNotifId === model.notifId
-        onToggleExpandedRequested: {
-            appNotifsList.expandedNotifId = (appNotifsList.expandedNotifId === model.notifId) ? "" : model.notifId;
-        }
-        onDismissRequested: {
-            if (appNotifsList.expandedNotifId === model.notifId) appNotifsList.expandedNotifId = "";
-            if (model.rawNotif && typeof model.rawNotif.dismiss === "function") model.rawNotif.dismiss();
-        }
     }
 }

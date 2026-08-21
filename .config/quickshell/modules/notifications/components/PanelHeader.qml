@@ -13,13 +13,11 @@ RowLayout {
     property string uptimeStr: "Up 0m"
     property string currentProfile: "performance"
     property bool powerProfileExpanded: false
-    property bool powerMenuExpanded: false
 
     property var hyprpickerProc
     property var screenshotProc
 
     signal togglePowerProfile()
-    signal togglePowerMenu()
     signal closeRequested()
 
     RowLayout {
@@ -29,7 +27,7 @@ RowLayout {
         IconImage {
             width: 17
             height: 17
-            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("clock.svg")
+            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/clock.svg")
             Layout.alignment: Qt.AlignVCenter
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -50,26 +48,10 @@ RowLayout {
 
     Item { Layout.fillWidth: true }
 
+    // Color Picker Button
     UI.Button {
         theme: headerRoot.theme
-        icon: {
-            var cfg = (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig);
-            if (headerRoot.currentProfile === "performance") return cfg.getIcon("zap.svg");
-            if (headerRoot.currentProfile === "power-saver") return cfg.getIcon("leaf-two.svg");
-            return cfg.getIcon("memory.svg");
-        }
-        text: {
-            if (headerRoot.currentProfile === "performance") return "Performance";
-            if (headerRoot.currentProfile === "power-saver") return "Power Saver";
-            return "Balanced";
-        }
-        active: headerRoot.powerProfileExpanded
-        onClicked: headerRoot.togglePowerProfile()
-    }
-
-    UI.Button {
-        theme: headerRoot.theme
-        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("eyedropper-filled.svg")
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/eyedropper-filled.svg")
         onClicked: {
             if (headerRoot.hyprpickerProc) {
                 headerRoot.hyprpickerProc.running = false;
@@ -78,9 +60,10 @@ RowLayout {
         }
     }
 
+    // Screenshot Button
     UI.Button {
         theme: headerRoot.theme
-        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("crop.svg")
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/crop.svg")
         onClicked: {
             headerRoot.closeRequested();
             if (headerRoot.screenshotProc) {
@@ -90,10 +73,16 @@ RowLayout {
         }
     }
 
+    // Power Profile Icon Button (Far Right)
     UI.Button {
         theme: headerRoot.theme
-        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("power.svg")
-        active: headerRoot.powerMenuExpanded
-        onClicked: headerRoot.togglePowerMenu()
+        icon: {
+            var cfg = (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig);
+            if (headerRoot.currentProfile === "performance") return cfg.getIcon("system/zap.svg");
+            if (headerRoot.currentProfile === "power-saver") return cfg.getIcon("system/leaf-two.svg");
+            return cfg.getIcon("system/memory.svg");
+        }
+        active: headerRoot.powerProfileExpanded
+        onClicked: headerRoot.togglePowerProfile()
     }
 }

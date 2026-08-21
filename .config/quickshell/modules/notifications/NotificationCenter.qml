@@ -18,7 +18,6 @@ Popup {
     property int micValue: 50
     property int brightnessValue: 50
     property int nightLightValue: 0
-    property bool powerMenuExpanded: false
     property bool powerProfileExpanded: false
     property bool micExpanded: false
     property string currentProfile: "performance"
@@ -65,7 +64,6 @@ Popup {
         if (active) {
             statsService.fetch();
         } else {
-            notifWindow.powerMenuExpanded = false;
             notifWindow.powerProfileExpanded = false;
         }
     }
@@ -118,16 +116,10 @@ Popup {
         uptimeStr: notifWindow.uptimeStr
         currentProfile: notifWindow.currentProfile
         powerProfileExpanded: notifWindow.powerProfileExpanded
-        powerMenuExpanded: notifWindow.powerMenuExpanded
         hyprpickerProc: hyprpickerProc
         screenshotProc: screenshotProc
         onTogglePowerProfile: {
             notifWindow.powerProfileExpanded = !notifWindow.powerProfileExpanded;
-            if (notifWindow.powerProfileExpanded) notifWindow.powerMenuExpanded = false;
-        }
-        onTogglePowerMenu: {
-            notifWindow.powerMenuExpanded = !notifWindow.powerMenuExpanded;
-            if (notifWindow.powerMenuExpanded) notifWindow.powerProfileExpanded = false;
         }
         onCloseRequested: notifWindow.active = false
     }
@@ -137,11 +129,6 @@ Popup {
         currentProfile: notifWindow.currentProfile
         setProfileProc: setProfileProc
         onProfileSelected: profileId => notifWindow.currentProfile = profileId
-    }
-    PowerMenu {
-        theme: notifWindow.theme
-        expanded: notifWindow.powerMenuExpanded
-        onClosed: notifWindow.active = false
     }
     QuickSliders {
         theme: notifWindow.theme

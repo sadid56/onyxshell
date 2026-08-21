@@ -19,7 +19,7 @@ Rectangle {
     property var theme
     property alias text: textInput.text
     property string placeholder: "Search..."
-    property string icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("search.svg")
+    property string icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/search.svg")
     property int echoMode: TextInput.Normal
     property bool clearButtonEnabled: true
     property alias textInput: textInput
@@ -49,7 +49,7 @@ Rectangle {
         IconImage {
             width: 16
             height: 16
-            source: inputRoot.icon.length > 2 ? inputRoot.icon : (typeof shellConfig !== "undefined" ? shellConfig.getIcon("search.svg") : "")
+            source: inputRoot.icon.length > 2 ? inputRoot.icon : (typeof shellConfig !== "undefined" ? shellConfig.getIcon("actions/search.svg") : "")
             visible: inputRoot.icon !== "" && inputRoot.icon.length > 2
             Layout.alignment: Qt.AlignVCenter
             layer.enabled: true
@@ -118,7 +118,7 @@ Rectangle {
                 anchors.centerIn: parent
                 width: 12
                 height: 12
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("dismiss.svg")
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/dismiss.svg")
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     colorization: 1.0

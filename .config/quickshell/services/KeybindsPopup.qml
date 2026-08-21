@@ -6,7 +6,6 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Wayland
 import Quickshell.Io
-import "../modules/launcher/components"
 import "../components/ui" as UIInputs
 import "./components"
 
@@ -115,7 +114,7 @@ PanelWindow {
                     spacing: 8
                     IconImage {
                         width: 20; height: 20
-                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("keyboard.svg")
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/keyboard.svg")
                         layer.enabled: true
                         layer.effect: MultiEffect { colorization: 1.0; colorizationColor: keybindsWindow.theme ? keybindsWindow.theme.getColor("primary") : "#ffb3b4" }
                     }
@@ -148,7 +147,7 @@ PanelWindow {
                     Behavior on color { ColorAnimation { duration: 140 } }
                     IconImage {
                         anchors.centerIn: parent; width: 14; height: 14
-                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("dismiss.svg")
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/dismiss.svg")
                         layer.enabled: true
                         layer.effect: MultiEffect { colorization: 1.0; colorizationColor: keybindsWindow.theme ? keybindsWindow.theme.getColor("onSurfaceVariant") : "#c4c5d0" }
                     }
@@ -161,7 +160,7 @@ PanelWindow {
                 Layout.fillWidth: true
                 theme: keybindsWindow.theme
                 placeholder: "Search shortcuts by key or action..."
-                icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("search.svg")
+                icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/search.svg")
                 onTextChanged: keybindsWindow.searchQuery = text
             }
 

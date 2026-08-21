@@ -14,7 +14,7 @@ PanelWindow {
     color: "transparent"
 
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: active ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
     exclusiveZone: 0
 
     property bool active: false
@@ -68,18 +68,6 @@ PanelWindow {
         clientsProc.running = true;
     }
 
-    function focusCurrentTarget() {
-        if (selectedIndex >= 0 && selectedIndex < clientsList.length) {
-            var target = clientsList[selectedIndex];
-            if (target && target.address) {
-                Quickshell.execDetached([
-                    "hyprctl", "eval",
-                    "hl.dispatch(hl.dsp.focus({ window = 'address:" + target.address + "' }))"
-                ]);
-            }
-        }
-    }
-
     function nextWindow() {
         if (clientsList.length === 0) return;
         selectedIndex = (selectedIndex + 1) % clientsList.length;
@@ -102,6 +90,10 @@ PanelWindow {
         }
     }
 
+    function cancelAndClose() {
+        altTabWindow.active = false;
+    }
+
     onSelectedIndexChanged: {
         if (cardsRepeater.count > 0 && selectedIndex >= 0 && selectedIndex < cardsRepeater.count) {
             var cardItem = cardsRepeater.itemAt(selectedIndex);
@@ -114,62 +106,18 @@ PanelWindow {
 
     onActiveChanged: {
         if (active) {
-            selectedIndex = (clientsList.length > 1) ? 1 : 0;
             refreshClients();
-            Qt.callLater(() => containerFocusScope.forceActiveFocus());
+            selectedIndex = (clientsList.length > 1) ? 1 : 0;
         }
     }
 
-    FocusScope {
-        id: containerFocusScope
+    Item {
+        id: rootContentItem
         anchors.fill: parent
-        focus: true
-        Keys.priority: Keys.BeforeItem
 
         MouseArea {
             anchors.fill: parent
-            onClicked: altTabWindow.active = false
-        }
-
-        Keys.onTabPressed: (event) => {
-            if (event.modifiers & Qt.ShiftModifier) {
-                altTabWindow.previousWindow();
-            } else {
-                altTabWindow.nextWindow();
-            }
-            event.accepted = true;
-        }
-
-        Keys.onBacktabPressed: (event) => {
-            altTabWindow.previousWindow();
-            event.accepted = true;
-        }
-
-        Keys.onPressed: (event) => {
-            if (event.key === Qt.Key_Tab) {
-                if (event.modifiers & Qt.ShiftModifier) altTabWindow.previousWindow();
-                else altTabWindow.nextWindow();
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Right || event.key === Qt.Key_Down) {
-                altTabWindow.nextWindow();
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Left || event.key === Qt.Key_Up) {
-                altTabWindow.previousWindow();
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Space) {
-                altTabWindow.selectAndClose();
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Escape) {
-                altTabWindow.active = false;
-                event.accepted = true;
-            }
-        }
-
-        Keys.onReleased: (event) => {
-            if (event.key === Qt.Key_Alt || event.key === Qt.Key_Meta || event.key === Qt.Key_Super_L || event.key === Qt.Key_Super_R) {
-                altTabWindow.selectAndClose();  
-                event.accepted = true;
-            }
+            onClicked: altTabWindow.cancelAndClose()
         }
 
         Rectangle {
@@ -188,6 +136,11 @@ PanelWindow {
                 shadowColor: "#80000000"
                 shadowBlur: 1.0
                 shadowVerticalOffset: 12
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {} // Prevent backdrop click when clicking inside switcher box
             }
 
             Item {

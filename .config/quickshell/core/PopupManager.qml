@@ -1,12 +1,12 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import "../modules/launcher"
 import "../modules/notifications"
 import "../modules/calendar"
 import "../modules/clipboard"
 import "../modules/alt_tab"
 import "../modules/emoji"
+import "../modules/dashboard"
 import "../modules/bar/components"
 import "../services"
 QtObject {
@@ -16,7 +16,7 @@ QtObject {
     property var mediaService: null
     property var clipboardService: null
     property var activeNotifs: []
-    property alias launcherLoader: launcherLoader
+    property alias dashboardLoader: dashboardLoader
     property alias mediaLoader: mediaLoader
     property alias notifsLoader: notifsLoader
     property alias calendarLoader: calendarLoader
@@ -32,7 +32,7 @@ QtObject {
     property alias trayMenuPopup: trayMenuPopup
     property alias confirmationModal: confirmationModal
     function closeAllPopupsExcept(excludeLoader) {
-        var loaders = [launcherLoader, notifsLoader, calendarLoader, wifiLoader, resourcesLoader, emojiLoader, clipboardLoader, wallpaperSelectorLoader, keybindsLoader, altTabLoader, mediaLoader];
+        var loaders = [dashboardLoader, notifsLoader, calendarLoader, wifiLoader, resourcesLoader, emojiLoader, clipboardLoader, wallpaperSelectorLoader, keybindsLoader, altTabLoader, mediaLoader];
         for (var i = 0; i < loaders.length; i++) {
             var l = loaders[i];
             if (l !== excludeLoader && l.loaded && l.item) l.item.active = false;
@@ -122,12 +122,6 @@ QtObject {
             }
         },
         Loader {
-            id: launcherLoader
-            property bool loaded: false
-            active: loaded
-            sourceComponent: AppLauncher { theme: popupManager.theme }
-        },
-        Loader {
             id: mediaLoader
             property bool loaded: false
             active: loaded
@@ -181,6 +175,12 @@ QtObject {
             property bool loaded: false
             active: loaded
             sourceComponent: KeybindsPopup { theme: popupManager.theme }
+        },
+        Loader {
+            id: dashboardLoader
+            property bool loaded: false
+            active: loaded
+            sourceComponent: AppDashboard { theme: popupManager.theme }
         },
         Loader {
             id: altTabLoader

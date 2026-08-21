@@ -147,7 +147,10 @@ Row {
                     if (dot.wsData && typeof dot.wsData.activate === "function") {
                         dot.wsData.activate();
                     } else {
-                        Quickshell.execDetached(["hyprctl", "dispatch", "workspace", String(dot.wsId)]);
+                        Quickshell.execDetached([
+                            "hyprctl", "eval",
+                            "hl.dispatch(hl.dsp.focus({ workspace = " + dot.wsId + " }))"
+                        ]);
                     }
                 }
             }

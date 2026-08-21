@@ -16,7 +16,7 @@ ColumnLayout {
     IconImage {
         width: 32
         height: 32
-        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("search.svg")
+        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/search.svg")
         Layout.alignment: Qt.AlignHCenter
         layer.enabled: true
         layer.effect: MultiEffect {

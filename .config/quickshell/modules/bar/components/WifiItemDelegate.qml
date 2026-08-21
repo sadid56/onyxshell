@@ -78,7 +78,7 @@ Item {
             IconImage {
                 width: 12
                 height: 12
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("lock-closed.svg")
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/lock-closed.svg")
                 visible: !delegateWrapper.netInfo.active && !delegateWrapper.netInfo.saved && delegateWrapper.netInfo.security !== ""
                 Layout.alignment: Qt.AlignVCenter
                 layer.enabled: true

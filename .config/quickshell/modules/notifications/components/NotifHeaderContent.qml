@@ -6,17 +6,17 @@ import Quickshell.Widgets
 RowLayout {
     id: headerRow
     Layout.fillWidth: true
-    spacing: 12
+    spacing: 10
 
     property var cardItem
     property var theme
 
     ClippingRectangle {
         id: iconWrapper
-        width: 44
-        height: 44
-        radius: 22
-        color: headerRow.cardItem.theme.getColor("surface")
+        width: 36
+        height: 36
+        radius: 18
+        color: headerRow.cardItem.theme ? headerRow.cardItem.theme.getColor("surfaceVariant") : "#2b2a2a"
         Layout.alignment: Qt.AlignTop
 
         IconImage {
@@ -31,19 +31,8 @@ RowLayout {
 
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: 3
+        spacing: 2
         Layout.alignment: Qt.AlignVCenter
-
-        Text {
-            text: headerRow.cardItem.appName
-            font.family: "Google Sans Flex, sans-serif"
-            font.pixelSize: 10
-            font.bold: true
-            color: headerRow.cardItem.theme ? headerRow.cardItem.theme.getColor("primary") : "#ffb3b4"
-            elide: Text.ElideRight
-            Layout.fillWidth: true
-            visible: headerRow.cardItem.appName !== "" && headerRow.cardItem.appName !== headerRow.cardItem.summaryText
-        }
 
         RowLayout {
             Layout.fillWidth: true
@@ -52,27 +41,28 @@ RowLayout {
             Text {
                 text: headerRow.cardItem.summaryText
                 font.family: "Google Sans Flex, sans-serif"
-                font.pixelSize: 13
+                font.pixelSize: 12
                 font.bold: true
-                color: headerRow.cardItem.theme.getColor("onSurface")
+                color: headerRow.cardItem.theme ? headerRow.cardItem.theme.getColor("onSurface") : "#FFFFFF"
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
 
             Rectangle {
-                width: 26
-                height: 26
-                radius: 13
+                width: 24
+                height: 24
+                radius: 12
                 color: headerRow.cardItem.theme ? headerRow.cardItem.theme.getColor("surface") : "#1b1b1b"
                 opacity: arrowMouse.containsMouse ? 0.7 : 1.0
                 Layout.alignment: Qt.AlignVCenter
+                z: 2
                 Behavior on opacity { NumberAnimation { duration: 120 } }
 
                 IconImage {
                     anchors.centerIn: parent
-                    width: 14
-                    height: 14
-                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("chevron-down.svg")
+                    width: 12
+                    height: 12
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/chevron-down.svg")
                     rotation: headerRow.cardItem.expanded ? 180 : 0
                     Behavior on rotation { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                     layer.enabled: true
@@ -96,7 +86,7 @@ RowLayout {
             text: headerRow.cardItem.bodyText
             font.family: "Google Sans Flex, sans-serif"
             font.pixelSize: 11
-            color: headerRow.cardItem.theme.getColor("onSurfaceVariant")
+            color: headerRow.cardItem.theme ? headerRow.cardItem.theme.getColor("onSurfaceVariant") : "#8f8f9f"
             elide: headerRow.cardItem.expanded ? Text.ElideNone : Text.ElideRight
             maximumLineCount: headerRow.cardItem.expanded ? 8 : 2
             wrapMode: Text.Wrap

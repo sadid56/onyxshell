@@ -22,6 +22,8 @@ Scope {
             var fileText = (typeof currentWallpaperFile.text === "function") ? currentWallpaperFile.text() : currentWallpaperFile.text;
             if (fileText && fileText.trim().length > 0) {
                 wallpaperRoot.currentWallpaperPath = fileText.trim();
+            } else if (!wallpaperRoot.currentWallpaperPath && typeof shellConfig !== "undefined" && shellConfig) {
+                wallpaperRoot.currentWallpaperPath = shellConfig.defaultWallpaper;
             }
         }
     }
@@ -30,8 +32,6 @@ Scope {
         var fileText = (typeof currentWallpaperFile.text === "function") ? currentWallpaperFile.text() : currentWallpaperFile.text;
         if (fileText && fileText.trim().length > 0) {
             wallpaperRoot.currentWallpaperPath = fileText.trim();
-        } else if (typeof shellConfig !== "undefined" && shellConfig) {
-            wallpaperRoot.currentWallpaperPath = shellConfig.defaultWallpaper;
         }
     }
 
@@ -50,7 +50,9 @@ Scope {
             }
             WlrLayershell.layer: WlrLayer.Background
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-            color: "black"
+            color: "transparent"
+
+            property bool isInitialLoad: true
 
             function formatSource(p) {
                 if (!p || p === "") return "";
@@ -63,9 +65,10 @@ Scope {
                 var src = formatSource(newPath);
                 if (!src || src === "") return;
 
-                if (currentImg.source.toString() === "") {
+                if (isInitialLoad || currentImg.source.toString() === "") {
                     currentImg.source = src;
                     currentImg.opacity = 1;
+                    isInitialLoad = false;
                     return;
                 }
 
@@ -90,14 +93,16 @@ Scope {
             }
 
             Component.onCompleted: {
-                wallpaperWindow.applyWallpaper(wallpaperRoot.currentWallpaperPath);
+                if (wallpaperRoot.currentWallpaperPath !== "") {
+                    wallpaperWindow.applyWallpaper(wallpaperRoot.currentWallpaperPath);
+                }
             }
 
             Image {
                 id: currentImg
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
-                asynchronous: true
+                asynchronous: false
                 cache: true
                 opacity: 1
             }

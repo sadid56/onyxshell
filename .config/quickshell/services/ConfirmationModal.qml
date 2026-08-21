@@ -21,7 +21,7 @@ PanelWindow {
     property var theme
     property string title: "Confirm Action"
     property string message: "Are you sure you want to proceed?"
-    property string icon: "power.svg"
+    property string icon: "system/power.svg"
     property string confirmText: "Confirm"
     property string cancelText: "Cancel"
     property bool isDanger: false
@@ -32,7 +32,7 @@ PanelWindow {
         if (!options) return;
         confirmModalRoot.title = options.title || "Confirm Action";
         confirmModalRoot.message = options.message || "Are you sure you want to proceed?";
-        confirmModalRoot.icon = options.icon || "power.svg";
+        confirmModalRoot.icon = options.icon || "system/power.svg";
         confirmModalRoot.confirmText = options.confirmText || "Confirm";
         confirmModalRoot.cancelText = options.cancelText || "Cancel";
         confirmModalRoot.isDanger = (options.isDanger === true);

@@ -9,6 +9,7 @@ import "modules/bar"
 import "modules/bar/components"
 import "components/ui"
 import "modules/wallpaper"
+import "modules/splash"
 
 QtObject {
     id: root
@@ -19,7 +20,7 @@ QtObject {
     property MediaService mediaService: MediaService { id: mediaService }
     property Config shellConfig: Config { id: shellConfig }
 
-    property alias launcherLoader: popupManager.launcherLoader
+    property alias dashboardLoader: popupManager.dashboardLoader
     property alias mediaLoader: popupManager.mediaLoader
     property alias notifsLoader: popupManager.notifsLoader
     property alias calendarLoader: popupManager.calendarLoader
@@ -100,16 +101,12 @@ QtObject {
         }
     }
 
-    property var defaultWallpaperLoader: Process {
-        id: defaultWallpaperLoader
-        command: ["sh", "-c", "if [ ! -f " + shellConfig.quickshellDir + "/current_wallpaper ]; then echo \"" + shellConfig.defaultWallpaper + "\" > " + shellConfig.quickshellDir + "/current_wallpaper; fi"]
-    }
-
-    Component.onCompleted: {
-        defaultWallpaperLoader.running = true;
-    }
-
     property list<QtObject> shellObjects: [
+        SplashScreen {
+            id: splashScreen
+            theme: rootTheme
+        },
+
         Wallpaper {
             id: wallpaperBackground
         },
@@ -149,7 +146,7 @@ QtObject {
             mediaService: root.mediaService
             notifCount: root.activeNotifs.length
 
-            toggleLauncher: () => { popupManager.toggleLoaderActive(popupManager.launcherLoader); }
+            toggleLauncher: () => { popupManager.toggleLoaderActive(popupManager.dashboardLoader, statusBar.getDistroX()); }
             toggleNotifications: () => { popupManager.toggleLoaderActive(popupManager.notifsLoader, statusBar.getNotifX()); }
             toggleCalendar: () => { popupManager.toggleLoaderActive(popupManager.calendarLoader, statusBar.getClockX()); }
             toggleWifi: () => { popupManager.toggleLoaderActive(popupManager.wifiLoader, statusBar.getWifiX()); }

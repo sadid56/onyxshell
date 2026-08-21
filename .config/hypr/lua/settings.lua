@@ -35,16 +35,27 @@ hl.config({
 		vfr = true,
 	},
 
+	dwindle = {
+		preserve_split = true,
+		special_scale_factor = 0.88,
+	},
+
+	master = {
+		special_scale_factor = 0.88,
+	},
+
 	decoration = {
 		rounding = rounded,
 		rounding_power = 2,
 		active_opacity = 1.0,
+		dim_special = 0.65,
 
 		blur = {
 			enabled = true,
-			size = 5,
+			size = 6,
 			passes = 3,
 			vibrancy = 0.1696,
+			special = true,
 		},
 	},
 
@@ -57,8 +68,11 @@ hl.config({
 		},
 	},
 
+
 	misc = {
-		disable_hyprland_logo = false,
+		disable_hyprland_logo = true,
+		disable_splash_rendering = true,
+		force_default_wallpaper = 0,
 		on_focus_under_fullscreen = 1,
 		focus_on_activate = true,
 	},

@@ -121,7 +121,7 @@ PanelWindow {
             alignRight: true
             cornerRadius: contentRect.radius
             color: popupWindow.theme.getColor("surface")
-            visible: popupWindow.showCorners
+            visible: popupWindow.showCorners && (contentRect.x > 0)
         }
 
         Corner {
@@ -133,6 +133,50 @@ PanelWindow {
             cornerRadius: contentRect.radius
             color: popupWindow.theme.getColor("surface")
             visible: popupWindow.showCorners && !popupWindow.slideFromRight
+        }
+
+        // Fill bottom-left corner flush when attached to left edge
+        Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            width: parent.radius
+            height: parent.radius
+            color: parent.color
+            visible: !popupWindow.flatBottom && (contentRect.x <= 0)
+        }
+
+        // Smooth Canvas corner curving into left screen border
+        Canvas {
+            id: bottomLeftCornerCanvas
+            width: contentRect.radius
+            height: contentRect.radius
+            anchors.top: parent.bottom
+            anchors.left: parent.left
+            antialiasing: true
+            renderTarget: Canvas.FramebufferObject
+            visible: popupWindow.showCorners && !popupWindow.flatBottom && (contentRect.x <= 0)
+
+            Connections {
+                target: popupWindow.theme
+                function onColorsChanged() { bottomLeftCornerCanvas.requestPaint(); }
+            }
+            onWidthChanged: requestPaint()
+            onHeightChanged: requestPaint()
+            onVisibleChanged: if (visible) requestPaint()
+
+            onPaint: {
+                var ctx = getContext("2d");
+                ctx.reset();
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = popupWindow.theme ? popupWindow.theme.getColor("surface") : "#1b1111";
+                ctx.beginPath();
+                ctx.moveTo(0, height);
+                ctx.lineTo(0, 0);
+                ctx.lineTo(width, 0);
+                ctx.arc(width, height, width, Math.PI * 1.5, Math.PI, true);
+                ctx.closePath();
+                ctx.fill();
+            }
         }
 
         Rectangle {

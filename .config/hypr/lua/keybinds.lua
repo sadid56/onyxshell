@@ -12,7 +12,7 @@ hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("~/.config/hypr/scripts/dropdown.sh")
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(
 	secondMod .. " + SPACE",
-	hl.dsp.exec_cmd("qs ipc call shell toggleLauncher")
+	hl.dsp.exec_cmd("qs ipc call shell toggleDashboard")
 )
 
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
@@ -59,14 +59,34 @@ hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
 
 -- Cycle & Move Focus
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
+local altTabTimer = nil
+
+local function checkAltReleased()
+	if not hl.is_key_down("Alt_L") and not hl.is_key_down(64) and not hl.is_key_down("Alt_R") and not hl.is_key_down(108) then
+		hl.exec_cmd("qs ipc call shell closeAltTab")
+		altTabTimer = nil
+	else
+		altTabTimer = hl.timer(checkAltReleased, { type = "oneshot", timeout = 25 })
+	end
+end
+
 hl.bind(
 	secondMod .. " + Tab",
-	hl.dsp.exec_cmd("qs ipc call shell toggleAltTab")
+	function()
+		hl.exec_cmd("qs ipc call shell toggleAltTab")
+		if not altTabTimer then
+			altTabTimer = hl.timer(checkAltReleased, { type = "oneshot", timeout = 25 })
+		end
+	end
 )
 hl.bind(
-	secondMod .. " + Alt_L",
-	hl.dsp.exec_cmd("qs ipc call shell closeAltTab"),
-	{ release = true }
+	secondMod .. " + SHIFT + Tab",
+	function()
+		hl.exec_cmd("qs ipc call shell toggleAltTab")
+		if not altTabTimer then
+			altTabTimer = hl.timer(checkAltReleased, { type = "oneshot", timeout = 25 })
+		end
+	end
 )
 hl.bind(mainMod .. " + G", hl.dsp.group.toggle())		
 
@@ -97,9 +117,12 @@ end
 hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }))
 
 -- Special Workspace (Scratchpad)
-hl.bind(secondMod .. " + S", hl.dsp.workspace.toggle_special("magic"))
-hl.bind(secondMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
-hl.bind(secondMod .. " + SHIFT + Y", hl.dsp.window.move({ workspace = "+0" }))
+hl.bind(mainMod .. " + S", function()
+	hl.config({ decoration = { dim_special = 0.65, blur = { special = true } } })
+	hl.dispatch(hl.dsp.workspace.toggle_special("magic"))
+end)
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+hl.bind(mainMod .. " + SHIFT + Y", hl.dsp.window.move({ workspace = "+0" }))
 
 -- Scroll Workspaces
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
@@ -130,7 +153,7 @@ hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("~/.config/hypr/scripts/shutd
 
 -- Screenshots
 hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh -m window"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh -m region"))
+hl.bind("PRINT", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh -m region"))
 hl.bind(mainMod .. " + SHIFT + PRINT", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh -m output"))
 
 -- Volume & Brightness

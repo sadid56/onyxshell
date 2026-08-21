@@ -47,4 +47,6 @@ hl.window_rule({
     float     = true,
     size      = { 1200, 600 },
     center    = true,
+    opaque    = true,
+    opacity   = 1.0,
 })

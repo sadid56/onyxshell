@@ -53,7 +53,7 @@ ColumnLayout {
         id: passwordInput
         theme: promptRoot.theme
         placeholder: "Enter password (min 8 chars)..."
-        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("lock-closed.svg")
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/lock-closed.svg")
         echoMode: TextInput.Password
         onTextChanged: {
             if (promptRoot.errorMessage !== "") {
@@ -82,7 +82,7 @@ ColumnLayout {
         IconImage {
             width: 14
             height: 14
-            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("alert.svg")
+            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("notifications/alert.svg")
             Layout.alignment: Qt.AlignVCenter
             layer.enabled: true
             layer.effect: MultiEffect {

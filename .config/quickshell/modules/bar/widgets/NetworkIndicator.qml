@@ -18,7 +18,7 @@ RowLayout {
         IconImage {
             width: 10
             height: 10
-            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("arrow-down.svg")
+            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/arrow-down.svg")
             Layout.alignment: Qt.AlignVCenter
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -58,7 +58,7 @@ RowLayout {
         IconImage {
             width: 10
             height: 10
-            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("arrow-up.svg")
+            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/arrow-up.svg")
             Layout.alignment: Qt.AlignVCenter
             layer.enabled: true
             layer.effect: MultiEffect {

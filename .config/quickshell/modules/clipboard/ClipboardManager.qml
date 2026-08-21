@@ -18,12 +18,56 @@ Popup {
 
     function getFilteredEntries() {
         if (!clipService || !clipService.entries) return [];
-        if (searchQuery === "") return clipService.entries;
+        var rawQuery = searchQuery.trim();
+        var lowerRaw = rawQuery.toLowerCase();
+
+        // Check if searching for pinned items specifically (e.g. >pin, >p, or pin:)
+        var isPinSearch = lowerRaw.startsWith(">pin") || lowerRaw.startsWith(">p") || lowerRaw.startsWith("pin:");
+        var pinQuery = "";
+        if (isPinSearch) {
+            if (lowerRaw.startsWith(">pin")) pinQuery = lowerRaw.substring(4).trim();
+            else if (lowerRaw.startsWith(">p")) pinQuery = lowerRaw.substring(2).trim();
+            else if (lowerRaw.startsWith("pin:")) pinQuery = lowerRaw.substring(4).trim();
+        }
+
+        var source = clipService.entries;
         var scored = [];
-        var query = searchQuery.trim().toLowerCase();
-        for (var i = 0; i < clipService.entries.length; i++) {
-            var entry = clipService.entries[i];
+
+        if (isPinSearch) {
+            for (var k = 0; k < source.length; k++) {
+                var pEntry = source[k];
+                if (!clipService.isPinned(pEntry)) continue;
+
+                var pClean = pEntry.substring(pEntry.indexOf("\t") + 1).toLowerCase();
+                if (pinQuery === "" || pClean.indexOf(pinQuery) !== -1) {
+                    scored.push({ entry: pEntry, score: 1000 - k });
+                }
+            }
+            scored.sort((a, b) => b.score - a.score);
+            var pinRes = [];
+            for (var p = 0; p < scored.length; p++) {
+                pinRes.push(scored[p].entry);
+            }
+            return pinRes;
+        }
+
+        if (rawQuery === "") {
+            // Sort: All pinned entries first, then recent items
+            var pinned = [];
+            var unpinned = [];
+            for (var i = 0; i < source.length; i++) {
+                var e = source[i];
+                if (clipService.isPinned(e)) pinned.push(e);
+                else unpinned.push(e);
+            }
+            return pinned.concat(unpinned);
+        }
+
+        var query = lowerRaw;
+        for (var j = 0; j < source.length; j++) {
+            var entry = source[j];
             var cleanText = entry.substring(entry.indexOf("\t") + 1).toLowerCase();
+            var isP = clipService.isPinned(entry);
 
             var score = 0;
             if (cleanText === query) {
@@ -37,15 +81,16 @@ Popup {
             }
 
             if (score > 0) {
-                score += Math.max(0, 50 - Math.abs(cleanText.length - query.length)) + Math.max(0, 30 - i);
+                if (isP) score += 2000; // Pinned priority boost
+                score += Math.max(0, 50 - Math.abs(cleanText.length - query.length)) + Math.max(0, 30 - j);
                 scored.push({ entry: entry, score: score });
             }
         }
 
         scored.sort((a, b) => b.score - a.score);
         var res = [];
-        for (var j = 0; j < scored.length; j++) {
-            res.push(scored[j].entry);
+        for (var m = 0; m < scored.length; m++) {
+            res.push(scored[m].entry);
         }
         return res;
     }
@@ -65,8 +110,8 @@ Popup {
         UIInputs.Input {
             id: searchInput
             theme: clipWindow.theme
-            placeholder: "Search clipboard history..."
-            icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("search.svg")
+            placeholder: "Search clipboard... (type >pin for pinned)"
+            icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/search.svg")
 
             onTextChanged: clipWindow.searchQuery = text
             onEscapePressed: clipWindow.active = false
@@ -102,6 +147,7 @@ Popup {
                 var _ = clipService.entries;
                 var __ = searchQuery;
                 var ___ = clipService.imagePreviews;
+                var ____ = clipService.pinnedEntries;
                 return clipWindow.getFilteredEntries();
             }
             visible: entriesList.count > 0
@@ -115,9 +161,12 @@ Popup {
                 clipWindow.clipService.deleteEntry(entryText);
             }
 
+            onPinClicked: entryText => {
+                clipWindow.clipService.togglePin(entryText);
+            }
+
             onUpPressedAtStart: searchInput.forceFocus()
             onEscapePressed: clipWindow.active = false
         }
     }
-
 }

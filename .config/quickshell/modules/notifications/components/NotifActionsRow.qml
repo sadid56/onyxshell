@@ -4,79 +4,124 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 
-RowLayout {
-    id: actionRow
+Item {
+    id: actionColWrapper
     Layout.fillWidth: true
-    spacing: 10
-    visible: cardItem.expanded
+    implicitHeight: cardItem.expanded ? (actionColContent.implicitHeight + 4) : 0
+    Layout.preferredHeight: implicitHeight
+    clip: true
     opacity: cardItem.expanded ? 1.0 : 0.0
 
     property var cardItem
     property var theme
 
-    Behavior on opacity { NumberAnimation { duration: 140 } }
+    Behavior on implicitHeight { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
+    Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutQuad } }
 
-    Rectangle {
-        Layout.fillWidth: true
-        height: 38
-        radius: 12
-        color: actionRow.theme ? actionRow.theme.getColor("surface") : "#1b1b1b"
-        opacity: delMouse.containsMouse ? 0.7 : 1.0
-        Behavior on opacity { NumberAnimation { duration: 120 } }
+    ColumnLayout {
+        id: actionColContent
+        anchors.top: parent.top
+        anchors.topMargin: 4
+        anchors.left: parent.left
+        anchors.right: parent.right
+        spacing: 6
 
-        IconImage {
-            anchors.centerIn: parent
-            width: 14
-            height: 14
-            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("dismiss.svg")
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                colorization: 1.0
-                colorizationColor: actionRow.theme ? actionRow.theme.getColor("onSurface") : "#f0dede"
+        // Action Buttons Row (Copy, Dismiss)
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+
+            // Copy Button (with image-copy.svg asset)
+            Rectangle {
+                Layout.fillWidth: true
+                height: 32
+                radius: 10
+                color: actionColWrapper.theme ? actionColWrapper.theme.getColor("surface") : "#1b1b1b"
+                opacity: copyMouse.containsMouse ? 0.7 : 1.0
+                Behavior on opacity { NumberAnimation { duration: 120 } }
+
+                RowLayout {
+                    anchors.centerIn: parent
+                    spacing: 6
+
+                    IconImage {
+                        width: 13
+                        height: 13
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon(actionColWrapper.cardItem.copiedFeedback ? "actions/check.svg" : "actions/image-copy.svg")
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: actionColWrapper.cardItem.copiedFeedback ?
+                                   (actionColWrapper.theme ? actionColWrapper.theme.getColor("primary") : "#ffb3b4") :
+                                   (actionColWrapper.theme ? actionColWrapper.theme.getColor("onSurface") : "#f0dede")
+                        }
+                    }
+
+                    Text {
+                        text: actionColWrapper.cardItem.copiedFeedback ? "Copied" : "Copy"
+                        font.family: "Google Sans Flex, sans-serif"
+                        font.pixelSize: 11
+                        font.weight: Font.DemiBold
+                        color: actionColWrapper.cardItem.copiedFeedback ?
+                               (actionColWrapper.theme ? actionColWrapper.theme.getColor("primary") : "#ffb3b4") :
+                               (actionColWrapper.theme ? actionColWrapper.theme.getColor("onSurface") : "#f0dede")
+                    }
+                }
+
+                MouseArea {
+                    id: copyMouse
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    onClicked: {
+                        var toCopy = (actionColWrapper.cardItem.summaryText + (actionColWrapper.cardItem.bodyText ? "\n" + actionColWrapper.cardItem.bodyText : "")).trim();
+                        Quickshell.execDetached(["wl-copy", toCopy]);
+                        actionColWrapper.cardItem.copiedFeedback = true;
+                        actionColWrapper.cardItem.feedbackTimer.restart();
+                    }
+                }
             }
-        }
 
-        MouseArea {
-            id: delMouse
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            hoverEnabled: true
-            onClicked: actionRow.cardItem.startDismiss()
-        }
-    }
+            // Dismiss Button (with dismiss.svg asset)
+            Rectangle {
+                Layout.fillWidth: true
+                height: 32
+                radius: 10
+                color: actionColWrapper.theme ? actionColWrapper.theme.getColor("surface") : "#1b1b1b"
+                opacity: delMouse.containsMouse ? 0.7 : 1.0
+                Behavior on opacity { NumberAnimation { duration: 120 } }
 
-    Rectangle {
-        Layout.fillWidth: true
-        height: 38
-        radius: 12
-        color: actionRow.theme ? actionRow.theme.getColor("surface") : "#1b1b1b"
-        opacity: copyMouse.containsMouse ? 0.7 : 1.0
-        Behavior on opacity { NumberAnimation { duration: 120 } }
+                RowLayout {
+                    anchors.centerIn: parent
+                    spacing: 6
 
-        IconImage {
-            anchors.centerIn: parent
-            width: 14
-            height: 14
-            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon(actionRow.cardItem.copiedFeedback ? "check.svg" : "image-copy.svg")
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                colorization: 1.0
-                colorizationColor: actionRow.cardItem.copiedFeedback ?
-                       (actionRow.theme ? actionRow.theme.getColor("primary") : "#ffb3b4") :
-                       (actionRow.theme ? actionRow.theme.getColor("onSurface") : "#f0dede")
-            }
-        }
+                    IconImage {
+                        width: 13
+                        height: 13
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/dismiss.svg")
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: actionColWrapper.theme ? actionColWrapper.theme.getColor("onSurface") : "#f0dede"
+                        }
+                    }
 
-        MouseArea {
-            id: copyMouse
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            hoverEnabled: true
-            onClicked: {
-                var toCopy = (actionRow.cardItem.summaryText + (actionRow.cardItem.bodyText ? "\n" + actionRow.cardItem.bodyText : "")).trim();
-                Quickshell.execDetached(["wl-copy", toCopy]);
-                actionRow.cardItem.copiedFeedback = true;
-                actionRow.cardItem.feedbackTimer.restart();
+                    Text {
+                        text: "Dismiss"
+                        font.family: "Google Sans Flex, sans-serif"
+                        font.pixelSize: 11
+                        font.weight: Font.DemiBold
+                        color: actionColWrapper.theme ? actionColWrapper.theme.getColor("onSurface") : "#f0dede"
+                    }
+                }
+
+                MouseArea {
+                    id: delMouse
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    onClicked: actionColWrapper.cardItem.startDismiss()
+                }
             }
         }
     }

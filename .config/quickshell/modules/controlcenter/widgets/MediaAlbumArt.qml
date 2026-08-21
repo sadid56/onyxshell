@@ -26,7 +26,7 @@ ClippingRectangle {
         anchors.centerIn: parent
         width: 32
         height: 32
-        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("music.svg")
+        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("media/music.svg")
         visible: !albumArtImage.visible
         layer.enabled: true
         layer.effect: MultiEffect {

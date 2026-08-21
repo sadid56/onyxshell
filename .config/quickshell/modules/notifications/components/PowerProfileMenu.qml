@@ -70,9 +70,9 @@ Item {
 
             Repeater {
                 model: [
-                    { profileId: "performance", name: "Performance", icon: "zap.svg" },
-                    { profileId: "balanced", name: "Balanced", icon: "memory.svg" },
-                    { profileId: "power-saver", name: "Saver", icon: "leaf-two.svg" }
+                    { profileId: "performance", name: "Performance", icon: "system/zap.svg" },
+                    { profileId: "balanced", name: "Balanced", icon: "system/memory.svg" },
+                    { profileId: "power-saver", name: "Saver", icon: "system/leaf-two.svg" }
                 ]
 
                 delegate: Item {

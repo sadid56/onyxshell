@@ -82,7 +82,7 @@ Popup {
         Layout.alignment: Qt.AlignTop
         theme: emojiWindow.theme
         placeholder: "Search emojis..."
-        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("search.svg")
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/search.svg")
         onTextChanged: {
             emojiWindow.searchQuery = text;
             emojiGrid.currentIndex = emojiGrid.count > 0 ? 0 : -1;

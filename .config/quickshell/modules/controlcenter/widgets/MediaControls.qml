@@ -99,7 +99,7 @@ ClippingRectangle {
                         anchors.centerIn: parent
                         width: 18
                         height: 18
-                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon(mediaRoot.isPlaying ? "pause.svg" : "play.svg")
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon(mediaRoot.isPlaying ? "media/pause.svg" : "media/play.svg")
                         layer.enabled: true
                         layer.effect: MultiEffect {
                             colorization: 1.0
@@ -128,7 +128,7 @@ ClippingRectangle {
                 IconImage {
                     width: 16
                     height: 16
-                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("skip-back.svg")
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("media/skip-back.svg")
                     opacity: 0.85
                     Layout.alignment: Qt.AlignVCenter
                     layer.enabled: true
@@ -163,7 +163,7 @@ ClippingRectangle {
                 IconImage {
                     width: 16
                     height: 16
-                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("skip-forward.svg")
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("media/skip-forward.svg")
                     opacity: 0.85
                     Layout.alignment: Qt.AlignVCenter
                     layer.enabled: true

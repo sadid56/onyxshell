@@ -13,6 +13,7 @@ set -gx EDITOR nvim
 set -gx VISUAL nvim
 set -gx TERMINAL kitty
 set -gx BROWSER brave-origin
+set -gx QT_LOGGING_RULES "qt.svg.warning=false"
 
 # Starship Prompt Integration
 if command -q starship
