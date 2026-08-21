@@ -89,7 +89,7 @@ install_packages() {
                 playerctl brightnessctl wireplumber pipewire pipewire-pulse pipewire-alsa pavucontrol
                 network-manager-applet
                 xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
-                hyprpolkitagent polkit-gnome gnome-keyring libnotify
+                polkit-gnome gnome-keyring libnotify
                 gnome-themes-extra adwaita-icon-theme nwg-look qt6ct qt5ct qt6-svg qt6-declarative
                 nodejs python python-pip fzf jq power-profiles-daemon nautilus rsync
                 ttf-jetbrains-mono-nerd noto-fonts-emoji
@@ -103,7 +103,8 @@ install_packages() {
                 wl-clipboard cliphist grim slurp playerctl brightnessctl wireplumber
                 NetworkManager-applet pavucontrol
                 xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
-                gnome-keyring libnotify gnome-themes-extra adwaita-icon-theme qt6ct qt5ct qt6-qtsvg qt6-qtdeclarative
+                polkit-gnome gnome-keyring libnotify
+                gnome-themes-extra adwaita-icon-theme qt6ct qt5ct qt6-qtsvg qt6-qtdeclarative
                 nodejs python3 fzf jq power-profiles-daemon nautilus rsync
                 google-noto-emoji-fonts jetbrains-mono-fonts-all
             )
@@ -116,7 +117,7 @@ install_packages() {
                 wl-clipboard cliphist grim slurp playerctl brightnessctl wireplumber
                 network-manager-gnome pavucontrol
                 xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
-                gnome-keyring libnotify-bin gnome-themes-extra adwaita-icon-theme
+                policykit-1-gnome gnome-keyring libnotify-bin gnome-themes-extra adwaita-icon-theme
                 qt6-style-plugins qt5-style-plugins qml6-module-qtquick qml6-module-qtquick-controls
                 nodejs python3 fzf jq power-profiles-daemon nautilus rsync
                 fonts-noto-color-emoji fonts-jetbrains-mono
