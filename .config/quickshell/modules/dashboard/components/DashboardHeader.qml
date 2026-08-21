@@ -18,6 +18,9 @@ Item {
     signal escapePressed()
     signal returnPressed()
     signal downPressed()
+    signal upPressed()
+    signal leftPressed()
+    signal rightPressed()
 
     function forceSearchFocus() {
         searchBox.forceFocus();
@@ -86,6 +89,9 @@ Item {
             onEscapePressed: headerRoot.escapePressed()
             onReturnPressed: headerRoot.returnPressed()
             onDownPressed: headerRoot.downPressed()
+            onUpPressed: headerRoot.upPressed()
+            onLeftPressed: headerRoot.leftPressed()
+            onRightPressed: headerRoot.rightPressed()
         }
 
         Item {

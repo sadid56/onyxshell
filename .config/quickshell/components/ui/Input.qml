@@ -26,6 +26,9 @@ Rectangle {
 
     signal escapePressed()
     signal downPressed()
+    signal upPressed()
+    signal leftPressed()
+    signal rightPressed()
     signal returnPressed()
 
     function forceFocus() {
@@ -95,6 +98,15 @@ Rectangle {
                     event.accepted = true;
                 } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab) {
                     inputRoot.downPressed();
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_Up) {
+                    inputRoot.upPressed();
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_Left && (!textInput.text || textInput.cursorPosition === 0)) {
+                    inputRoot.leftPressed();
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_Right && (!textInput.text || textInput.cursorPosition === textInput.text.length)) {
+                    inputRoot.rightPressed();
                     event.accepted = true;
                 } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                     inputRoot.returnPressed();

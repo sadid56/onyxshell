@@ -100,20 +100,22 @@ Popup {
         return res;
     }
 
+    property bool _isSyncing: false
+
     function updateAppsModel() {
         var filtered = getFilteredApps();
+        gridUnhoverTimer.stop();
+        _isSyncing = true;
         modelUtils.syncListModel(dynamicAppsModel, filtered, "name", 0);
+        _isSyncing = false;
         if (appsGrid) {
             if (dynamicAppsModel.count > 0) {
-                if (appsGrid.currentIndex < 0 || appsGrid.currentIndex >= dynamicAppsModel.count) {
-                    appsGrid.currentIndex = 0;
-                }
-                Qt.callLater(() => appsGrid.updatePillPosition());
+                appsGrid.currentIndex = 0;
+                pillUpdateTimer.restart();
             } else {
                 appsGrid.currentIndex = -1;
-                if (typeof gridHoverPill !== "undefined" && gridHoverPill) {
-                    gridHoverPill.isHovered = false;
-                }
+                pillUpdateTimer.stop();
+                gridHoverPill.isHovered = false;
             }
         }
     }
@@ -249,9 +251,30 @@ Popup {
             }
         }
         onDownPressed: {
-            appsGrid.forceActiveFocus();
             if (appsGrid.count > 0) {
                 if (appsGrid.currentIndex < 0) appsGrid.currentIndex = 0;
+                var newIdx = Math.min(appsGrid.count - 1, appsGrid.currentIndex + appsGrid.cols);
+                appsGrid.currentIndex = newIdx;
+                appsGrid.updatePillPosition();
+            }
+        }
+        onUpPressed: {
+            if (appsGrid.count > 0 && appsGrid.currentIndex > 0) {
+                var newIdx = Math.max(0, appsGrid.currentIndex - appsGrid.cols);
+                appsGrid.currentIndex = newIdx;
+                appsGrid.updatePillPosition();
+            }
+        }
+        onLeftPressed: {
+            if (appsGrid.count > 0 && appsGrid.currentIndex > 0) {
+                appsGrid.currentIndex = appsGrid.currentIndex - 1;
+                appsGrid.updatePillPosition();
+            }
+        }
+        onRightPressed: {
+            if (appsGrid.count > 0 && appsGrid.currentIndex < appsGrid.count - 1) {
+                appsGrid.currentIndex = appsGrid.currentIndex + 1;
+                appsGrid.updatePillPosition();
             }
         }
         onSearchTextChanged: {
@@ -304,6 +327,17 @@ Popup {
                 }
             }
 
+            Timer {
+                id: pillUpdateTimer
+                interval: 60
+                repeat: false
+                onTriggered: {
+                    if (appsGrid.count > 0) {
+                        appsGrid.updatePillPosition();
+                    }
+                }
+            }
+
             GridView {
                 id: appsGrid
                 anchors.fill: parent
@@ -336,15 +370,14 @@ Popup {
                 }
 
                 onCurrentIndexChanged: {
-                    updatePillPosition();
+                    if (!dashboardWindow._isSyncing) {
+                        updatePillPosition();
+                    }
                 }
 
                 onCountChanged: {
                     if (count > 0) {
                         if (currentIndex < 0 || currentIndex >= count) currentIndex = 0;
-                        updatePillPosition();
-                    } else {
-                        gridHoverPill.isHovered = false;
                     }
                 }
 
