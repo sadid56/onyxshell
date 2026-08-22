@@ -1,11 +1,10 @@
-
 ------------------
 ---- MONITORS ----
 ------------------
 hl.monitor({
-	output = "eDP-1",
-	mode = "1920x1080@144",
-	position = "0x0",
+	output = "",
+	mode = "preferred",
+	position = "auto",
 	scale = 1,
 })
 
@@ -13,13 +12,17 @@ hl.monitor({
 ---- MY PROGRAMS ----
 ---------------------
 terminal = "kitty"
-fileManager = "nautilus"
+fileManager = "kitty -e yazi"
 browser = "brave-origin"
 
 -------------------
 ---- AUTOSTART ----
 -------------------
 hl.on("hyprland.start", function()
+	-- Sync Wayland environment with systemd & D-Bus for screen sharing & portals
+	hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+	hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+
 	hl.exec_cmd("quickshell")
 	hl.exec_cmd("hypridle -c ~/.config/hypr/config/hypridle.conf")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
@@ -35,11 +38,12 @@ end)
 -------------------------------
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
+hl.env("QT_QPA_PLATFORM", "wayland;xcb")
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
+hl.env("GDK_BACKEND", "wayland,x11,*")
 hl.env("QT_LOGGING_RULES", "qt.svg.warning=false")
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
 hl.env("ROUNDED", "16")
-
 
 ------------------------
 ---- IMPORT MODULES ----

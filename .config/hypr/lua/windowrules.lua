@@ -50,3 +50,24 @@ hl.window_rule({
     opaque    = true,
     opacity   = 1.0,
 })
+
+hl.window_rule({
+    name  = "jetbrains-dialogs",
+    match = { class = "^(jetbrains-.*)$", title = "^(splash|win.*|Preferences|Project Structure|Rename)$" },
+    float = true,
+})
+
+hl.window_rule({
+    name  = "pip-video",
+    match = { title = "^(Picture-in-Picture)$" },
+    float = true,
+    pin   = true,
+    size  = { 520, 292 },
+})
+
+hl.window_rule({
+    name   = "dev-utils-float",
+    match  = { class = "^(pavucontrol|blueman-manager|nm-connection-editor|org.pulseaudio.pavucontrol|zenity)$" },
+    float  = true,
+    center = true,
+})

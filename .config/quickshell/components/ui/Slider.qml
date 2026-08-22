@@ -32,8 +32,28 @@ Item {
             anchors.bottom: parent.bottom
             width: Math.max(0, Math.min(track.width, ((sliderRoot.value - sliderRoot.min) / (sliderRoot.max - sliderRoot.min)) * track.width))
             radius: 14
-            color: sliderRoot.theme.getColor("primary")
             opacity: sliderMouse.containsMouse ? 0.95 : 0.85
+
+            // Gradient when over 100% (Alert / Over-amplification mode)
+            gradient: sliderRoot.value > 100 ? alertGradient : null
+            color: sliderRoot.value > 100 ? "transparent" : (sliderRoot.theme ? sliderRoot.theme.getColor("primary") : "#ffb3b4")
+
+            Gradient {
+                id: alertGradient
+                orientation: Gradient.Horizontal
+                GradientStop {
+                    position: 0.0
+                    color: sliderRoot.theme ? sliderRoot.theme.getColor("primary") : "#ffb3b4"
+                }
+                GradientStop {
+                    position: Math.max(0.2, Math.min(0.75, (100.0 - sliderRoot.min) / (sliderRoot.value - sliderRoot.min)))
+                    color: sliderRoot.theme ? (sliderRoot.theme.getColor("tertiary") || "#ffb875") : "#ffb875"
+                }
+                GradientStop {
+                    position: 1.0
+                    color: "#ff5252"
+                }
+            }
 
             Behavior on width {
                 enabled: !sliderMouse.pressed
@@ -92,7 +112,9 @@ Item {
                 font.family: "Google Sans Flex, sans-serif"
                 font.pixelSize: 12
                 font.bold: true
-                color: fillBar.width > (track.width - 45) ? sliderRoot.theme.getColor("onPrimary") : sliderRoot.theme.getColor("outline")
+                color: fillBar.width > (track.width - 45)
+                    ? (sliderRoot.theme ? sliderRoot.theme.getColor("onPrimary") : "#FFFFFF")
+                    : (sliderRoot.value > 100 ? "#ff5252" : (sliderRoot.theme ? sliderRoot.theme.getColor("outline") : "#a58a8a"))
                 Layout.alignment: Qt.AlignVCenter
             }
         }

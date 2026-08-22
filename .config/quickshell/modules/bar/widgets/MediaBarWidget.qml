@@ -49,7 +49,7 @@ Item {
 
     Timer {
         id: smoothTimer
-        interval: 16
+        interval: 25
         running: mediaBarRoot.isPlaying && mediaBarRoot.hasMedia
         repeat: true
         onTriggered: {

@@ -24,6 +24,7 @@ ColumnLayout {
         theme: quickSlidersRoot.theme
         icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getSpeakerIcon(quickSlidersRoot.volumeValue === 0)
         value: quickSlidersRoot.volumeValue
+        max: 150
         onMoved: val => {
             quickSlidersRoot.volumeMoved(val);
             if (quickSlidersRoot.volumeSetter) {
