@@ -74,7 +74,7 @@ Row {
                         Layout.alignment: Qt.AlignVCenter
                         source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getSwapIcon()
                         layer.enabled: true
-                        layer.effect: MultiEffect { colorization: 1.0; colorizationColor: "#FFFFFF" }
+                        layer.effect: MultiEffect { colorization: 1.0; colorizationColor: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF" }
                     }
                     Text {
                         text: Math.round(sysStatsRoot.sysStats.swapUsage || 0) + "%"
@@ -145,7 +145,15 @@ Row {
             delegate: Item {
                 id: trayItemDelegate
                 width: 20; height: 20
-                IconImage { anchors.fill: parent; source: modelData.icon || "" }
+                IconImage {
+                    anchors.fill: parent
+                    source: {
+                        var ic = modelData.icon || "";
+                        if (!ic) return "";
+                        if (ic.startsWith("/") || ic.startsWith("file://") || ic.startsWith("image://") || ic.startsWith("qrc:/")) return ic;
+                        return "image://icon/" + ic;
+                    }
+                }
                 MouseArea {
                     anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                     onEntered: { var pos = trayItemDelegate.mapToItem(null, 0, 0); root.showTrayMenu(modelData, pos.x + trayItemDelegate.width / 2); }

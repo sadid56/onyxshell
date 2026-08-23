@@ -503,10 +503,88 @@ Popup {
                 }
             }
 
+            // 1. Skeleton Loading Grid (when fetching for the first time)
+            Grid {
+                anchors.fill: parent
+                columns: appsGrid.cols
+                visible: appsProc.running && allApps.length === 0
+                clip: true
+
+                Repeater {
+                    model: appsGrid.cols * 4
+
+                    Item {
+                        width: appsGrid.cellWidth
+                        height: appsGrid.cellHeight
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.topMargin: 10
+                            anchors.bottomMargin: 10
+                            anchors.leftMargin: 6
+                            anchors.rightMargin: 6
+                            spacing: 8
+
+                            // Icon Skeleton
+                            Rectangle {
+                                Layout.alignment: Qt.AlignHCenter
+                                width: 44
+                                height: 44
+                                radius: 14
+                                color: dashboardWindow.theme ? dashboardWindow.theme.getColor("surfaceVariant") : "#2b2a27"
+                                opacity: skeletonAnim.shimmerOpacity
+                            }
+
+                            // App Name Line 1 Skeleton
+                            Rectangle {
+                                Layout.alignment: Qt.AlignHCenter
+                                width: 68
+                                height: 11
+                                radius: 5
+                                color: dashboardWindow.theme ? dashboardWindow.theme.getColor("surfaceVariant") : "#2b2a27"
+                                opacity: skeletonAnim.shimmerOpacity
+                            }
+
+                            // App Name Line 2 Skeleton
+                            Rectangle {
+                                Layout.alignment: Qt.AlignHCenter
+                                width: 44
+                                height: 9
+                                radius: 4
+                                color: dashboardWindow.theme ? dashboardWindow.theme.getColor("surfaceVariant") : "#2b2a27"
+                                opacity: skeletonAnim.shimmerOpacity * 0.7
+                            }
+                        }
+                    }
+                }
+
+                QtObject {
+                    id: skeletonAnim
+                    property real shimmerOpacity: 0.35
+
+                    SequentialAnimation on shimmerOpacity {
+                        loops: Animation.Infinite
+                        running: dashboardWindow.visible && appsProc.running && allApps.length === 0
+
+                        NumberAnimation {
+                            to: 0.8
+                            duration: 650
+                            easing.type: Easing.InOutQuad
+                        }
+                        NumberAnimation {
+                            to: 0.35
+                            duration: 650
+                            easing.type: Easing.InOutQuad
+                        }
+                    }
+                }
+            }
+
+            // 2. Empty Search Result State
             ColumnLayout {
                 anchors.centerIn: parent
                 spacing: 12
-                visible: dynamicAppsModel.count === 0
+                visible: dynamicAppsModel.count === 0 && (!appsProc.running || allApps.length > 0)
 
                 IconImage {
                     width: 44

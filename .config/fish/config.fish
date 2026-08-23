@@ -75,3 +75,7 @@ alias gd="git diff"
 alias ls="ls --color=auto --group-directories-first"
 alias ll="ls -la --color=auto --group-directories-first"
 alias la="ls -A --color=auto"
+
+
+# Added by Antigravity CLI installer
+set -gx PATH "/home/sadid/.local/bin" $PATH

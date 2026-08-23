@@ -2,9 +2,13 @@ local rounded = tonumber(os.getenv("ROUNDED")) or 16
 
 local has_colors, colors = pcall(require, "theme.colors")
 local active_col = (has_colors and colors.primary) and ("rgb(" .. colors.primary:gsub("#", "") .. ")") or "rgb(ffb3b4)"
-local inactive_col = (has_colors and colors.outline_variant) and ("rgb(" .. colors.outline_variant:gsub("#", "") .. ")") or "rgb(574142)"
-local group_active_col = (has_colors and colors.primary) and ("rgba(" .. colors.primary:gsub("#", "") .. "cc)") or "rgba(ffb3b4cc)"
-local group_inactive_col = (has_colors and colors.outline_variant) and ("rgba(" .. colors.outline_variant:gsub("#", "") .. "55)") or "rgba(47464c55)"
+local inactive_col = (has_colors and colors.outline_variant) and ("rgb(" .. colors.outline_variant:gsub("#", "") .. ")")
+	or "rgb(574142)"
+local group_active_col = (has_colors and colors.primary) and ("rgba(" .. colors.primary:gsub("#", "") .. "cc)")
+	or "rgba(ffb3b4cc)"
+local group_inactive_col = (has_colors and colors.outline_variant)
+		and ("rgba(" .. colors.outline_variant:gsub("#", "") .. "55)")
+	or "rgba(47464c55)"
 
 hl.device({
 	name = "elan07d2:00-04f3:321a-touchpad",
@@ -52,7 +56,7 @@ hl.config({
 
 		blur = {
 			enabled = true,
-			size = 4,
+			size = 6,
 			passes = 2,
 			vibrancy = 0.1696,
 			special = false,
@@ -67,7 +71,6 @@ hl.config({
 			natural_scroll = true,
 		},
 	},
-
 
 	misc = {
 		disable_hyprland_logo = true,
