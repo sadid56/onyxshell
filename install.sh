@@ -177,7 +177,7 @@ install_packages() {
                 hyprpicker
                 quickshell
                 matugen
-
+                
                 kitty
                 neovim
                 fastfetch
@@ -223,7 +223,7 @@ install_packages() {
                 nodejs
                 python
                 python-pip
-
+                python-psutil
                 fzf
                 jq
 
@@ -293,7 +293,7 @@ install_packages() {
 
                 nodejs
                 python3
-
+                python-psutil
                 fzf
                 jq
 
@@ -368,7 +368,7 @@ install_packages() {
 
                 nautilus
                 rsync
-
+                python-psutil
                 fonts-noto-color-emoji
                 fonts-jetbrains-mono
             )
