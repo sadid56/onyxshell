@@ -40,7 +40,6 @@ confirm() {
 detect_distro() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
-
         DISTRO="$ID"
         LIKE="${ID_LIKE:-}"
     else
@@ -51,7 +50,10 @@ detect_distro() {
 
 detect_distro
 
-DISTRO_NAME="$(echo "$DISTRO" | awk '{print toupper(substr($0,1,1))tolower(substr($0,2))}')"
+DISTRO_NAME="$(
+    echo "$DISTRO" |
+        awk '{print toupper(substr($0,1,1))tolower(substr($0,2))}'
+)"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -65,7 +67,9 @@ echo ""
 # ====================================================
 
 if confirm "Update system packages?"; then
+
     case "$DISTRO" in
+
         arch|cachyos|endeavouros|manjaro)
             sudo pacman -Syu --noconfirm
             ;;
@@ -87,7 +91,9 @@ if confirm "Update system packages?"; then
         *)
             echo -e "${YELLOW}[!] Unsupported distro for auto-update. Skipping...${RESET}"
             ;;
+
     esac
+
 fi
 
 # ====================================================
@@ -95,8 +101,11 @@ fi
 # ====================================================
 
 if confirm "Install base build tools (git, curl, fish, base-devel)?"; then
+
     case "$DISTRO" in
+
         arch|cachyos|endeavouros|manjaro)
+
             sudo pacman -S --needed --noconfirm \
                 git \
                 curl \
@@ -106,6 +115,7 @@ if confirm "Install base build tools (git, curl, fish, base-devel)?"; then
             ;;
 
         ubuntu|debian|pop|mint)
+
             sudo apt install -y \
                 git \
                 curl \
@@ -115,6 +125,7 @@ if confirm "Install base build tools (git, curl, fish, base-devel)?"; then
             ;;
 
         fedora)
+
             sudo dnf install -y \
                 git \
                 curl \
@@ -124,6 +135,7 @@ if confirm "Install base build tools (git, curl, fish, base-devel)?"; then
             ;;
 
         opensuse*|suse)
+
             sudo zypper install -y \
                 git \
                 curl \
@@ -133,9 +145,12 @@ if confirm "Install base build tools (git, curl, fish, base-devel)?"; then
             ;;
 
         *)
+
             echo -e "${YELLOW}[!] Unsupported distro for base tools. Skipping...${RESET}"
             ;;
+
     esac
+
 fi
 
 # ====================================================
@@ -221,7 +236,8 @@ install_packages() {
                 noto-fonts-emoji
             )
 
-            sudo pacman -S --needed --noconfirm "${ARCH_PACKAGES[@]}"
+            sudo pacman -S --needed --noconfirm \
+                "${ARCH_PACKAGES[@]}"
             ;;
 
         # ------------------------------------------------
@@ -254,7 +270,6 @@ install_packages() {
 
                 playerctl
                 brightnessctl
-
                 wireplumber
 
                 NetworkManager-applet
@@ -291,7 +306,8 @@ install_packages() {
                 jetbrains-mono-fonts-all
             )
 
-            sudo dnf install -y "${FEDORA_PACKAGES[@]}"
+            sudo dnf install -y \
+                "${FEDORA_PACKAGES[@]}"
             ;;
 
         # ------------------------------------------------
@@ -357,7 +373,8 @@ install_packages() {
                 fonts-jetbrains-mono
             )
 
-            sudo apt install -y "${DEB_PACKAGES[@]}"
+            sudo apt install -y \
+                "${DEB_PACKAGES[@]}"
             ;;
 
         # ------------------------------------------------
@@ -368,8 +385,8 @@ install_packages() {
 
             echo -e "${RED}[!] Package list not pre-configured for $DISTRO.${RESET}"
             echo -e "${YELLOW}[!] Please install dependencies manually.${RESET}"
-
             ;;
+
     esac
 }
 
@@ -385,15 +402,24 @@ if confirm "Enable Power Profiles Daemon & PipeWire Audio services?"; then
 
     echo -e "${BLUE}[*] Enabling system services...${RESET}"
 
-    sudo systemctl enable --now power-profiles-daemon.service 2>/dev/null || true
+    sudo systemctl enable --now power-profiles-daemon.service \
+        2>/dev/null || true
 
     echo -e "${BLUE}[*] Enabling PipeWire & WirePlumber audio services for user...${RESET}"
 
-    systemctl --user enable --now pipewire.socket pipewire.service 2>/dev/null || true
+    systemctl --user enable --now \
+        pipewire.socket \
+        pipewire.service \
+        2>/dev/null || true
 
-    systemctl --user enable --now pipewire-pulse.socket pipewire-pulse.service 2>/dev/null || true
+    systemctl --user enable --now \
+        pipewire-pulse.socket \
+        pipewire-pulse.service \
+        2>/dev/null || true
 
-    systemctl --user enable --now wireplumber.service 2>/dev/null || true
+    systemctl --user enable --now \
+        wireplumber.service \
+        2>/dev/null || true
 
 fi
 
@@ -405,104 +431,209 @@ if confirm "Deploy Onyxshell configuration files to ~/.config?"; then
 
     TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 
-    mkdir -p "$HOME/.config"
+    SOURCE_CONFIG_DIR="$SCRIPT_DIR/.config"
+    DEST_CONFIG_DIR="$HOME/.config"
 
-    if [ -d "$SCRIPT_DIR/.config" ]; then
+    mkdir -p "$DEST_CONFIG_DIR"
 
-        for SRC_ITEM in "$SCRIPT_DIR/.config"/*; do
+    # ------------------------------------------------
+    # SAFETY CHECK
+    #
+    # Never allow source config directory and destination
+    # config directory to be the exact same directory.
+    # ------------------------------------------------
 
-            # Nothing matched
-            [ -e "$SRC_ITEM" ] || continue
+    SOURCE_CONFIG_REAL="$(realpath -m "$SOURCE_CONFIG_DIR")"
+    DEST_CONFIG_REAL="$(realpath -m "$DEST_CONFIG_DIR")"
 
-            item="$(basename "$SRC_ITEM")"
-            DEST_ITEM="$HOME/.config/$item"
+    if [ "$SOURCE_CONFIG_REAL" = "$DEST_CONFIG_REAL" ]; then
 
-            # ====================================================
-            # DIRECTORY
-            # ====================================================
+        echo -e "${RED}[!] SAFETY CHECK FAILED.${RESET}"
+        echo -e "${RED}[!] Source and destination .config directories are the same:${RESET}"
+        echo -e "    $SOURCE_CONFIG_REAL"
+        echo ""
+        echo -e "${YELLOW}[!] Configuration deployment has been skipped.${RESET}"
+        echo -e "${YELLOW}[!] This prevents backup recursion and same-file corruption.${RESET}"
 
-            if [ -d "$SRC_ITEM" ]; then
+    elif [ ! -d "$SOURCE_CONFIG_DIR" ]; then
 
-                # Source and destination are the same directory
-                if [ -d "$DEST_ITEM" ] && [ "$SRC_ITEM" -ef "$DEST_ITEM" ]; then
-
-                    echo -e "${YELLOW}[!] $item is already the same directory. Skipping.${RESET}"
-
-                    continue
-                fi
-
-                # Existing destination directory
-                if [ -d "$DEST_ITEM" ]; then
-
-                    BACKUP_DIR="${DEST_ITEM}_backup_${TIMESTAMP}"
-
-                    echo -e "${BLUE}[*] Backing up existing directory:${RESET}"
-                    echo -e "    $DEST_ITEM"
-                    echo -e "${BLUE}    -> $BACKUP_DIR${RESET}"
-
-                    cp -a "$DEST_ITEM" "$BACKUP_DIR"
-
-                elif [ -e "$DEST_ITEM" ]; then
-
-                    # Destination exists but is not a directory
-                    BACKUP_PATH="${DEST_ITEM}_backup_${TIMESTAMP}"
-
-                    echo -e "${BLUE}[*] Backing up existing path:${RESET}"
-                    echo -e "    $DEST_ITEM"
-                    echo -e "${BLUE}    -> $BACKUP_PATH${RESET}"
-
-                    cp -a "$DEST_ITEM" "$BACKUP_PATH"
-
-                    rm -rf "$DEST_ITEM"
-                fi
-
-                echo -e "${GREEN}[+] Deploying $item config to ~/.config/$item...${RESET}"
-
-                mkdir -p "$DEST_ITEM"
-
-                rsync -a --delete "$SRC_ITEM/" "$DEST_ITEM/"
-
-            # ====================================================
-            # FILE
-            # ====================================================
-
-            elif [ -f "$SRC_ITEM" ]; then
-
-                # Source and destination are the exact same file
-                if [ -f "$DEST_ITEM" ] && [ "$SRC_ITEM" -ef "$DEST_ITEM" ]; then
-
-                    echo -e "${YELLOW}[!] $item is already the same file. Skipping deployment.${RESET}"
-
-                    continue
-                fi
-
-                # Existing destination
-                if [ -e "$DEST_ITEM" ]; then
-
-                    BACKUP_FILE="${DEST_ITEM}_backup_${TIMESTAMP}"
-
-                    echo -e "${BLUE}[*] Backing up existing file:${RESET}"
-                    echo -e "    $DEST_ITEM"
-                    echo -e "${BLUE}    -> $BACKUP_FILE${RESET}"
-
-                    cp -a "$DEST_ITEM" "$BACKUP_FILE"
-                fi
-
-                echo -e "${GREEN}[+] Deploying $item to ~/.config/$item...${RESET}"
-
-                mkdir -p "$(dirname "$DEST_ITEM")"
-
-                cp -a "$SRC_ITEM" "$DEST_ITEM"
-
-            fi
-
-        done
+        echo -e "${YELLOW}[!] Source config directory not found:${RESET}"
+        echo -e "    $SOURCE_CONFIG_DIR"
+        echo -e "${YELLOW}[!] Skipping configuration deployment.${RESET}"
 
     else
 
-        echo -e "${YELLOW}[!] $SCRIPT_DIR/.config directory not found. Skipping configuration deployment.${RESET}"
+        echo -e "${BLUE}[*] Preparing configuration deployment...${RESET}"
+
+        # ------------------------------------------------
+        # IMPORTANT:
+        #
+        # Create the source list BEFORE creating ANY backup.
+        #
+        # This prevents:
+        #
+        #   file_backup_123
+        #   file_backup_456
+        #
+        # from becoming new source items during the same run.
+        # ------------------------------------------------
+
+        SOURCE_ITEMS=()
+
+        while IFS= read -r -d '' SRC_ITEM; do
+            SOURCE_ITEMS+=("$SRC_ITEM")
+        done < <(
+            find "$SOURCE_CONFIG_DIR" \
+                -mindepth 1 \
+                -maxdepth 1 \
+                ! -name '*_backup_*' \
+                -print0
+        )
+
+        # ------------------------------------------------
+        # Nothing to deploy
+        # ------------------------------------------------
+
+        if [ "${#SOURCE_ITEMS[@]}" -eq 0 ]; then
+
+            echo -e "${YELLOW}[!] No configuration files found to deploy.${RESET}"
+
+        else
+
+            for SRC_ITEM in "${SOURCE_ITEMS[@]}"; do
+
+                item="$(basename "$SRC_ITEM")"
+
+                DEST_ITEM="$DEST_CONFIG_DIR/$item"
+
+                # ------------------------------------------------
+                # Resolve actual paths
+                # ------------------------------------------------
+
+                SRC_REAL="$(realpath -m "$SRC_ITEM")"
+                DEST_REAL="$(realpath -m "$DEST_ITEM")"
+
+                # ====================================================
+                # SAME PATH
+                # ====================================================
+
+                if [ "$SRC_REAL" = "$DEST_REAL" ]; then
+
+                    echo -e "${YELLOW}[!] $item already exists at the same path. Skipping.${RESET}"
+
+                    continue
+
+                fi
+
+                # ====================================================
+                # SAME FILE / SAME DIRECTORY
+                #
+                # Handles symlink / hardlink / same inode situations.
+                # ====================================================
+
+                if [ -e "$SRC_ITEM" ] && [ -e "$DEST_ITEM" ]; then
+
+                    if [ "$SRC_ITEM" -ef "$DEST_ITEM" ]; then
+
+                        echo -e "${YELLOW}[!] $item is already the same file/directory. Skipping.${RESET}"
+
+                        continue
+
+                    fi
+
+                fi
+
+                # ====================================================
+                # DIRECTORY
+                # ====================================================
+
+                if [ -d "$SRC_ITEM" ]; then
+
+                    # ------------------------------------------------
+                    # Existing destination directory
+                    # ------------------------------------------------
+
+                    if [ -d "$DEST_ITEM" ]; then
+
+                        BACKUP_DIR="${DEST_ITEM}_backup_${TIMESTAMP}"
+
+                        echo -e "${BLUE}[*] Backing up existing directory:${RESET}"
+                        echo -e "    $DEST_ITEM"
+                        echo -e "${BLUE}    -> $BACKUP_DIR${RESET}"
+
+                        cp -a -- "$DEST_ITEM" "$BACKUP_DIR"
+
+                    # ------------------------------------------------
+                    # Destination exists but is not a directory
+                    # ------------------------------------------------
+
+                    elif [ -e "$DEST_ITEM" ]; then
+
+                        BACKUP_PATH="${DEST_ITEM}_backup_${TIMESTAMP}"
+
+                        echo -e "${BLUE}[*] Backing up existing path:${RESET}"
+                        echo -e "    $DEST_ITEM"
+                        echo -e "${BLUE}    -> $BACKUP_PATH${RESET}"
+
+                        cp -a -- "$DEST_ITEM" "$BACKUP_PATH"
+
+                        rm -rf -- "$DEST_ITEM"
+
+                    fi
+
+                    # ------------------------------------------------
+                    # Deploy directory
+                    # ------------------------------------------------
+
+                    echo -e "${GREEN}[+] Deploying $item config to ~/.config/$item...${RESET}"
+
+                    mkdir -p -- "$DEST_ITEM"
+
+                    rsync -a --delete \
+                        -- "$SRC_ITEM/" "$DEST_ITEM/"
+
+                # ====================================================
+                # FILE
+                # ====================================================
+
+                elif [ -f "$SRC_ITEM" ]; then
+
+                    # ------------------------------------------------
+                    # Existing destination file
+                    # ------------------------------------------------
+
+                    if [ -e "$DEST_ITEM" ]; then
+
+                        BACKUP_FILE="${DEST_ITEM}_backup_${TIMESTAMP}"
+
+                        echo -e "${BLUE}[*] Backing up existing file:${RESET}"
+                        echo -e "    $DEST_ITEM"
+                        echo -e "${BLUE}    -> $BACKUP_FILE${RESET}"
+
+                        cp -a -- "$DEST_ITEM" "$BACKUP_FILE"
+
+                    fi
+
+                    # ------------------------------------------------
+                    # Deploy file
+                    # ------------------------------------------------
+
+                    echo -e "${GREEN}[+] Deploying $item to ~/.config/$item...${RESET}"
+
+                    mkdir -p -- "$(dirname "$DEST_ITEM")"
+
+                    cp -a -- "$SRC_ITEM" "$DEST_ITEM"
+
+                fi
+
+            done
+
+            echo -e "${GREEN}[+] Configuration deployment completed successfully.${RESET}"
+
+        fi
 
     fi
+
 fi
 
 # ====================================================
@@ -563,9 +694,13 @@ fi
 
 echo -e "${BLUE}[*] Setting execution permissions for scripts...${RESET}"
 
-chmod +x "$HOME/.config/hypr/scripts/"*.sh 2>/dev/null || true
+chmod +x \
+    "$HOME/.config/hypr/scripts/"*.sh \
+    2>/dev/null || true
 
-chmod +x "$HOME/.config/quickshell/scripts/"*.py 2>/dev/null || true
+chmod +x \
+    "$HOME/.config/quickshell/scripts/"*.py \
+    2>/dev/null || true
 
 echo -e "${GREEN}[+] Execution permissions applied.${RESET}"
 
@@ -581,7 +716,8 @@ if confirm "Set Fish as your default login shell?"; then
 
         if ! grep -Fxq "$FISH_PATH" /etc/shells; then
 
-            echo "$FISH_PATH" | sudo tee -a /etc/shells >/dev/null
+            echo "$FISH_PATH" |
+                sudo tee -a /etc/shells >/dev/null
 
         fi
 
