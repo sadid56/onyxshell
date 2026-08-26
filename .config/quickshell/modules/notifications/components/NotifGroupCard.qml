@@ -46,7 +46,6 @@ Rectangle {
         anchors.margins: 10
         spacing: 8
 
-        // Group Header Bar
         Rectangle {
             Layout.fillWidth: true
             height: 38
@@ -66,7 +65,6 @@ Rectangle {
                 anchors.rightMargin: 10
                 spacing: 10
 
-                // App Icon
                 Rectangle {
                     width: 26
                     height: 26
@@ -84,7 +82,6 @@ Rectangle {
                     }
                 }
 
-                // App Name
                 Text {
                     text: groupCardRoot.groupName
                     font.family: "Google Sans Flex, sans-serif"
@@ -96,7 +93,6 @@ Rectangle {
                     Layout.alignment: Qt.AlignVCenter
                 }
 
-                // Count Badge
                 Rectangle {
                     height: 20
                     implicitWidth: Math.max(20, countText.implicitWidth + 10)
@@ -116,7 +112,6 @@ Rectangle {
                     }
                 }
 
-                // Clear Group Button
                 Rectangle {
                     width: 24
                     height: 24
@@ -157,7 +152,6 @@ Rectangle {
                     }
                 }
 
-                // Chevron Expand/Collapse
                 Rectangle {
                     width: 24
                     height: 24
@@ -182,7 +176,6 @@ Rectangle {
             }
         }
 
-        // Expanded Notification Items Column
         ColumnLayout {
             Layout.fillWidth: true
             spacing: 6

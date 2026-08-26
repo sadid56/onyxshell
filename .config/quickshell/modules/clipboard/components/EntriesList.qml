@@ -193,7 +193,6 @@ UI.AnimatedListView {
                 Behavior on color { ColorAnimation { duration: 140 } }
             }
 
-            // Pin Button
             Rectangle {
                 id: pinBtn
                 width: 28
@@ -233,7 +232,6 @@ UI.AnimatedListView {
                 }
             }
 
-            // Delete / Close Button
             Rectangle {
                 id: deleteBtn
                 width: 28

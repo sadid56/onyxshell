@@ -12,7 +12,7 @@ Scope {
 
     property var theme: null
     property bool isFadingOut: false
-    // Frame 0 synchronous check: only bypass splash if reload flag is explicitly set
+
     property bool isFinished: (Quickshell.env("QUICKSHELL_NO_SPLASH") === "1" || Quickshell.env("QUICKSHELL_RELOAD") === "1")
 
     Variants {
@@ -39,12 +39,10 @@ Scope {
                 color: splashScope.theme ? splashScope.theme.getColor("surface") : "#1b1111"
                 opacity: 1.0
 
-                // Center Splash Card
                 ColumnLayout {
                     anchors.centerIn: parent
                     spacing: 24
 
-                    // Breathing Distro Logo
                     Item {
                         Layout.alignment: Qt.AlignHCenter
                         width: 72
@@ -83,7 +81,6 @@ Scope {
                         }
                     }
 
-                    // Welcome / Starting Message
                     ColumnLayout {
                         Layout.alignment: Qt.AlignHCenter
                         spacing: 6
@@ -106,7 +103,6 @@ Scope {
                         }
                     }
 
-                    // Minimalist Indeterminate Progress Bar
                     Rectangle {
                         Layout.alignment: Qt.AlignHCenter
                         width: 180
@@ -138,7 +134,6 @@ Scope {
                     }
                 }
 
-                // Splash Duration Timer
                 Timer {
                     id: hideTimer
                     interval: 1000
@@ -149,7 +144,6 @@ Scope {
                     }
                 }
 
-                // Smooth Fade Out Transition
                 NumberAnimation {
                     id: fadeOutAnim
                     target: splashRootRect
@@ -158,7 +152,7 @@ Scope {
                     duration: 480
                     easing.type: Easing.OutCubic
                     onFinished: {
-                        // Completely destroy and unmount the splash window from memory!
+
                         splashScope.isFinished = true;
                     }
                 }

@@ -45,8 +45,8 @@ hl.window_rule({
     match     = { class = "^(kitty-dropdown)$" },
     workspace = "special:dropdown",
     float     = true,
-    size      = { 1200, 600 },
-    center    = true,
+    size      = { 1520, 500 },
+    move      = "200 570",
     opaque    = true,
     opacity   = 1.0,
 })

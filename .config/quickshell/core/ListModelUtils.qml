@@ -19,7 +19,6 @@ QtObject {
             return;
         }
 
-        // 1. Build map of target keys for fast lookup
         var targetMap = {};
         for (var t = 0; t < limit; t++) {
             var val = sourceArray[t];
@@ -27,7 +26,6 @@ QtObject {
             targetMap[kVal] = true;
         }
 
-        // 2. Remove items not present in target array first
         for (var r = listModel.count - 1; r >= 0; r--) {
             var curr = listModel.get(r);
             var currKey = (curr && keyProp && curr[keyProp] !== undefined) ? curr[keyProp] : (curr ? curr.entryData : curr);
@@ -36,7 +34,6 @@ QtObject {
             }
         }
 
-        // 3. Reorder existing items and insert new items at the correct position
         for (var j = 0; j < limit; j++) {
             var targetItem = sourceArray[j];
             var targetKeyVal = (typeof targetItem === "object" && keyProp) ? targetItem[keyProp] : targetItem;
@@ -46,10 +43,9 @@ QtObject {
                 var modelKeyVal = (modelItem && keyProp && modelItem[keyProp] !== undefined) ? modelItem[keyProp] : (modelItem ? modelItem.entryData : modelItem);
 
                 if (modelKeyVal === targetKeyVal) {
-                    continue; // Already at the right index
+                    continue;
                 }
 
-                // Look ahead to see if it's already in the model further down
                 var foundIdx = -1;
                 for (var k = j + 1; k < listModel.count; k++) {
                     var lookItem = listModel.get(k);
@@ -70,7 +66,6 @@ QtObject {
             }
         }
 
-        // 4. Remove any extra items beyond limit
         while (listModel.count > limit) {
             listModel.remove(listModel.count - 1);
         }

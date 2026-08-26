@@ -6,7 +6,7 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Wayland
 import Quickshell.Io
-import "../components/ui" as UIInputs
+import "../components/ui" as UI
 import "./components"
 
 PanelWindow {
@@ -155,7 +155,7 @@ PanelWindow {
                 }
             }
 
-            UIInputs.Input {
+            UI.Input {
                 id: searchInput
                 Layout.fillWidth: true
                 theme: keybindsWindow.theme
@@ -166,7 +166,7 @@ PanelWindow {
 
             Rectangle { Layout.fillWidth: true; height: 1; color: keybindsWindow.theme ? keybindsWindow.theme.getColor("surfaceVariant") : "#2b2a27" }
 
-            UIInputs.AnimatedListView {
+            UI.AnimatedListView {
                 id: shortcutsList
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -184,10 +184,13 @@ PanelWindow {
                 }
             }
 
-            KeybindEmptyState {
+            UI.EmptyState {
                 visible: dynamicKeybindsModel.count === 0
                 theme: keybindsWindow.theme
                 searchQuery: keybindsWindow.searchQuery
+                defaultIcon: "devices/keyboard.svg"
+                title: keybindsWindow.searchQuery !== "" ? "No matching keybinds" : "No keybinds registered"
+                subtitle: keybindsWindow.searchQuery !== "" ? ("Nothing matched \"" + keybindsWindow.searchQuery + "\"\nMaybe bind it in keybinds.lua ⌨️😉") : ""
             }
         }
     }

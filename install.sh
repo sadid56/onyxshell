@@ -207,7 +207,7 @@ install_packages() {
                 xdg-desktop-portal-hyprland
                 xdg-desktop-portal-gtk
 
-                polkit-gnome
+                hyprpolkitagent
                 gnome-keyring
                 libnotify
 
@@ -279,7 +279,7 @@ install_packages() {
                 xdg-desktop-portal-hyprland
                 xdg-desktop-portal-gtk
 
-                polkit-gnome
+                hyprpolkitagent
                 gnome-keyring
                 libnotify
 
@@ -345,7 +345,7 @@ install_packages() {
                 xdg-desktop-portal-hyprland
                 xdg-desktop-portal-gtk
 
-                policykit-1-gnome
+                hyprpolkitagent
                 gnome-keyring
                 libnotify-bin
 

@@ -7,20 +7,20 @@ Rectangle {
     Layout.preferredHeight: 38
     radius: 19
 
-    property bool isTodayDate: modelData.dayNumber === calWindow.today.getDate() && 
-                              modelData.month === calWindow.today.getMonth() && 
+    property bool isTodayDate: modelData.dayNumber === calWindow.today.getDate() &&
+                              modelData.month === calWindow.today.getMonth() &&
                               modelData.year === calWindow.today.getFullYear()
 
-    property bool isSelectedDate: modelData.dayNumber === calWindow.selectedDate.getDate() && 
-                                  modelData.month === calWindow.selectedDate.getMonth() && 
+    property bool isSelectedDate: modelData.dayNumber === calWindow.selectedDate.getDate() &&
+                                  modelData.month === calWindow.selectedDate.getMonth() &&
                                   modelData.year === calWindow.selectedDate.getFullYear()
 
     color: isTodayDate ?
            (calWindow.theme ? calWindow.theme.getColor("primary") : "#ffb3b4") :
            (isSelectedDate ?
                (calWindow.theme ? calWindow.theme.getColor("surfaceVariant") : "#34343c") :
-               (cellHover.hovered ? 
-                   (calWindow.theme ? calWindow.theme.getColor("surfaceVariant") : "#2b2a27") : 
+               (cellHover.hovered ?
+                   (calWindow.theme ? calWindow.theme.getColor("surfaceVariant") : "#2b2a27") :
                    "transparent"))
 
     border.width: (isSelectedDate && !isTodayDate) ? 1.5 : 0

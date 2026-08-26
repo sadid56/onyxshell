@@ -8,16 +8,16 @@ import "../../components/ui" as UI
 import "./components"
 Popup {
     id: notifWindow
-    popupWidth: 450
-    popupHeight: notifWindow.height > 0 ? (notifWindow.height + topOverlap) : 1080
-    flatBottom: true
-    slideFromRight: true
+    popupWidth: 440
+    popupHeight: 650
+    showCorners: false
+    flatBottom: false
+    contentRectX: notifWindow.safeWidth - notifWindow.popupWidth - 10
     readonly property var activeNotifs: (typeof root !== "undefined" && root.activeNotifs) ? root.activeNotifs : ((typeof popupManager !== "undefined" && popupManager.activeNotifs) ? popupManager.activeNotifs : [])
     property int notifCount: activeNotifs.length
     property int volumeValue: 50
     property int micValue: 50
     property int brightnessValue: 50
-    property int nightLightValue: 0
     property bool powerProfileExpanded: false
     property bool micExpanded: false
     property string currentProfile: "performance"
@@ -98,19 +98,6 @@ Popup {
             Qt.callLater(() => running = true);
         }
     }
-    Process {
-        id: nightLightSetter
-        function setNightLight(val) {
-            if (val <= 0) {
-                command = ["sh", "-c", "pgrep -x hyprsunset >/dev/null || (hyprsunset >/dev/null 2>&1 & sleep 0.2); hyprctl hyprsunset identity 2>/dev/null || true"];
-            } else {
-                var temp = Math.round(6500 - (val / 100) * 3500);
-                command = ["sh", "-c", "pgrep -x hyprsunset >/dev/null || (hyprsunset >/dev/null 2>&1 & sleep 0.2); hyprctl hyprsunset temperature " + temp + " 2>/dev/null || true"];
-            }
-            running = false;
-            Qt.callLater(() => running = true);
-        }
-    }
     PanelHeader {
         theme: notifWindow.theme
         uptimeStr: notifWindow.uptimeStr
@@ -134,13 +121,10 @@ Popup {
         theme: notifWindow.theme
         volumeValue: notifWindow.volumeValue
         brightnessValue: notifWindow.brightnessValue
-        nightLightValue: notifWindow.nightLightValue
         volumeSetter: volumeSetter
         brightnessSetter: brightnessSetter
-        nightLightSetter: nightLightSetter
         onVolumeMoved: val => notifWindow.volumeValue = val
         onBrightnessMoved: val => notifWindow.brightnessValue = val
-        onNightLightMoved: val => notifWindow.nightLightValue = val
     }
     UI.Divider {
         theme: notifWindow.theme

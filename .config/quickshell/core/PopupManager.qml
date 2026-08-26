@@ -6,7 +6,7 @@ import "../modules/calendar"
 import "../modules/clipboard"
 import "../modules/alt_tab"
 import "../modules/emoji"
-import "../modules/dashboard"
+import "../modules/app_launcher"
 import "../modules/bar/components"
 import "../services"
 QtObject {
@@ -103,24 +103,6 @@ QtObject {
         if (loader.loaded && loader.item) loader.item.active = false;
     }
     property list<QtObject> elements: [
-        PanelWindow {
-            id: rightEdgeTrigger
-            anchors { top: true; bottom: true; right: true }
-            implicitWidth: 2
-            color: "transparent"
-            exclusiveZone: 0
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                onEntered: {
-                    var notifX = popupManager.statusBar ? popupManager.statusBar.getNotifX() : undefined;
-                    popupManager.stopLoaderTimerAndActivate(notifsLoader, notifX);
-                    popupManager.setLoaderInactive(calendarLoader);
-                    popupManager.setLoaderInactive(wifiLoader);
-                    popupManager.setLoaderInactive(mediaLoader);
-                }
-            }
-        },
         Loader {
             id: mediaLoader
             property bool loaded: false
@@ -180,7 +162,7 @@ QtObject {
             id: dashboardLoader
             property bool loaded: false
             active: loaded
-            sourceComponent: AppDashboard { theme: popupManager.theme }
+            sourceComponent: AppLauncher { theme: popupManager.theme }
         },
         Loader {
             id: altTabLoader

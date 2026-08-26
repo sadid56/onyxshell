@@ -91,9 +91,8 @@ Row {
 
             Behavior on width {
                 NumberAnimation {
-                    duration: 350
-                    easing.type: Easing.OutBack
-                    easing.overshoot: 1.5
+                    duration: 220
+                    easing.type: Easing.OutCubic
                 }
             }
 

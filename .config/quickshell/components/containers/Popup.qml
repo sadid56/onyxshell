@@ -33,8 +33,8 @@ PanelWindow {
 
     readonly property int safeWidth: popupWindow.width > 0 ? popupWindow.width : 1920
 
-    property real contentRectX: targetX > 0 ? Math.max(0, Math.min(targetX - popupWidth / 2, safeWidth - popupWidth)) : (safeWidth - popupWidth) / 2
-    property real contentRectY: popupWindow.active ? -popupWindow.topOverlap : -(popupWindow.topOverlap + 20)
+    property real contentRectX: targetX > 0 ? Math.max(10, Math.min(targetX - popupWidth / 2, safeWidth - popupWidth - 10)) : ((safeWidth - popupWidth) / 2)
+    property real contentRectY: popupWindow.showCorners ? (popupWindow.active ? -popupWindow.topOverlap : -(popupWindow.topOverlap + 20)) : (popupWindow.active ? 10 : -20)
 
     default property alias contentData: columnLayout.data
 
@@ -76,8 +76,9 @@ PanelWindow {
     Rectangle {
         id: contentRect
         anchors.right: popupWindow.slideFromRight ? parent.right : undefined
+        anchors.rightMargin: popupWindow.slideFromRight ? (popupWindow.showCorners ? 0 : 10) : 0
         x: popupWindow.slideFromRight ? 0 : (popupWindow.contentRectX !== undefined ? popupWindow.contentRectX : 0)
-        y: popupWindow.slideFromRight ? -popupWindow.topOverlap : (popupWindow.contentRectY !== undefined ? popupWindow.contentRectY : 0)
+        y: popupWindow.slideFromRight ? (popupWindow.showCorners ? -popupWindow.topOverlap : 10) : popupWindow.contentRectY
 
         width: popupWindow.popupWidth
         height: popupWindow.popupHeight
@@ -135,17 +136,15 @@ PanelWindow {
             visible: popupWindow.showCorners && !popupWindow.slideFromRight
         }
 
-        // Fill bottom-left corner flush when attached to left edge
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             width: parent.radius
             height: parent.radius
             color: parent.color
-            visible: !popupWindow.flatBottom && (contentRect.x <= 0)
+            visible: popupWindow.showCorners && !popupWindow.flatBottom && (contentRect.x <= 0)
         }
 
-        // Smooth Canvas corner curving into left screen border
         Canvas {
             id: bottomLeftCornerCanvas
             width: contentRect.radius
@@ -181,6 +180,48 @@ PanelWindow {
 
         Rectangle {
             anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            width: parent.radius
+            height: parent.radius
+            color: parent.color
+            visible: popupWindow.showCorners && !popupWindow.flatBottom && popupWindow.slideFromRight
+        }
+
+        Canvas {
+            id: bottomRightCornerCanvas
+            width: contentRect.radius
+            height: contentRect.radius
+            anchors.top: parent.bottom
+            anchors.right: parent.right
+            antialiasing: true
+            renderTarget: Canvas.FramebufferObject
+            visible: popupWindow.showCorners && !popupWindow.flatBottom && popupWindow.slideFromRight
+
+            Connections {
+                target: popupWindow.theme
+                function onColorsChanged() { bottomRightCornerCanvas.requestPaint(); }
+            }
+            onWidthChanged: requestPaint()
+            onHeightChanged: requestPaint()
+            onVisibleChanged: if (visible) requestPaint()
+
+            onPaint: {
+                var ctx = getContext("2d");
+                ctx.reset();
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = popupWindow.theme ? popupWindow.theme.getColor("surface") : "#1b1111";
+                ctx.beginPath();
+                ctx.moveTo(width, height);
+                ctx.lineTo(width, 0);
+                ctx.lineTo(0, 0);
+                ctx.arc(0, height, width, Math.PI * 1.5, Math.PI * 2, false);
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        Rectangle {
+            anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             height: parent.radius
@@ -205,7 +246,7 @@ PanelWindow {
             anchors.leftMargin: 20
             anchors.rightMargin: 20
             anchors.bottomMargin: 20
-            anchors.topMargin: popupWindow.topOverlap + 10
+            anchors.topMargin: popupWindow.showCorners ? (popupWindow.topOverlap + 10) : 20
             spacing: 14
         }
     }

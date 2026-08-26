@@ -12,7 +12,7 @@ Popup {
     property var activeTrayItem: null
 
     popupWidth: 230
-    popupHeight: Math.min(480, Math.max(50, mainLayout.implicitHeight + 8))
+    popupHeight: Math.min(480, Math.max(50, mainLayout.implicitHeight - 6))
 
     showCorners: true
     closeOnHoverOutside: true
@@ -40,7 +40,7 @@ Popup {
         anchors.leftMargin: 6
         anchors.rightMargin: 6
         anchors.bottomMargin: 4
-        anchors.topMargin: 0
+        anchors.topMargin: -14
         contentWidth: width
         contentHeight: mainLayout.implicitHeight
         clip: true
@@ -98,7 +98,24 @@ Popup {
                     readonly property var menuItem: modelData
                     readonly property string rawText: (menuItem && menuItem.text) ? menuItem.text : ""
                     readonly property string cleanText: rawText.replace(/<[^>]*>?/gm, "").trim()
-                    readonly property bool isSep: menuItem ? !!menuItem.isSeparator : false
+                    readonly property bool isRawSep: menuItem ? Boolean(menuItem.isSeparator) : false
+                    readonly property bool isSep: {
+                        if (!isRawSep) return false;
+                        if (!parent || !parent.children) return true;
+                        var foundPrevText = false;
+                        for (var i = 0; i < parent.children.length; i++) {
+                            var sib = parent.children[i];
+                            if (sib === delegateWrapper) break;
+                            if (sib && sib !== glidingPill && sib.visible && sib.height > 0) {
+                                if (sib.isSep === true) {
+                                    foundPrevText = false;
+                                } else if (sib.cleanText && sib.cleanText !== "") {
+                                    foundPrevText = true;
+                                }
+                            }
+                        }
+                        return foundPrevText;
+                    }
                     readonly property bool isValidItem: isSep || cleanText !== ""
 
                     visible: isValidItem
@@ -113,8 +130,8 @@ Popup {
                         anchors.centerIn: parent
                         width: parent.width - 16
                         height: 1
-                        color: trayMenuWindow.theme.getColor("outline")
-                        opacity: 0.25
+                        color: trayMenuWindow.theme ? trayMenuWindow.theme.getColor("outlineVariant") : "#40FFFFFF"
+                        opacity: 0.4
                         visible: delegateWrapper.isSep
                     }
 

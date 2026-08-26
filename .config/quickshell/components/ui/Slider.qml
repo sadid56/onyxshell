@@ -34,7 +34,6 @@ Item {
             radius: 14
             opacity: sliderMouse.containsMouse ? 0.95 : 0.85
 
-            // Gradient when over 100% (Alert / Over-amplification mode)
             gradient: sliderRoot.value > 100 ? alertGradient : null
             color: sliderRoot.value > 100 ? "transparent" : (sliderRoot.theme ? sliderRoot.theme.getColor("primary") : "#ffb3b4")
 

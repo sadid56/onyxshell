@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Io
+import "../../../components/ui" as UI
 
 Item {
     id: mediaBarRoot
@@ -10,81 +10,22 @@ Item {
     property var mediaService
     property var toggleMedia
 
-    property var targetBars: []
-    property var smoothBars: []
-
     readonly property bool isPlaying: mediaBarRoot.mediaService ? Boolean(mediaBarRoot.mediaService.isPlaying) : false
     readonly property bool hasMedia: mediaBarRoot.mediaService ? Boolean(mediaBarRoot.mediaService.hasMedia) : false
 
-    implicitHeight: 24
-    implicitWidth: 215
-    Layout.maximumWidth: 230
+    implicitHeight: 28
+    implicitWidth: hasMedia ? Math.min(240, contentRow.implicitWidth + 12) : 0
+    visible: opacity > 0.001
+    opacity: hasMedia ? 1.0 : 0.0
+    clip: true
+
+    Behavior on implicitWidth { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+    Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }
+
     Layout.alignment: Qt.AlignVCenter
 
-    onIsPlayingChanged: {
-        if (!isPlaying) {
-            targetBars = [];
-            smoothBars = [];
-            barVisualizerCanvas.requestPaint();
-        }
-    }
-
-    Process {
-        id: cavaProcess
-        command: ["cava", "-p", shellConfig.quickshellDir + "/scripts/cava_bar.conf"]
-        running: mediaBarRoot.isPlaying && mediaBarRoot.hasMedia
-        stdout: SplitParser {
-            onRead: data => {
-                var clean = data.trim();
-                if (!clean) return;
-                var parts = clean.split(';');
-                var vals = [];
-                for (var i = 0; i < parts.length; i++) {
-                    if (parts[i] !== "") vals.push(parseInt(parts[i]) || 0);
-                }
-                if (vals.length > 0) mediaBarRoot.targetBars = vals;
-            }
-        }
-    }
-
-    Timer {
-        id: smoothTimer
-        interval: 25
-        running: mediaBarRoot.isPlaying && mediaBarRoot.hasMedia
-        repeat: true
-        onTriggered: {
-            var targets = mediaBarRoot.targetBars;
-            if (!targets || targets.length === 0) return;
-
-            if (!mediaBarRoot.smoothBars || mediaBarRoot.smoothBars.length !== targets.length) {
-                var initArr = [];
-                for (var k = 0; k < targets.length; k++) initArr.push(0);
-                mediaBarRoot.smoothBars = initArr;
-            }
-
-            var current = mediaBarRoot.smoothBars.slice();
-            var changed = false;
-
-            for (var i = 0; i < targets.length; i++) {
-                var targetVal = (mediaBarRoot.isPlaying && mediaBarRoot.hasMedia) ? (targets[i] || 0) : 0;
-                var diff = targetVal - (current[i] || 0);
-                if (Math.abs(diff) > 0.1) {
-                    current[i] += diff * 0.42;
-                    changed = true;
-                } else {
-                    current[i] = targetVal;
-                }
-            }
-
-            if (changed) {
-                mediaBarRoot.smoothBars = current;
-                barVisualizerCanvas.requestPaint();
-            }
-        }
-    }
-
     MouseArea {
-        id: pillMouseArea
+        id: mainMouseArea
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
@@ -92,9 +33,6 @@ Item {
         onEntered: {
             if (typeof root !== "undefined" && root.stopLoaderTimerAndActivate && typeof mediaLoader !== "undefined" && typeof statusBar !== "undefined") {
                 root.stopLoaderTimerAndActivate(mediaLoader, statusBar.getMediaX());
-                root.setLoaderInactive(calendarLoader);
-                root.setLoaderInactive(wifiLoader);
-                root.setLoaderInactive(notifsLoader);
             }
         }
         onExited: {
@@ -111,84 +49,46 @@ Item {
         }
     }
 
-    Canvas {
-        id: barVisualizerCanvas
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
-        height: 22
+    RowLayout {
+        id: contentRow
+        anchors.fill: parent
+        anchors.leftMargin: 2
+        anchors.rightMargin: 4
+        spacing: 8
 
-        onVisibleChanged: requestPaint()
-        onWidthChanged: requestPaint()
+        Rectangle {
+            width: 1
+            height: 16
+            radius: 0.5
+            color: mediaBarRoot.theme ? mediaBarRoot.theme.getColor("outline") : "#9f8c8c"
+            opacity: 0.45
+            Layout.alignment: Qt.AlignVCenter
+            Layout.rightMargin: 2
+        }
 
-        onPaint: {
-            var ctx = getContext("2d");
-            ctx.reset();
-            ctx.clearRect(0, 0, width, height);
+        UI.Icon {
+            size: 15
+            icon: "media/music.svg"
+            color: mediaBarRoot.theme ? mediaBarRoot.theme.getColor("primary") : "#ffb3b4"
+            Layout.alignment: Qt.AlignVCenter
+        }
 
-            var baselineY = height - 2;
-            var primaryColor = mediaBarRoot.theme ? mediaBarRoot.theme.getColor("primary") : "#3574d4";
-            var outlineColor = mediaBarRoot.theme ? mediaBarRoot.theme.getColor("outline") : "#757680";
-            var bars = mediaBarRoot.smoothBars || [];
-            var maxAmplitude = height - 4;
-
-            var hasSignal = false;
-            for (var b = 0; b < bars.length; b++) {
-                if (bars[b] > 1.0) { hasSignal = true; break; }
+        Text {
+            Layout.fillWidth: true
+            Layout.maximumWidth: 160
+            Layout.alignment: Qt.AlignVCenter
+            text: {
+                if (!mediaBarRoot.mediaService) return "";
+                var t = mediaBarRoot.mediaService.mediaTitle || "";
+                var a = mediaBarRoot.mediaService.mediaArtist || "";
+                if (t === "No media playing" || t === "") return "";
+                return a ? (t + " • " + a) : t;
             }
-
-            if (hasSignal && mediaBarRoot.isPlaying && bars.length > 1) {
-                var points = [];
-                var step = (width - 4) / (bars.length - 1);
-                for (var i = 0; i < bars.length; i++) {
-                    var normalized = Math.min(1.0, Math.max(0.0, (bars[i] || 0) / 100.0));
-                    points.push({ x: 2 + i * step, y: baselineY - (normalized * maxAmplitude) });
-                }
-
-                ctx.beginPath();
-                ctx.moveTo(points[0].x, baselineY);
-                ctx.lineTo(points[0].x, points[0].y);
-                for (var j = 0; j < points.length - 1; j++) {
-                    var xc = (points[j].x + points[j + 1].x) / 2;
-                    var yc = (points[j].y + points[j + 1].y) / 2;
-                    ctx.quadraticCurveTo(points[j].x, points[j].y, xc, yc);
-                }
-                ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
-                ctx.lineTo(points[points.length - 1].x, baselineY);
-                ctx.closePath();
-
-                var grad = ctx.createLinearGradient(0, 0, 0, baselineY);
-                grad.addColorStop(0.0, primaryColor);
-                grad.addColorStop(1.0, primaryColor);
-                ctx.fillStyle = grad;
-                ctx.globalAlpha = 0.35;
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.lineWidth = 2.2;
-                ctx.lineCap = "round";
-                ctx.lineJoin = "round";
-                ctx.strokeStyle = primaryColor;
-                ctx.globalAlpha = 1.0;
-                ctx.moveTo(points[0].x, points[0].y);
-                for (var k = 0; k < points.length - 1; k++) {
-                    var xck = (points[k].x + points[k + 1].x) / 2;
-                    var yck = (points[k].y + points[k + 1].y) / 2;
-                    ctx.quadraticCurveTo(points[k].x, points[k].y, xck, yck);
-                }
-                ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
-                ctx.stroke();
-            } else {
-                ctx.beginPath();
-                ctx.lineWidth = 2.0;
-                ctx.lineCap = "round";
-                ctx.strokeStyle = mediaBarRoot.isPlaying ? primaryColor : outlineColor;
-                ctx.globalAlpha = 0.6;
-                ctx.moveTo(2, baselineY);
-                ctx.lineTo(width - 2, baselineY);
-                ctx.stroke();
-            }
-            ctx.globalAlpha = 1.0;
+            font.family: "Google Sans Flex, sans-serif"
+            font.pixelSize: 13
+            font.bold: true
+            color: mediaBarRoot.theme ? mediaBarRoot.theme.getColor("onSurface") : "#FFFFFF"
+            elide: Text.ElideRight
         }
     }
 }

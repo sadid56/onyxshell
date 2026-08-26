@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Hyprland
 import "./widgets"
 import "../../core"
 import "../../components/ui" as UI
@@ -10,7 +11,9 @@ PanelWindow {
     anchors { top: true; left: true; right: true }
     implicitHeight: 56
     color: "transparent"
-    visible: (typeof root === "undefined" || !root.splashScreen || root.splashScreen.isFadingOut || root.splashScreen.isFinished)
+
+    readonly property bool isFullscreen: (Hyprland.focusedWorkspace && Boolean(Hyprland.focusedWorkspace.hasfullscreen || Hyprland.focusedWorkspace.hasFullscreen))
+    visible: (typeof root === "undefined" || !root.splashScreen || root.splashScreen.isFadingOut || root.splashScreen.isFinished) && !barWindow.isFullscreen
 
     margins {
         top: 0
@@ -18,7 +21,7 @@ PanelWindow {
         right: 0
     }
 
-    exclusiveZone: 40
+    exclusiveZone: isFullscreen ? 0 : 40
 
     property var theme
     property var sysStats
@@ -104,10 +107,6 @@ PanelWindow {
                     theme: barWindow.theme
                     Layout.alignment: Qt.AlignVCenter
                 }
-            }
-
-            UI.Divider {
-                theme: barWindow.theme
             }
 
             MediaBarWidget {

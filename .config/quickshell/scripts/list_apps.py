@@ -4,7 +4,7 @@ import json
 import re
 
 CACHE_FILE = "/tmp/quickshell_apps_cache.json"
-MAX_CACHE_AGE = 3600  # 1 hour max, even if nothing changed
+MAX_CACHE_AGE = 3600
 
 app_dirs = [
     "/usr/share/applications",
@@ -25,11 +25,9 @@ def is_cache_valid():
         import time
         cache_mtime = os.path.getmtime(CACHE_FILE)
 
-        # Max age check
         if time.time() - cache_mtime > MAX_CACHE_AGE:
             return False
 
-        # Check if any app directory or its .desktop files changed
         for d in app_dirs:
             if not os.path.exists(d):
                 continue
@@ -41,7 +39,6 @@ def is_cache_valid():
                     if os.path.getmtime(fp) > cache_mtime:
                         return False
 
-        # Check if icon theme root dirs changed (theme install/switch)
         for d in icon_theme_dirs:
             if os.path.exists(d) and os.path.getmtime(d) > cache_mtime:
                 return False
@@ -65,19 +62,23 @@ DEFAULT_APP_ICON = os.path.expanduser("~/.config/quickshell/assets/icons/system/
 def icon_score(path):
     p = path.lower()
     score = 0
-    if "/apps/" in p or "/pixmaps" in p:
+    if "symbolic" in p:
+        score -= 200
+    if "/apps/" in p or "/applications/" in p or "/pixmaps" in p:
         score += 100
     if "/scalable/" in p:
+        score += 60
+    elif "/512x512/" in p or "/256x256/" in p or "/128x128/" in p:
         score += 50
-    elif "/128x128/" in p or "/256x256/" in p or "/512x512/" in p:
-        score += 40
     elif "/64x64/" in p or "/48x48/" in p:
-        score += 30
+        score += 40
     elif "/32x32/" in p:
         score += 20
     elif "/16x16/" in p or "/22x22/" in p or "/mimes/" in p:
         score -= 50
     if path.endswith(".svg"):
+        score += 15
+    elif path.endswith(".png"):
         score += 10
     return score
 
@@ -110,7 +111,7 @@ def resolve_icon(name):
         return name
     if name in icon_cache:
         return icon_cache[name]
-    # Check if name has an extension
+
     base, _ = os.path.splitext(name)
     if base in icon_cache:
         return icon_cache[base]
@@ -122,10 +123,10 @@ def resolve_icon(name):
 def parse_categories(cat_str):
     if not cat_str:
         return ["Utilities"]
-    
+
     raw = [c.strip() for c in cat_str.split(";") if c.strip()]
     cats = set()
-    
+
     for c in raw:
         cl = c.lower()
         if any(x in cl for x in ["develop", "ide", "debugger", "building", "programming", "code"]):
@@ -146,7 +147,7 @@ def parse_categories(cat_str):
             cats.add("System")
         elif any(x in cl for x in ["utility", "accessories", "archive", "compression", "calc", "clock", "texteditor", "editor"]):
             cats.add("Utilities")
-            
+
     if not cats:
         cats.add("Utilities")
     return sorted(list(cats))
@@ -179,7 +180,7 @@ for d in app_dirs:
                 if name_match and exec_match and not nodisplay_match:
                     name = name_match.group(1).strip()
                     exec_cmd = exec_match.group(1).strip()
-                    exec_cmd = re.sub(r"%[fFuuNodDiks]", "", exec_cmd).strip()
+                    exec_cmd = re.sub(r"%[a-zA-Z%]", "", exec_cmd).strip()
 
                     if name in seen_names:
                         continue

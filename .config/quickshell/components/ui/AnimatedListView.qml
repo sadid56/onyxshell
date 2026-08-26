@@ -57,20 +57,31 @@ ListView {
         return (hoveredIndex !== -1) ? (hoveredIndex === idx) : (currentIndex === idx);
     }
 
+    function updateSelectionPill() {
+        if (currentIndex >= 0 && currentIndex < count) {
+            if (currentItem && currentItem.height > 0) {
+                selectionPill.targetY = currentItem.y;
+                selectionPill.targetHeight = currentItem.height;
+            } else {
+                selectionPill.targetY = currentIndex * (48 + spacing);
+                selectionPill.targetHeight = 48;
+            }
+        }
+    }
+
     onCountChanged: {
         if (hoveredIndex >= count) {
             hoveredIndex = -1;
         }
         if (currentIndex >= count) {
-            currentIndex = -1;
+            currentIndex = count > 0 ? 0 : -1;
         }
+        Qt.callLater(() => updateSelectionPill());
     }
 
     onCurrentIndexChanged: {
-        if (currentIndex >= 0 && currentItem) {
-            selectionPill.targetY = currentItem.y;
-            selectionPill.targetHeight = currentItem.height;
-        }
+        updateSelectionPill();
+        Qt.callLater(() => updateSelectionPill());
     }
 
     Rectangle {
@@ -83,11 +94,11 @@ ListView {
         color: listViewRoot.pillColor
 
         property real targetY: 0
-        property real targetHeight: 0
+        property real targetHeight: 48
 
         y: targetY
         height: targetHeight
-        opacity: ((listViewRoot.hoveredIndex >= 0 && listViewRoot.hoveredIndex < listViewRoot.count) || (listViewRoot.currentIndex >= 0 && listViewRoot.currentIndex < listViewRoot.count && listViewRoot.currentItem)) ? 1.0 : 0.0
+        opacity: (listViewRoot.hoveredIndex >= 0 || (listViewRoot.currentIndex >= 0 && listViewRoot.count > 0)) ? 1.0 : 0.0
 
         Behavior on y { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
         Behavior on height { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
@@ -98,23 +109,23 @@ ListView {
 
     add: Transition {
         ParallelAnimation {
-            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 200; easing.type: Easing.OutQuad }
-            NumberAnimation { property: "scale"; from: 0.95; to: 1.0; duration: 220; easing.type: Easing.OutCubic }
+            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 280; easing.type: Easing.OutQuad }
+            NumberAnimation { property: "scale"; from: 0.96; to: 1.0; duration: 320; easing.type: Easing.OutCubic }
         }
     }
 
     remove: Transition {
         ParallelAnimation {
-            NumberAnimation { property: "opacity"; to: 0.0; duration: 160; easing.type: Easing.OutQuad }
-            NumberAnimation { property: "scale"; to: 0.95; duration: 160; easing.type: Easing.OutCubic }
+            NumberAnimation { property: "opacity"; to: 0.0; duration: 220; easing.type: Easing.OutQuad }
+            NumberAnimation { property: "scale"; to: 0.96; duration: 240; easing.type: Easing.OutCubic }
         }
     }
 
-    move: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
-    moveDisplaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
-    displaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
-    removeDisplaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
-    addDisplaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
+    move: Transition { NumberAnimation { properties: "x,y"; duration: 360; easing.type: Easing.OutCubic } }
+    moveDisplaced: Transition { NumberAnimation { properties: "x,y"; duration: 360; easing.type: Easing.OutCubic } }
+    displaced: Transition { NumberAnimation { properties: "x,y"; duration: 360; easing.type: Easing.OutCubic } }
+    removeDisplaced: Transition { NumberAnimation { properties: "x,y"; duration: 360; easing.type: Easing.OutCubic } }
+    addDisplaced: Transition { NumberAnimation { properties: "x,y"; duration: 360; easing.type: Easing.OutCubic } }
 
     WheelHandler {
         id: wheelHandler

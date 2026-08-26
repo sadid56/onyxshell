@@ -16,113 +16,33 @@ Item {
     property string networkUp: "0 B/s"
     property int wifiSignal: -1
 
-    property var netProc: Process {
-        id: netProc
-        command: ["python", shellConfig.getScript("net_telemetry.py")]
+    property var telemetryProc: Process {
+        id: telemetryProc
+        command: ["python", ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getScript("sys_telemetry.py")]
         running: true
         stdout: SplitParser {
             onRead: data => {
                 try {
                     var parsed = JSON.parse(data.trim());
-                    sysStats.networkSsid = parsed.ssid;
-                    sysStats.networkDown = parsed.down;
-                    sysStats.networkUp = parsed.up;
-                    sysStats.wifiSignal = parsed.signal !== undefined ? parsed.signal : -1;
+                    if (!parsed) return;
+
+                    if (parsed.cpu !== undefined) sysStats.cpuUsage = parsed.cpu;
+                    if (parsed.memory !== undefined) sysStats.memUsage = parsed.memory;
+                    if (parsed.swap !== undefined) sysStats.swapUsage = parsed.swap;
+
+                    if (parsed.battery) {
+                        sysStats.batteryPercentage = parsed.battery.percentage;
+                        sysStats.batteryIsCharging = parsed.battery.charging;
+                    }
+
+                    if (parsed.network) {
+                        sysStats.networkSsid = parsed.network.ssid || "Disconnected";
+                        sysStats.networkDown = parsed.network.down || "0 B/s";
+                        sysStats.networkUp = parsed.network.up || "0 B/s";
+                        sysStats.wifiSignal = parsed.network.signal !== undefined ? parsed.network.signal : -1;
+                    }
                 } catch(e) {}
             }
-        }
-    }
-
-    property var lastCpu: ({})
-
-    Process {
-        id: statsProc
-        command: ["cat", "/proc/meminfo", "/proc/stat", "/sys/class/power_supply/BAT0/capacity", "/sys/class/power_supply/BAT0/status"]
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var text = this.text;
-                if (!text) return;
-
-                var lines = text.split('\n');
-                var total = 0, available = 0;
-                var swapTotal = 0, swapFree = 0;
-                var cpuLine = "";
-                var capacityRead = -1;
-                var statusRead = "";
-
-                for (var i = 0; i < lines.length; i++) {
-                    var line = lines[i].trim();
-                    if (line.indexOf("MemTotal:") === 0) {
-                        total = parseInt(line.match(/\d+/)[0]) || 0;
-                    } else if (line.indexOf("MemAvailable:") === 0) {
-                        available = parseInt(line.match(/\d+/)[0]) || 0;
-                    } else if (line.indexOf("SwapTotal:") === 0) {
-                        swapTotal = parseInt(line.match(/\d+/)[0]) || 0;
-                    } else if (line.indexOf("SwapFree:") === 0) {
-                        swapFree = parseInt(line.match(/\d+/)[0]) || 0;
-                    } else if (line.indexOf("cpu ") === 0) {
-                        cpuLine = line;
-                    } else if (/^\d+$/.test(line)) {
-                        capacityRead = parseInt(line);
-                    } else if (line === "Charging" || line === "Discharging" || line === "Full" || line === "Not charging") {
-                        statusRead = line;
-                    }
-                }
-
-                if (total > 0) {
-                    sysStats.memUsage = ((total - available) / total) * 100;
-                }
-
-                if (swapTotal > 0) {
-                    sysStats.swapUsage = ((swapTotal - swapFree) / swapTotal) * 100;
-                } else {
-                    sysStats.swapUsage = 0.0;
-                }
-
-                if (cpuLine) {
-                    var parts = cpuLine.split(/\s+/);
-                    var user = parseInt(parts[1]) || 0;
-                    var nice = parseInt(parts[2]) || 0;
-                    var system = parseInt(parts[3]) || 0;
-                    var idle = parseInt(parts[4]) || 0;
-                    var iowait = parseInt(parts[5]) || 0;
-                    var irq = parseInt(parts[6]) || 0;
-                    var softirq = parseInt(parts[7]) || 0;
-                    var steal = parseInt(parts[8]) || 0;
-
-                    var totalCpu = user + nice + system + idle + iowait + irq + softirq + steal;
-                    var totalIdle = idle + iowait;
-
-                    if (sysStats.lastCpu.total !== undefined) {
-                        var diffTotal = totalCpu - sysStats.lastCpu.total;
-                        var diffIdle = totalIdle - sysStats.lastCpu.idle;
-                        if (diffTotal > 0) {
-                            sysStats.cpuUsage = ((diffTotal - diffIdle) / diffTotal) * 100;
-                        }
-                    }
-
-                    sysStats.lastCpu = { "total": totalCpu, "idle": totalIdle };
-                }
-
-                if (capacityRead >= 0) {
-                    sysStats.batteryPercentage = capacityRead;
-                }
-                if (statusRead !== "") {
-                    sysStats.batteryIsCharging = (statusRead === "Charging" || statusRead === "Full");
-                }
-            }
-        }
-    }
-
-    property var statsTimer: Timer {
-        interval: 1500
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            statsProc.running = false;
-            statsProc.running = true;
         }
     }
 }

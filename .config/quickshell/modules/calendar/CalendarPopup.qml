@@ -135,9 +135,9 @@ Popup {
 
             Text {
                 id: selectedFullDateText
-                text: calWindow.dayFullNames[calWindow.selectedDate.getDay()] + ", " + 
-                      calWindow.selectedDate.getDate() + " " + 
-                      calWindow.monthNames[calWindow.selectedDate.getMonth()] + " " + 
+                text: calWindow.dayFullNames[calWindow.selectedDate.getDay()] + ", " +
+                      calWindow.selectedDate.getDate() + " " +
+                      calWindow.monthNames[calWindow.selectedDate.getMonth()] + " " +
                       calWindow.selectedDate.getFullYear()
                 font.family: "Google Sans Flex, sans-serif"
                 font.pixelSize: 17
@@ -161,8 +161,8 @@ Popup {
             width: 34
             height: 34
             radius: 17
-            color: prevMouse.containsMouse ? 
-                   (calWindow.theme ? calWindow.theme.getColor("surfaceVariant") : "#34343c") : 
+            color: prevMouse.containsMouse ?
+                   (calWindow.theme ? calWindow.theme.getColor("surfaceVariant") : "#34343c") :
                    "transparent"
 
             Behavior on color { ColorAnimation { duration: 120 } }
@@ -194,8 +194,8 @@ Popup {
             width: 34
             height: 34
             radius: 17
-            color: nextMouse.containsMouse ? 
-                   (calWindow.theme ? calWindow.theme.getColor("surfaceVariant") : "#34343c") : 
+            color: nextMouse.containsMouse ?
+                   (calWindow.theme ? calWindow.theme.getColor("surfaceVariant") : "#34343c") :
                    "transparent"
 
             Behavior on color { ColorAnimation { duration: 120 } }

@@ -11,14 +11,11 @@ ColumnLayout {
     property int volumeValue: 50
     property int micValue: 50
     property int brightnessValue: 50
-    property int nightLightValue: 0
     property var volumeSetter
     property var brightnessSetter
-    property var nightLightSetter
 
     signal volumeMoved(int val)
     signal brightnessMoved(int val)
-    signal nightLightMoved(int val)
 
     UISliders.Slider {
         theme: quickSlidersRoot.theme
@@ -41,18 +38,6 @@ ColumnLayout {
             quickSlidersRoot.brightnessMoved(val);
             if (quickSlidersRoot.brightnessSetter) {
                 quickSlidersRoot.brightnessSetter.setBrightness(val);
-            }
-        }
-    }
-
-    UISliders.Slider {
-        theme: quickSlidersRoot.theme
-        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/moon.svg")
-        value: quickSlidersRoot.nightLightValue
-        onMoved: val => {
-            quickSlidersRoot.nightLightMoved(val);
-            if (quickSlidersRoot.nightLightSetter) {
-                quickSlidersRoot.nightLightSetter.setNightLight(val);
             }
         }
     }

@@ -83,9 +83,12 @@ PanelWindow {
         var target = (selectedIndex >= 0 && selectedIndex < clientsList.length) ? clientsList[selectedIndex] : null;
         altTabWindow.active = false;
         if (target && target.address) {
+            var addr = target.address;
             Quickshell.execDetached([
                 "hyprctl", "eval",
-                "hl.dispatch(hl.dsp.focus({ window = 'address:" + target.address + "' }))"
+                "hl.dispatch(hl.dsp.focus({ window = 'address:" + addr + "' }))\n" +
+                "hl.dispatch(hl.dsp.window.bring_to_top({ window = 'address:" + addr + "' }))\n" +
+                "hl.dispatch(hl.dsp.window.alter_zorder({ action = 'top', window = 'address:" + addr + "' }))"
             ]);
         }
     }
@@ -140,7 +143,7 @@ PanelWindow {
 
             MouseArea {
                 anchors.fill: parent
-                onClicked: {} // Prevent backdrop click when clicking inside switcher box
+                onClicked: {}
             }
 
             Item {

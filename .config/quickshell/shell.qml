@@ -70,9 +70,9 @@ QtObject {
 
     function clearAllNotifications() {
         var toDismiss = root.activeNotifs.slice();
-        // Clear UI model atomically in 1 operation (instant 0ms UI update)
+
         root.activeNotifs = [];
-        // Dismiss each notification
+
         for (var i = 0; i < toDismiss.length; i++) {
             var n = toDismiss[i];
             if (n && typeof n.dismiss === "function") {
@@ -96,9 +96,9 @@ QtObject {
                 remaining.push(n);
             }
         }
-        // Atomic UI update
+
         root.activeNotifs = remaining;
-        // Dismiss in background
+
         for (var j = 0; j < toDismiss.length; j++) {
             var d = toDismiss[j];
             if (d && typeof d.dismiss === "function") {

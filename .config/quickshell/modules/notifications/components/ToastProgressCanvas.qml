@@ -15,37 +15,32 @@ Canvas {
     onPaint: {
         var ctx = getContext("2d");
         ctx.reset();
+        ctx.clearRect(0, 0, width, height);
         if (progress <= 0) return;
 
-        var arcLength = Math.PI * 14.5 / 2;
-        var totalLength = arcLength + (parent.width - 16);
-        var L = progress * totalLength;
+        var cx = width / 2;
+        var cy = height / 2;
+        var strokeW = 2.5;
+        var radius = Math.min(cx, cy) - strokeW;
+        if (radius <= 0) return;
 
-        ctx.strokeStyle = progressBarCanvas.theme ? progressBarCanvas.theme.getColor("primary") : "#ffb3b4";
+        var primColor = progressBarCanvas.theme ? progressBarCanvas.theme.getColor("primary") : "#ffb3b4";
+
+        ctx.strokeStyle = Qt.rgba(primColor.r, primColor.g, primColor.b, 0.18);
+        ctx.lineWidth = strokeW;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2, false);
+        ctx.stroke();
+
+        var startAngle = -Math.PI / 2;
+        var endAngle = startAngle + (progress * Math.PI * 2);
+
+        ctx.strokeStyle = primColor;
+        ctx.lineWidth = strokeW;
         ctx.lineCap = "round";
-
-        var activeAngle = L / 14.5;
-        var taperLimit = Math.min(Math.PI / 2, activeAngle);
-        var steps = 15;
-        var stepSize = taperLimit / steps;
-
-        for (var i = 0; i < steps; i++) {
-            var a1 = Math.PI - (i * stepSize);
-            var a2 = Math.PI - ((i + 1) * stepSize);
-
-            ctx.lineWidth = 3.0 * ((i + 0.5) / steps);
-            ctx.beginPath();
-            ctx.arc(16, parent.height - 16, 14.5, a1, a2, true);
-            ctx.stroke();
-        }
-
-        if (activeAngle > Math.PI / 2) {
-            ctx.lineWidth = 3.0;
-            ctx.beginPath();
-            ctx.moveTo(16, parent.height - 1.5);
-            ctx.lineTo(16 + (L - arcLength), parent.height - 1.5);
-            ctx.stroke();
-        }
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, startAngle, endAngle, false);
+        ctx.stroke();
     }
 
     NumberAnimation {

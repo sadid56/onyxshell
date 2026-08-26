@@ -69,7 +69,9 @@ Rectangle {
         var app = appName || "";
         var summary = summaryText || "";
         var body = bodyText || "";
-        var scriptPath = (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getScript("focus_app.sh");
+        var cfg = (typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : ((typeof root !== "undefined" && root) ? root.shellConfig : null);
+        var home = (cfg && cfg.homeDir) ? cfg.homeDir : Quickshell.env("HOME");
+        var scriptPath = cfg ? cfg.getScript("focus_app.sh") : (home + "/.config/quickshell/scripts/focus_app.sh");
         Quickshell.execDetached([scriptPath, app, summary, body]);
     }
 

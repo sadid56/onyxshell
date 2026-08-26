@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Io
 import "./components"
 import "../../components/containers"
-import "../../components/ui" as UIInputs
+import "../../components/ui" as UI
 
 Popup {
     id: emojiWindow
@@ -76,7 +76,7 @@ Popup {
         }
     }
 
-    UIInputs.Input {
+    UI.Input {
         id: searchInput
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignTop
@@ -101,9 +101,12 @@ Popup {
         }
     }
 
-    EmojiEmptyState {
+    UI.EmptyState {
         theme: emojiWindow.theme
         searchQuery: emojiWindow.searchQuery
+        defaultIcon: "actions/search.svg"
+        title: emojiWindow.searchQuery === "" ? "No emojis found" : "No matching emojis found"
+        subtitle: emojiWindow.searchQuery !== "" ? ("No emojis matching \"" + emojiWindow.searchQuery + "\"") : ""
         visible: emojiGrid.count === 0
     }
 

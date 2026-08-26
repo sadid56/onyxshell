@@ -26,12 +26,10 @@ Item {
         anchors.right: parent.right
         spacing: 6
 
-        // Action Buttons Row (Copy, Dismiss)
         RowLayout {
             Layout.fillWidth: true
             spacing: 8
 
-            // Copy Button (with image-copy.svg asset)
             Rectangle {
                 Layout.fillWidth: true
                 height: 32
@@ -82,7 +80,6 @@ Item {
                 }
             }
 
-            // Dismiss Button (with dismiss.svg asset)
             Rectangle {
                 Layout.fillWidth: true
                 height: 32

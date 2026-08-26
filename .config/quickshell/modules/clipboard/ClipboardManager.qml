@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Wayland
 import "./components"
 import "../../components/containers"
-import "../../components/ui" as UIInputs
+import "../../components/ui" as UI
 
 Popup {
     id: clipWindow
@@ -21,7 +21,6 @@ Popup {
         var rawQuery = searchQuery.trim();
         var lowerRaw = rawQuery.toLowerCase();
 
-        // Check if searching for pinned items specifically (e.g. >pin, >p, or pin:)
         var isPinSearch = lowerRaw.startsWith(">pin") || lowerRaw.startsWith(">p") || lowerRaw.startsWith("pin:");
         var pinQuery = "";
         if (isPinSearch) {
@@ -52,7 +51,7 @@ Popup {
         }
 
         if (rawQuery === "") {
-            // Sort: All pinned entries first, then recent items
+
             var pinned = [];
             var unpinned = [];
             for (var i = 0; i < source.length; i++) {
@@ -81,7 +80,7 @@ Popup {
             }
 
             if (score > 0) {
-                if (isP) score += 2000; // Pinned priority boost
+                if (isP) score += 2000;
                 score += Math.max(0, 50 - Math.abs(cleanText.length - query.length)) + Math.max(0, 30 - j);
                 scored.push({ entry: entry, score: score });
             }
@@ -107,7 +106,7 @@ Popup {
         Layout.fillWidth: true
         spacing: 12
 
-        UIInputs.Input {
+        UI.Input {
             id: searchInput
             theme: clipWindow.theme
             placeholder: "Search clipboard... (type >pin for pinned)"
@@ -131,9 +130,12 @@ Popup {
             }
         }
 
-        EmptyState {
+        UI.EmptyState {
             theme: clipWindow.theme
             searchQuery: clipWindow.searchQuery
+            defaultIcon: clipWindow.searchQuery === "" ? "actions/image-copy.svg" : "actions/search.svg"
+            title: clipWindow.searchQuery === "" ? "Clipboard is empty" : "No matching items found"
+            subtitle: clipWindow.searchQuery !== "" ? "Try searching for a different keyword" : ""
             visible: entriesList.count === 0
         }
 

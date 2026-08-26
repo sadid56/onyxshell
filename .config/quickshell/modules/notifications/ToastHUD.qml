@@ -8,27 +8,18 @@ import "./components"
 
 PanelWindow {
     id: toastWindow
-    anchors { top: true; bottom: true; left: false; right: true }
-    implicitWidth: 416
+    anchors { top: true; left: true; right: true }
+    implicitHeight: 200
     color: "transparent"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
     exclusiveZone: 0
-    mask: Region { item: staticMaskArea }
-
-    Item {
-        id: staticMaskArea
-        x: 0
-        y: 0
-        width: 416
-        height: 180
-    }
+    mask: Region { item: contentRect }
 
     property var theme
     property bool active: false
     property var currentNotification: null
-    readonly property int toastRadius: 16
-    readonly property int topOverlap: 14
+    readonly property int toastRadius: 22
 
     readonly property string appName: currentNotification ? (currentNotification.appName || currentNotification.applicationName || "") : ""
     readonly property string summaryText: currentNotification ? (currentNotification.summary || "Notification") : "Notification"
@@ -68,17 +59,13 @@ PanelWindow {
         var app = toastWindow.appName || "";
         var summary = toastWindow.summaryText || "";
         var body = toastWindow.bodyText || "";
-        var scriptPath = (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getScript("focus_app.sh");
+        var cfg = (typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : ((typeof root !== "undefined" && root) ? root.shellConfig : null);
+        var home = (cfg && cfg.homeDir) ? cfg.homeDir : Quickshell.env("HOME");
+        var scriptPath = cfg ? cfg.getScript("focus_app.sh") : (home + "/.config/quickshell/scripts/focus_app.sh");
         Quickshell.execDetached([scriptPath, app, summary, body]);
     }
 
-    visible: active || toastDismissAnim.running
-    onActiveChanged: {
-        if (!active && !toastDismissAnim.running) {
-            toastTranslate.x = 0;
-            contentRect.opacity = 0.0;
-        }
-    }
+    visible: active || enterAnim.running || exitAnim.running || contentRect.opacity > 0.0
 
     Timer {
         id: dismissTimer
@@ -87,19 +74,20 @@ PanelWindow {
         repeat: false
         onTriggered: {
             if (!toastSwipeArea.containsMouse && !toastSwipeArea.isDragging) {
-                toastDismissAnim.start();
+                exitAnim.start();
             }
         }
     }
 
     function showToast(notification) {
-        toastDismissAnim.stop();
-        snapBackAnim.stop();
+        exitAnim.stop();
         currentNotification = notification;
-        toastTranslate.x = 0;
-        contentRect.opacity = 1.0;
         dismissTimer.stop();
         active = true;
+        contentRect.y = -contentRect.height - 30;
+        contentRect.opacity = 0.0;
+        contentRect.scale = 0.88;
+        enterAnim.restart();
         if (progressBar && progressBar.progressAnim) {
             progressBar.progressAnim.stop();
             progressBar.progress = 1.0;
@@ -108,52 +96,138 @@ PanelWindow {
         dismissTimer.start();
     }
 
+    ParallelAnimation {
+        id: enterAnim
+        NumberAnimation {
+            target: contentRect
+            property: "y"
+            from: -contentRect.height - 30
+            to: 0
+            duration: 380
+            easing.type: Easing.OutCubic
+        }
+        NumberAnimation {
+            target: contentRect
+            property: "opacity"
+            from: 0.0
+            to: 1.0
+            duration: 250
+            easing.type: Easing.OutCubic
+        }
+        NumberAnimation {
+            target: contentRect
+            property: "scale"
+            from: 0.88
+            to: 1.0
+            duration: 380
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    ParallelAnimation {
+        id: exitAnim
+        NumberAnimation {
+            target: contentRect
+            property: "y"
+            to: -contentRect.height - 30
+            duration: 240
+            easing.type: Easing.InCubic
+        }
+        NumberAnimation {
+            target: contentRect
+            property: "opacity"
+            to: 0.0
+            duration: 200
+            easing.type: Easing.InQuad
+        }
+        NumberAnimation {
+            target: contentRect
+            property: "scale"
+            to: 0.88
+            duration: 240
+            easing.type: Easing.InCubic
+        }
+        onStopped: {
+            toastWindow.active = false;
+        }
+    }
+
     Rectangle {
         id: contentRect
-        x: 16
-        y: -toastWindow.topOverlap
-        width: 400
-        height: Math.max(84, notifRow.implicitHeight + toastWindow.topOverlap + 24)
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: -height - 30
+        width: Math.min(470, parent.width - 32)
+        height: Math.max(70, notifRow.implicitHeight + 16)
         radius: toastWindow.toastRadius
-        clip: true
         color: toastWindow.theme ? toastWindow.theme.getColor("surface") : "#1b1b1b"
-        border.width: 0
+        border.width: 1
+        border.color: Qt.rgba(toastWindow.theme ? toastWindow.theme.getColor("outline").r : 1, toastWindow.theme ? toastWindow.theme.getColor("outline").g : 1, toastWindow.theme ? toastWindow.theme.getColor("outline").b : 1, 0.12)
         opacity: 0.0
-        transform: Translate {
-            id: toastTranslate
-            x: 0
-        }
+        scale: 0.88
+        transformOrigin: Item.Top
 
         Rectangle {
-            anchors { top: parent.top; right: parent.right; bottom: parent.bottom }
-            width: parent.radius
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: parent.radius
             color: parent.color
         }
 
-        // Notification Content Row
+        Corner {
+            anchors.top: parent.top
+            anchors.right: parent.left
+            anchors.rightMargin: -0.5
+            alignRight: true
+            cornerRadius: toastWindow.toastRadius
+            color: toastWindow.theme ? toastWindow.theme.getColor("surface") : "#1b1b1b"
+        }
+
+        Corner {
+            anchors.top: parent.top
+            anchors.left: parent.right
+            anchors.leftMargin: -0.5
+            alignRight: false
+            cornerRadius: toastWindow.toastRadius
+            color: toastWindow.theme ? toastWindow.theme.getColor("surface") : "#1b1b1b"
+        }
+
         RowLayout {
             id: notifRow
-            anchors.top: parent.top
-            anchors.topMargin: toastWindow.topOverlap + 12
-            anchors.left: parent.left
-            anchors.leftMargin: 14
-            anchors.right: parent.right
+            anchors.fill: parent
+            anchors.topMargin: 4
+            anchors.bottomMargin: 10
+            anchors.leftMargin: 16
             anchors.rightMargin: 16
             spacing: 12
 
-            Rectangle {
-                id: iconWrapper
-                width: 44
-                height: 44
-                radius: 22
-                color: toastWindow.theme ? toastWindow.theme.getColor("surfaceVariant") : "#34343c"
-                clip: true
+            Item {
+                id: iconContainer
+                width: 48
+                height: 48
                 Layout.alignment: Qt.AlignVCenter
 
-                IconImage {
+                Rectangle {
+                    id: iconWrapper
+                    anchors.centerIn: parent
+                    width: 38
+                    height: 38
+                    radius: 19
+                    color: toastWindow.theme ? toastWindow.theme.getColor("surfaceVariant") : "#34343c"
+                    clip: true
+
+                    IconImage {
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        source: toastWindow.getNotifIcon()
+                        onStatusChanged: { if (status === Image.Error) source = "file://" + shellConfig.defaultAppIcon; }
+                    }
+                }
+
+                ToastProgressCanvas {
+                    id: progressBar
                     anchors.fill: parent
-                    source: toastWindow.getNotifIcon()
-                    onStatusChanged: { if (status === Image.Error) source = "file://" + shellConfig.defaultAppIcon; }
+                    theme: toastWindow.theme
                 }
             }
 
@@ -197,18 +271,12 @@ PanelWindow {
             }
         }
 
-        ToastProgressCanvas {
-            id: progressBar
-            theme: toastWindow.theme
-        }
-
-        // Clickable & Swipeable Mouse Area
         MouseArea {
             id: toastSwipeArea
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            property real startX: 0
+            property real startY: 0
             property bool isDragging: false
 
             onEntered: {
@@ -226,7 +294,7 @@ PanelWindow {
                 }
             }
             onPressed: mouse => {
-                startX = mouse.x;
+                startY = mouse.y;
                 isDragging = false;
                 dismissTimer.stop();
                 if (progressBar && progressBar.progressAnim && progressBar.progressAnim.running) {
@@ -235,93 +303,24 @@ PanelWindow {
             }
             onPositionChanged: mouse => {
                 if (mouse.buttons & Qt.LeftButton) {
-                    var deltaX = mouse.x - startX;
-                    if (!isDragging && Math.abs(deltaX) > 8) isDragging = true;
-                    if (isDragging) {
-                        toastTranslate.x = deltaX > 0 ? deltaX : 0;
-                        contentRect.opacity = Math.max(0.0, 1.0 - toastTranslate.x / 260.0);
+                    var deltaY = mouse.y - startY;
+                    if (!isDragging && Math.abs(deltaY) > 6) isDragging = true;
+                    if (isDragging && deltaY < -20) {
+                        exitAnim.start();
                     }
                 }
             }
             onReleased: mouse => {
                 if (isDragging) {
                     isDragging = false;
-                    if (toastTranslate.x > 60) {
-                        toastDismissAnim.start();
-                    } else {
-                        snapBackAnim.start();
-                        if (progressBar && progressBar.progressAnim && progressBar.progressAnim.paused) {
-                            progressBar.progressAnim.resume();
-                        }
-                        dismissTimer.restart();
-                    }
                 } else {
                     toastWindow.redirectToApp();
-                    toastDismissAnim.start();
+                    exitAnim.start();
                 }
             }
             onCanceled: {
-                if (isDragging) {
-                    isDragging = false;
-                    snapBackAnim.start();
-                    if (progressBar && progressBar.progressAnim && progressBar.progressAnim.paused) {
-                        progressBar.progressAnim.resume();
-                    }
-                    dismissTimer.restart();
-                }
+                isDragging = false;
             }
-        }
-    }
-
-    ParallelAnimation {
-        id: snapBackAnim
-        NumberAnimation { target: toastTranslate; property: "x"; to: 0; duration: 180; easing.type: Easing.OutCubic }
-        NumberAnimation { target: contentRect; property: "opacity"; to: 1.0; duration: 180; easing.type: Easing.OutCubic }
-    }
-
-    ParallelAnimation {
-        id: toastDismissAnim
-        NumberAnimation { target: toastTranslate; property: "x"; to: contentRect.width + 40; duration: 160; easing.type: Easing.OutQuad }
-        NumberAnimation { target: contentRect; property: "opacity"; to: 0.0; duration: 140; easing.type: Easing.OutQuad }
-        onStopped: {
-            toastWindow.active = false;
-            toastTranslate.x = 0;
-        }
-    }
-
-    // Top-Left Seamless Inverted Corner
-    Corner {
-        x: contentRect.x - 16
-        y: contentRect.y + toastWindow.topOverlap
-        alignRight: true
-        cornerRadius: 16
-        color: toastWindow.theme ? toastWindow.theme.getColor("surface") : "#1b1b1b"
-        opacity: contentRect.opacity
-        transform: Translate { x: toastTranslate.x }
-    }
-
-    // Bottom-Right Seamless Inverted Canvas Curve
-    Canvas {
-        width: 16
-        height: 16
-        antialiasing: true
-        renderTarget: Canvas.Image
-        x: contentRect.x + contentRect.width - 16
-        y: contentRect.y + contentRect.height
-        opacity: contentRect.opacity
-        transform: Translate { x: toastTranslate.x }
-        onPaint: {
-            var ctx = getContext("2d");
-            ctx.reset();
-            ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = toastWindow.theme ? toastWindow.theme.getColor("surface") : "#1b1b1b";
-            ctx.beginPath();
-            ctx.moveTo(width, height);
-            ctx.lineTo(width, 0);
-            ctx.lineTo(0, 0);
-            ctx.arc(0, height, width, Math.PI * 1.5, 0, false);
-            ctx.closePath();
-            ctx.fill();
         }
     }
 }

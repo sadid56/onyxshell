@@ -48,7 +48,6 @@ RowLayout {
 
     Item { Layout.fillWidth: true }
 
-    // Color Picker Button
     UI.Button {
         theme: headerRoot.theme
         icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/eyedropper-filled.svg")
@@ -60,7 +59,6 @@ RowLayout {
         }
     }
 
-    // Screenshot Button
     UI.Button {
         theme: headerRoot.theme
         icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/crop.svg")
@@ -73,7 +71,6 @@ RowLayout {
         }
     }
 
-    // Power Profile Icon Button (Far Right)
     UI.Button {
         theme: headerRoot.theme
         icon: {

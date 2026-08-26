@@ -39,6 +39,10 @@ hl.config({
 		vfr = true,
 	},
 
+	render = {
+		direct_scanout = 1,
+	},
+
 	dwindle = {
 		preserve_split = true,
 		special_scale_factor = 0.88,
@@ -59,20 +63,25 @@ hl.config({
 			size = 6,
 			passes = 2,
 			vibrancy = 0.1696,
+			new_optimizations = true,
+			ignore_opacity = true,
 			special = false,
 		},
 	},
 
 	input = {
 		follow_mouse = 1,
-		float_switch_override_focus = 2,
-		mouse_refocus = false,
+		float_switch_override_focus = 0,
+		mouse_refocus = true,
 		touchpad = {
 			natural_scroll = true,
 		},
 	},
 
 	misc = {
+		vrr = 1,
+		animate_manual_resizes = false,
+		animate_mouse_windowdragging = false,
 		disable_hyprland_logo = true,
 		disable_splash_rendering = true,
 		force_default_wallpaper = 0,
@@ -82,6 +91,8 @@ hl.config({
 
 	cursor = {
 		no_hardware_cursors = 0,
+		no_warps = true,
+		inactive_timeout = 5,
 	},
 
 	group = {

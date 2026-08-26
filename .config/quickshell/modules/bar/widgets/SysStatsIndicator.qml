@@ -1,17 +1,20 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.SystemTray
+import "../../../components/ui" as UI
+
 Row {
     id: sysStatsRoot
     spacing: 16
+
     property var theme
     property var sysStats
     property var toggleNotifications
     property var toggleWifi
     property int notifCount: 0
+
     function getWifiX() { var pos = netClickArea.mapToItem(null, 0, 0); return pos.x + netClickArea.width / 2; }
     function getResourcesX() { var pos = resourcesClickArea.mapToItem(null, 0, 0); return pos.x + resourcesClickArea.width / 2; }
     function getNotifX() { var pos = notifButton.mapToItem(null, 0, 0); return pos.x + notifButton.width / 2; }
@@ -19,6 +22,7 @@ Row {
     RowLayout {
         spacing: 16
         Layout.alignment: Qt.AlignVCenter
+
         MouseArea {
             id: netClickArea
             Layout.preferredWidth: netIndicator.implicitWidth
@@ -26,11 +30,13 @@ Row {
             Layout.alignment: Qt.AlignVCenter
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
-            onEntered: { root.stopLoaderTimerAndActivate(wifiLoader, statusBar.getWifiX()); root.setLoaderInactive(calendarLoader); root.setLoaderInactive(notifsLoader); root.setLoaderInactive(resourcesLoader); }
+            onEntered: root.stopLoaderTimerAndActivate(wifiLoader, statusBar.getWifiX())
             onExited: root.restartLoaderTimer(wifiLoader)
             onClicked: root.toggleLoaderActive(wifiLoader, statusBar.getWifiX())
+
             NetworkIndicator { id: netIndicator; theme: sysStatsRoot.theme; sysStats: sysStatsRoot.sysStats }
         }
+
         MouseArea {
             id: resourcesClickArea
             Layout.preferredWidth: resourcesRow.implicitWidth
@@ -38,7 +44,7 @@ Row {
             Layout.alignment: Qt.AlignVCenter
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
-            onEntered: { root.stopLoaderTimerAndActivate(resourcesLoader, statusBar.getResourcesX()); root.setLoaderInactive(calendarLoader); root.setLoaderInactive(notifsLoader); root.setLoaderInactive(wifiLoader); }
+            onEntered: root.stopLoaderTimerAndActivate(resourcesLoader, statusBar.getResourcesX())
             onExited: root.restartLoaderTimer(resourcesLoader)
             onClicked: root.toggleLoaderActive(resourcesLoader, statusBar.getResourcesX())
 
@@ -50,12 +56,11 @@ Row {
                 RowLayout {
                     spacing: 4
                     Layout.alignment: Qt.AlignVCenter
-                    IconImage {
-                        width: 15; height: 15
+                    UI.Icon {
+                        size: 15
+                        icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getCpuIcon()
+                        color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
                         Layout.alignment: Qt.AlignVCenter
-                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getCpuIcon()
-                        layer.enabled: true
-                        layer.effect: MultiEffect { colorization: 1.0; colorizationColor: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF" }
                     }
                     Text {
                         text: Math.round(sysStatsRoot.sysStats.cpuUsage) + "%"
@@ -66,15 +71,15 @@ Row {
                         Layout.alignment: Qt.AlignVCenter
                     }
                 }
+
                 RowLayout {
                     spacing: 4
                     Layout.alignment: Qt.AlignVCenter
-                    IconImage {
-                        width: 15; height: 15
+                    UI.Icon {
+                        size: 15
+                        icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getSwapIcon()
+                        color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
                         Layout.alignment: Qt.AlignVCenter
-                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getSwapIcon()
-                        layer.enabled: true
-                        layer.effect: MultiEffect { colorization: 1.0; colorizationColor: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF" }
                     }
                     Text {
                         text: Math.round(sysStatsRoot.sysStats.swapUsage || 0) + "%"
@@ -85,15 +90,15 @@ Row {
                         Layout.alignment: Qt.AlignVCenter
                     }
                 }
+
                 RowLayout {
                     spacing: 4
                     Layout.alignment: Qt.AlignVCenter
-                    IconImage {
-                        width: 15; height: 15
+                    UI.Icon {
+                        size: 15
+                        icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getMemoryIcon()
+                        color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
                         Layout.alignment: Qt.AlignVCenter
-                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getMemoryIcon()
-                        layer.enabled: true
-                        layer.effect: MultiEffect { colorization: 1.0; colorizationColor: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF" }
                     }
                     Text {
                         text: Math.round(sysStatsRoot.sysStats.memUsage) + "%"
@@ -106,25 +111,23 @@ Row {
                 }
             }
         }
+
         RowLayout {
             spacing: 4
             Layout.alignment: Qt.AlignVCenter
-            IconImage {
-                width: 22
-                height: 22
-                Layout.alignment: Qt.AlignVCenter
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getBatteryIcon(
+
+            UI.Icon {
+                size: 22
+                icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getBatteryIcon(
                     sysStatsRoot.sysStats.batteryPercentage,
                     sysStatsRoot.sysStats.batteryIsCharging
                 )
-                layer.enabled: true
-                layer.effect: MultiEffect {
-                    colorization: 1.0
-                    colorizationColor: sysStatsRoot.sysStats.batteryPercentage < 20
-                        ? (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("error") : "#ff5555")
-                        : (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF")
-                }
+                color: sysStatsRoot.sysStats.batteryPercentage < 20
+                    ? (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("error") : "#ff5555")
+                    : (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF")
+                Layout.alignment: Qt.AlignVCenter
             }
+
             Text {
                 text: sysStatsRoot.sysStats.batteryPercentage + "%"
                 font.family: "Noto Sans"
@@ -137,14 +140,18 @@ Row {
             }
         }
     }
+
     Row {
         spacing: 12
         anchors.verticalCenter: parent.verticalCenter
+
         Repeater {
             model: SystemTray.items
             delegate: Item {
                 id: trayItemDelegate
-                width: 20; height: 20
+                width: 20
+                height: 20
+
                 IconImage {
                     anchors.fill: parent
                     source: {
@@ -154,13 +161,19 @@ Row {
                         return "image://icon/" + ic;
                     }
                 }
+
                 MouseArea {
-                    anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                    onEntered: { var pos = trayItemDelegate.mapToItem(null, 0, 0); root.showTrayMenu(modelData, pos.x + trayItemDelegate.width / 2); }
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onEntered: {
+                        var pos = trayItemDelegate.mapToItem(null, 0, 0);
+                        root.showTrayMenu(modelData, pos.x + trayItemDelegate.width / 2);
+                    }
                     onExited: root.hideTrayMenu()
                     onClicked: {
                         modelData.activate();
-                        var scriptPath = (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getScript("focus_tray_window.py");
+                        var scriptPath = ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getScript("focus_tray_window.py");
                         Quickshell.execDetached([
                             "python", scriptPath,
                             modelData.id || "",
@@ -172,22 +185,29 @@ Row {
             }
         }
     }
+
     Item {
         id: notifButton
-        width: 20; height: 20
+        width: 20
+        height: 20
         Layout.alignment: Qt.AlignVCenter
-        IconImage {
-            anchors.centerIn: parent; width: 18; height: 18
-            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getNotificationIcon(
+
+        UI.Icon {
+            anchors.centerIn: parent
+            size: 18
+            icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getNotificationIcon(
                 (typeof root !== "undefined" && root.dndEnabled),
                 sysStatsRoot.notifCount > 0
             )
-            layer.enabled: true
-            layer.effect: MultiEffect { colorization: 1.0; colorizationColor: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("primary") : "#ffb3b4" }
+            color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("primary") : "#ffb3b4"
         }
+
         MouseArea {
-            anchors.fill: parent; anchors.rightMargin: -20; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-            onEntered: { root.stopLoaderTimerAndActivate(notifsLoader, sysStatsRoot.getNotifX()); root.setLoaderInactive(calendarLoader); root.setLoaderInactive(wifiLoader); }
+            anchors.fill: parent
+            anchors.rightMargin: -20
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onEntered: root.stopLoaderTimerAndActivate(notifsLoader, sysStatsRoot.getNotifX())
             onExited: root.restartLoaderTimer(notifsLoader)
             onClicked: root.toggleLoaderActive(notifsLoader, sysStatsRoot.getNotifX())
         }
