@@ -37,8 +37,12 @@ QtObject {
             var l = loaders[i];
             if (l !== excludeLoader && l.loaded && l.item) l.item.active = false;
         }
+        if (trayMenuPopup && trayMenuPopup !== excludeLoader && trayMenuPopup.active) {
+            trayMenuPopup.active = false;
+        }
     }
     function showTrayMenu(trayItem, centerX) {
+        closeAllPopupsExcept(trayMenuPopup);
         if (trayItem && trayItem.menu && trayItem.menu.menu) trayItem.menu.menu.updateLayout();
         trayMenuPopup.activeTrayItem = trayItem;
         trayMenuPopup.targetX = centerX;
