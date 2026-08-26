@@ -188,7 +188,7 @@ PanelWindow {
                 visible: dynamicKeybindsModel.count === 0
                 theme: keybindsWindow.theme
                 searchQuery: keybindsWindow.searchQuery
-                defaultIcon: "devices/keyboard.svg"
+                defaultIcon: "system/keyboard.svg"
                 title: keybindsWindow.searchQuery !== "" ? "No matching keybinds" : "No keybinds registered"
                 subtitle: keybindsWindow.searchQuery !== "" ? ("Nothing matched \"" + keybindsWindow.searchQuery + "\"\nMaybe bind it in keybinds.lua ⌨️😉") : ""
             }
