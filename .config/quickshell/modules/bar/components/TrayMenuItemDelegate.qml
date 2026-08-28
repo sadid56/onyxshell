@@ -12,6 +12,7 @@ Item {
     property var itemModel
     property var popupWindow
     property var menuOpener
+    property bool isSubMenu: false
 
     signal hovered(real yPos, real itemHeight)
     signal unhovered()
@@ -33,15 +34,26 @@ Item {
 
     readonly property bool hasToggle: isCheckmark || isRadio
 
+    readonly property bool hasIcon: {
+        if (isSeparator) return false;
+        if (!itemModel) return false;
+        if (hasToggle && itemModel.checkState === Qt.Checked) return true;
+        var ic = itemModel.icon;
+        if (ic === null || ic === undefined) return false;
+        var str = String(ic).trim();
+        if (str === "" || str === "null" || str === "undefined" || str === "[object Object]") return false;
+        return true;
+    }
+
     width: parent ? parent.width : 200
-    height: isSeparator ? 9 : 32
+    height: isSeparator ? 9 : 34
 
     opacity: (!isItemEnabled && !isSeparator) ? 0.45 : 1.0
 
     Rectangle {
         id: highlightBg
         anchors.fill: parent
-        radius: 8
+        radius: 9
         color: entryDelegate.theme ? entryDelegate.theme.getColor("surfaceVariant") : "#302f38"
         opacity: (!entryDelegate.isSeparator && itemMouse.containsMouse) ? 1.0 : 0.0
         z: 0
@@ -61,88 +73,82 @@ Item {
         z: 1
     }
 
-    readonly property bool hasIcon: {
-        if (isSeparator) return false;
-        if (hasToggle) return true;
-        if (!itemModel) return false;
-        var ic = itemModel.icon;
-        if (!ic || ic === "") return false;
-        if (typeof ic === "string" && ic.trim() === "") return false;
-        return true;
-    }
-
-    RowLayout {
-        visible: !entryDelegate.isSeparator
-        anchors.fill: parent
-        anchors.leftMargin: 4
-        anchors.rightMargin: 4
-        spacing: 4
+    Item {
+        id: iconContainer
+        anchors.left: parent.left
+        anchors.leftMargin: 8
+        anchors.verticalCenter: parent.verticalCenter
+        width: entryDelegate.hasIcon ? 16 : 0
+        height: 16
+        visible: entryDelegate.hasIcon && !entryDelegate.isSeparator
         z: 2
 
-        Item {
-            Layout.preferredWidth: 16
-            Layout.preferredHeight: 16
-            visible: entryDelegate.hasToggle || (entryDelegate.itemModel && entryDelegate.itemModel.icon && String(entryDelegate.itemModel.icon).trim() !== "")
-
-            IconImage {
-                anchors.centerIn: parent
-                width: 14
-                height: 14
-                visible: entryDelegate.isCheckmark && entryDelegate.itemModel && entryDelegate.itemModel.checkState === Qt.Checked
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/check.svg")
-                layer.enabled: true
-                layer.effect: MultiEffect {
-                    colorization: 1.0
-                    colorizationColor: entryDelegate.theme ? entryDelegate.theme.getColor("primary") : "#ffb3b4"
-                }
-            }
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: 6
-                height: 6
-                radius: 3
-                visible: entryDelegate.isRadio && entryDelegate.itemModel && entryDelegate.itemModel.checkState === Qt.Checked
-                color: entryDelegate.theme ? entryDelegate.theme.getColor("primary") : "#ffb3b4"
-            }
-
-            IconImage {
-                anchors.centerIn: parent
-                width: 14
-                height: 14
-                visible: !entryDelegate.hasToggle && entryDelegate.itemModel && Boolean(entryDelegate.itemModel.icon)
-                source: {
-                    if (!entryDelegate.itemModel || !entryDelegate.itemModel.icon) return "";
-                    var ic = entryDelegate.itemModel.icon;
-                    if (ic.startsWith("/") || ic.startsWith("file://") || ic.startsWith("image://") || ic.startsWith("qrc:/")) return ic;
-                    return "image://icon/" + ic;
-                }
-            }
-        }
-
-        UI.Typography {
-            theme: entryDelegate.theme
-            Layout.fillWidth: true
-            text: (entryDelegate.itemModel && entryDelegate.itemModel.text) ? entryDelegate.itemModel.text.replace(/&/g, "") : ""
-            variant: "labelMedium"
-            colorRole: "onSurface"
-            horizontalAlignment: Text.AlignLeft
-            elide: Text.ElideRight
-            Layout.alignment: Qt.AlignVCenter
-        }
-
         IconImage {
-            width: 10
-            height: 10
-            visible: entryDelegate.itemModel ? Boolean(entryDelegate.itemModel.hasChildren) : false
-            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/chevron-right.svg")
+            anchors.centerIn: parent
+            width: 14
+            height: 14
+            visible: entryDelegate.isCheckmark && entryDelegate.itemModel && entryDelegate.itemModel.checkState === Qt.Checked
+            source: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getIcon("actions/check.svg")
             layer.enabled: true
             layer.effect: MultiEffect {
                 colorization: 1.0
-                colorizationColor: entryDelegate.theme ? entryDelegate.theme.getColor("onSurfaceVariant") : "#999999"
+                colorizationColor: entryDelegate.theme ? entryDelegate.theme.getColor("primary") : "#ffb3b4"
             }
-            Layout.alignment: Qt.AlignVCenter
         }
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: 6
+            height: 6
+            radius: 3
+            visible: entryDelegate.isRadio && entryDelegate.itemModel && entryDelegate.itemModel.checkState === Qt.Checked
+            color: entryDelegate.theme ? entryDelegate.theme.getColor("primary") : "#ffb3b4"
+        }
+
+        IconImage {
+            anchors.centerIn: parent
+            width: 14
+            height: 14
+            visible: !entryDelegate.hasToggle && entryDelegate.itemModel && Boolean(entryDelegate.itemModel.icon)
+            source: {
+                if (!entryDelegate.itemModel || !entryDelegate.itemModel.icon) return "";
+                var ic = entryDelegate.itemModel.icon;
+                if (ic.startsWith("/") || ic.startsWith("file://") || ic.startsWith("image://") || ic.startsWith("qrc:/")) return ic;
+                return "image://icon/" + ic;
+            }
+        }
+    }
+
+    UI.Typography {
+        anchors.left: entryDelegate.hasIcon ? iconContainer.right : parent.left
+        anchors.leftMargin: entryDelegate.hasIcon ? 8 : 10
+        anchors.right: chevronIcon.visible ? chevronIcon.left : parent.right
+        anchors.rightMargin: 10
+        anchors.verticalCenter: parent.verticalCenter
+        text: (entryDelegate.itemModel && entryDelegate.itemModel.text) ? entryDelegate.itemModel.text.replace(/&/g, "").trim() : ""
+        variant: "labelMedium"
+        colorRole: "onSurface"
+        horizontalAlignment: Text.AlignLeft
+        elide: Text.ElideRight
+        visible: !entryDelegate.isSeparator
+        z: 2
+    }
+
+    IconImage {
+        id: chevronIcon
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        anchors.verticalCenter: parent.verticalCenter
+        width: 10
+        height: 10
+        visible: !entryDelegate.isSeparator && entryDelegate.itemModel && Boolean(entryDelegate.itemModel.hasChildren)
+        source: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getIcon("actions/chevron-right.svg")
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            colorization: 1.0
+            colorizationColor: entryDelegate.theme ? entryDelegate.theme.getColor("onSurfaceVariant") : "#999999"
+        }
+        z: 2
     }
 
     MouseArea {
@@ -153,20 +159,24 @@ Item {
         cursorShape: Qt.PointingHandCursor
         z: 3
         onEntered: {
-            if (entryDelegate.popupWindow && entryDelegate.popupWindow.closeTimer) {
-                entryDelegate.popupWindow.closeTimer.stop();
+            if (entryDelegate.popupWindow) {
+                if (entryDelegate.popupWindow.closeTimer) entryDelegate.popupWindow.closeTimer.stop();
+                if (entryDelegate.popupWindow.subMenuCloseTimer) entryDelegate.popupWindow.subMenuCloseTimer.stop();
             }
             entryDelegate.hovered(entryDelegate.y, entryDelegate.height);
+
             if (entryDelegate.itemModel && entryDelegate.itemModel.hasChildren) {
                 if (typeof entryDelegate.itemModel.sendOpened === "function") entryDelegate.itemModel.sendOpened();
                 if (typeof entryDelegate.itemModel.updateLayout === "function") entryDelegate.itemModel.updateLayout();
                 if (entryDelegate.popupWindow && typeof entryDelegate.popupWindow.openSubMenu === "function") {
-                    var globalPos = entryDelegate.mapToItem(null, 0, 0);
-                    entryDelegate.popupWindow.openSubMenu(entryDelegate.itemModel, globalPos.y - 6);
+                    var anchorPos = (entryDelegate.popupWindow.morphAnchorRef)
+                        ? entryDelegate.mapToItem(entryDelegate.popupWindow.morphAnchorRef, 0, 0)
+                        : entryDelegate.mapToItem(null, 0, 0);
+                    entryDelegate.popupWindow.openSubMenu(entryDelegate.itemModel, anchorPos.y - 4);
                 }
-            } else {
-                if (entryDelegate.popupWindow && typeof entryDelegate.popupWindow.closeSubMenu === "function" && entryDelegate.menuOpener === entryDelegate.popupWindow.menuOpener) {
-                    entryDelegate.popupWindow.closeSubMenu();
+            } else if (!entryDelegate.isSubMenu) {
+                if (entryDelegate.popupWindow) {
+                    entryDelegate.popupWindow.activeSubMenuItem = null;
                 }
             }
         }
@@ -178,8 +188,10 @@ Item {
                 if (typeof entryDelegate.itemModel.sendOpened === "function") entryDelegate.itemModel.sendOpened();
                 if (typeof entryDelegate.itemModel.updateLayout === "function") entryDelegate.itemModel.updateLayout();
                 if (entryDelegate.popupWindow && typeof entryDelegate.popupWindow.openSubMenu === "function") {
-                    var globalPos = entryDelegate.mapToItem(null, 0, 0);
-                    entryDelegate.popupWindow.openSubMenu(entryDelegate.itemModel, globalPos.y - 6);
+                    var anchorPos = (entryDelegate.popupWindow.morphAnchorRef)
+                        ? entryDelegate.mapToItem(entryDelegate.popupWindow.morphAnchorRef, 0, 0)
+                        : entryDelegate.mapToItem(null, 0, 0);
+                    entryDelegate.popupWindow.openSubMenu(entryDelegate.itemModel, anchorPos.y - 4);
                 }
                 return;
             }

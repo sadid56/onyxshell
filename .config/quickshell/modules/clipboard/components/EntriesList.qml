@@ -6,9 +6,6 @@ import "../../../components/ui" as UI
 
 UI.AnimatedListView {
     id: entriesListRoot
-    Layout.fillWidth: true
-    Layout.fillHeight: true
-    Layout.preferredHeight: Math.min(380, count * 54)
     spacing: 4
     pillMargin: 0
     pillRadius: 12
@@ -79,11 +76,32 @@ UI.AnimatedListView {
         onHovered: (yPos, itemH) => {
             entriesListRoot.currentIndex = index;
             entriesListRoot.hoverItem(index, yPos, itemH);
+            entriesListRoot.forceActiveFocus();
         }
         onUnhovered: entriesListRoot.unhoverItem(index)
         onItemClicked: entriesListRoot.entryClicked(entryText)
         onPinRequested: entriesListRoot.pinClicked(entryText)
         onDeleteRequested: entriesListRoot.removeEntryOptimistically(index, entryText)
+    }
+
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_P) {
+            if (currentIndex >= 0 && currentIndex < dynamicClipModel.count) {
+                var pItem = dynamicClipModel.get(currentIndex);
+                if (pItem) {
+                    pinClicked(pItem.entryData || "");
+                    event.accepted = true;
+                }
+            }
+        } else if (event.key === Qt.Key_D || event.key === Qt.Key_Delete) {
+            if (currentIndex >= 0 && currentIndex < dynamicClipModel.count) {
+                var dItem = dynamicClipModel.get(currentIndex);
+                if (dItem) {
+                    removeEntryOptimistically(currentIndex, dItem.entryData || "");
+                    event.accepted = true;
+                }
+            }
+        }
     }
 
     Keys.onDownPressed: {

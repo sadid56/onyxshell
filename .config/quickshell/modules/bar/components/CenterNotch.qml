@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell.Widgets
 import "../widgets"
 import "../../../components/ui" as UI
@@ -106,16 +107,33 @@ Item {
                         visible: !(barWindow && barWindow.activeNotifData && barWindow.activeNotifData.isEmoji)
                         source: {
                             if (!barWindow || !barWindow.activeNotifData || barWindow.activeNotifData.isEmoji) return "";
-                            var ic = barWindow.activeNotifData.appIcon || "";
-                            if (!ic) return "";
-                            if (ic.indexOf("/") === 0) return "file://" + ic;
-                            if (ic.startsWith("file://") || ic.startsWith("image://") || ic.startsWith("qrc:/")) return ic;
                             var cfg = ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : (typeof root !== "undefined" ? root.shellConfig : null));
-                            if (cfg && cfg.getIcon && (ic.indexOf("/") !== -1 || ic.endsWith(".svg"))) {
-                                return cfg.getIcon(ic);
+                            var ic = barWindow.activeNotifData.appIcon || "";
+                            var app = (barWindow.activeNotifData.appName || "").toLowerCase();
+                            var sum = (barWindow.activeNotifData.summary || "").toLowerCase();
+
+                            if (app.indexOf("hyprshot") !== -1 || app.indexOf("screenshot") !== -1 || sum.indexOf("screenshot") !== -1 || sum.indexOf("hyprshot") !== -1) {
+                                if (cfg && cfg.getIcon) return cfg.getIcon("actions/crop.svg");
+                                return "file://" + (Quickshell.env("HOME") + "/.config/quickshell/assets/icons/actions/crop.svg");
                             }
+
+                            if (ic) {
+                                if (ic.indexOf("/") === 0) return "file://" + ic;
+                                if (ic.startsWith("file://") || ic.startsWith("image://") || ic.startsWith("qrc:/")) return ic;
+                                if (cfg && cfg.getIcon && (ic.indexOf("/") !== -1 || ic.endsWith(".svg"))) {
+                                    return cfg.getIcon(ic);
+                                }
+                                return "image://icon/" + ic;
+                            }
+
                             if (cfg && cfg.defaultAppIcon) return "file://" + cfg.defaultAppIcon;
                             return "file://" + (Quickshell.env("HOME") + "/.config/quickshell/assets/icons/system/default-app.svg");
+                        }
+
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: (barWindow && barWindow.theme) ? barWindow.theme.getColor("onPrimaryContainer") : "#ffffff"
                         }
                     }
                 }

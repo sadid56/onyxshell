@@ -9,10 +9,6 @@ QtObject {
     property var imagePreviews: ({})
     property var pinnedEntries: []
 
-    function shellEscape(str) {
-        return str.replace(/'/g, "'\\''");
-    }
-
     function getEntryContent(entryText) {
         if (!entryText) return "";
         var tabIdx = entryText.indexOf("\t");
@@ -80,11 +76,19 @@ QtObject {
         if (isPinned(entry)) {
             togglePin(entry);
         }
+        var arr = root.entries.slice();
+        var idx = arr.indexOf(entry);
+        if (idx !== -1) {
+            arr.splice(idx, 1);
+            root.entries = arr;
+        }
         Quickshell.execDetached(["bash", "-c", "printf '%s' \"$1\" | cliphist delete", "cliphist-delete", entry]);
         refreshTimer.restart();
     }
 
     function wipe() {
+        root.entries = [];
+        root.imagePreviews = ({});
         Quickshell.execDetached(["cliphist", "wipe"]);
         refreshTimer.restart();
     }
@@ -121,28 +125,18 @@ QtObject {
                 root.refreshImages();
             }
         }
-
-        stderr: StdioCollector {
-            onStreamFinished: {
-                if (this.text.trim() !== "") {
-                    console.error("Clipboard readProc stderr:", this.text);
-                }
-            }
-        }
     }
 
     property var imgProc: Process {
         id: imgProc
-        command: ["python3", shellConfig.getScript("decode_clip_images.py")]
+        command: ["python3", (typeof shellConfig !== "undefined" && shellConfig) ? shellConfig.getScript("decode_clip_images.py") : (Quickshell.env("HOME") + "/.config/quickshell/scripts/decode_clip_images.py")]
 
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
                     var parsed = JSON.parse(this.text);
                     root.imagePreviews = parsed;
-                } catch(e) {
-                    console.error("Failed to parse image previews:", e);
-                }
+                } catch(e) {}
             }
         }
     }

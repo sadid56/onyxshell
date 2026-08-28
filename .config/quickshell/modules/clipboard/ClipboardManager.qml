@@ -10,11 +10,24 @@ Popup {
     id: clipWindow
 
     popupWidth: 480
-    popupHeight: Math.min(520, mainLayout.implicitHeight + 48)
-    closeOnHoverOutside: false
+
+    readonly property int chromeHeight: 146
+    readonly property int itemRowHeight: 52
+    readonly property int maxVisibleItems: 7
 
     property var clipService
     property string searchQuery: ""
+    property var filteredEntriesList: []
+
+    function updateFilteredList() {
+        filteredEntriesList = getFilteredEntries();
+    }
+
+    popupHeight: (filteredEntriesList.length === 0)
+        ? 240
+        : (chromeHeight + Math.min(maxVisibleItems, filteredEntriesList.length) * itemRowHeight)
+
+    closeOnHoverOutside: false
 
     function getFilteredEntries() {
         if (!clipService || !clipService.entries) return [];
@@ -37,7 +50,7 @@ Popup {
                 var pEntry = source[k];
                 if (!clipService.isPinned(pEntry)) continue;
 
-                var pClean = pEntry.substring(pEntry.indexOf("\t") + 1).toLowerCase();
+                var pClean = pEntry.indexOf("\t") !== -1 ? pEntry.substring(pEntry.indexOf("\t") + 1).toLowerCase() : pEntry.toLowerCase();
                 if (pinQuery === "" || pClean.indexOf(pinQuery) !== -1) {
                     scored.push({ entry: pEntry, score: 1000 - k });
                 }
@@ -51,7 +64,6 @@ Popup {
         }
 
         if (rawQuery === "") {
-
             var pinned = [];
             var unpinned = [];
             for (var i = 0; i < source.length; i++) {
@@ -65,7 +77,7 @@ Popup {
         var query = lowerRaw;
         for (var j = 0; j < source.length; j++) {
             var entry = source[j];
-            var cleanText = entry.substring(entry.indexOf("\t") + 1).toLowerCase();
+            var cleanText = entry.indexOf("\t") !== -1 ? entry.substring(entry.indexOf("\t") + 1).toLowerCase() : entry.toLowerCase();
             var isP = clipService.isPinned(entry);
 
             var score = 0;
@@ -94,11 +106,18 @@ Popup {
         return res;
     }
 
+    Connections {
+        target: clipService ? clipService : null
+        function onEntriesChanged() { clipWindow.updateFilteredList(); }
+        function onPinnedEntriesChanged() { clipWindow.updateFilteredList(); }
+    }
+
     onActiveChanged: {
         if (active) {
             searchQuery = "";
             searchInput.text = "";
-            clipService.refresh();
+            if (clipService) clipService.refresh();
+            updateFilteredList();
             Qt.callLater(() => searchInput.forceFocus());
         }
     }
@@ -112,20 +131,28 @@ Popup {
     ColumnLayout {
         id: mainLayout
         Layout.fillWidth: true
-        spacing: 12
+        Layout.fillHeight: true
+        spacing: 8
 
         UI.Input {
             id: searchInput
+            Layout.fillWidth: true
+            Layout.leftMargin: 2
+            Layout.rightMargin: 2
             theme: clipWindow.theme
-            placeholder: "Search clipboard... (type >pin for pinned)"
-            icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/search.svg")
+            placeholder: "Search clipboard... (type >pin for pin item)"
+            icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getIcon("actions/search.svg")
 
-            onTextChanged: clipWindow.searchQuery = text
+            onTextChanged: {
+                clipWindow.searchQuery = text;
+                clipWindow.updateFilteredList();
+            }
             onEscapePressed: clipWindow.active = false
 
             onDownPressed: {
                 if (entriesList.count > 0) {
                     entriesList.currentIndex = Math.min(entriesList.count - 1, (entriesList.currentIndex < 0 ? 0 : entriesList.currentIndex + 1));
+                    entriesList.forceActiveFocus();
                 }
             }
 
@@ -147,45 +174,60 @@ Popup {
             }
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.leftMargin: -2
+            Layout.rightMargin: -2
+            Layout.topMargin: 4
+            Layout.bottomMargin: 4
+            height: 1
+            color: clipWindow.theme ? clipWindow.theme.getColor("outlineVariant") : "#20FFFFFF"
+            opacity: 0.35
+        }
+
         UI.EmptyState {
+            id: emptyState
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             theme: clipWindow.theme
             searchQuery: clipWindow.searchQuery
             defaultIcon: clipWindow.searchQuery === "" ? "actions/image-copy.svg" : "actions/search.svg"
             title: clipWindow.searchQuery === "" ? "Clipboard is empty" : "No matching items found"
             subtitle: clipWindow.searchQuery !== "" ? "Try searching for a different keyword" : ""
-            visible: entriesList.count === 0
+            visible: clipWindow.filteredEntriesList.length === 0
         }
 
-        EntriesList {
-            id: entriesList
-            theme: clipWindow.theme
-            clipService: clipWindow.clipService
-            searchQuery: clipWindow.searchQuery
-            entriesModel: {
-                if (!clipService) return [];
-                var _ = clipService.entries;
-                var __ = searchQuery;
-                var ___ = clipService.imagePreviews;
-                var ____ = clipService.pinnedEntries;
-                return clipWindow.getFilteredEntries();
-            }
-            visible: entriesList.count > 0
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            visible: clipWindow.filteredEntriesList.length > 0
 
-            onEntryClicked: entryText => {
-                clipWindow.clipService.copyEntry(entryText);
-                clipWindow.active = false;
-            }
+            EntriesList {
+                id: entriesList
+                anchors.fill: parent
+                theme: clipWindow.theme
+                clipService: clipWindow.clipService
+                searchQuery: clipWindow.searchQuery
+                entriesModel: clipWindow.filteredEntriesList
 
-            onDeleteClicked: entryText => {
-                clipWindow.clipService.deleteEntry(entryText);
-            }
+                onEntryClicked: entryText => {
+                    clipWindow.clipService.copyEntry(entryText);
+                    clipWindow.active = false;
+                }
 
-            onPinClicked: entryText => {
-                clipWindow.clipService.togglePin(entryText);
-            }
+                onDeleteClicked: entryText => {
+                    clipWindow.clipService.deleteEntry(entryText);
+                    clipWindow.updateFilteredList();
+                }
 
-            onUpPressedAtStart: searchInput.forceFocus()
-            onEscapePressed: clipWindow.active = false
+                onPinClicked: entryText => {
+                    clipWindow.clipService.togglePin(entryText);
+                    clipWindow.updateFilteredList();
+                }
+
+                onUpPressedAtStart: searchInput.forceFocus()
+                onEscapePressed: clipWindow.active = false
+            }
         }
     }
 }

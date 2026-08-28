@@ -43,7 +43,7 @@ PanelWindow {
 
     Timer {
         id: closeTimer
-        interval: 80
+        interval: 15
         running: false
         repeat: false
         onTriggered: {
@@ -53,7 +53,7 @@ PanelWindow {
 
     Timer {
         id: openGuard
-        interval: 100
+        interval: 80
         running: false
         repeat: false
     }
@@ -86,7 +86,7 @@ PanelWindow {
         width: popupWindow.popupWidth
         height: popupWindow.popupHeight
 
-        Behavior on height { enabled: !popupWindow.flatBottom; NumberAnimation { duration: 340; easing.type: Easing.OutQuint } }
+        Behavior on height { enabled: !popupWindow.flatBottom; NumberAnimation { duration: 220; easing.type: Easing.OutQuint } }
         radius: (root && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : ((root && root.shellConfig) ? root.shellConfig.cornerRadius : 16)
 
         color: popupWindow.theme.getColor("surface")
@@ -103,20 +103,20 @@ PanelWindow {
         }
 
         opacity: popupWindow.active ? 1.0 : 0.0
-        scale: popupWindow.slideFromRight ? 1.0 : (popupWindow.active ? 1.0 : 0.88)
+        scale: popupWindow.slideFromRight ? 1.0 : (popupWindow.active ? 1.0 : 0.94)
         transformOrigin: Item.Top
 
         transform: Translate {
             id: slideTranslate
             x: popupWindow.slideFromRight ? (popupWindow.active ? 0 : (popupWindow.popupWidth + 40)) : 0
             Behavior on x {
-                NumberAnimation { duration: 340; easing.type: Easing.OutQuint }
+                NumberAnimation { duration: 220; easing.type: Easing.OutQuint }
             }
         }
 
-        Behavior on opacity { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: 380; easing.type: Easing.OutQuint } }
-        Behavior on y { NumberAnimation { duration: 380; easing.type: Easing.OutQuint } }
+        Behavior on opacity { NumberAnimation { duration: 70; easing.type: Easing.OutQuad } }
+        Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutQuint } }
+        Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutQuint } }
 
         Corner {
             anchors.top: parent.top
@@ -253,6 +253,5 @@ PanelWindow {
             anchors.topMargin: popupWindow.showCorners ? (popupWindow.topOverlap + 12) : popupWindow.contentMargin
             spacing: 12
         }
-
     }
 }

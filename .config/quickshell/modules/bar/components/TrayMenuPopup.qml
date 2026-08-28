@@ -6,6 +6,7 @@ import Quickshell.Widgets
 import Quickshell.Wayland
 import Quickshell.Services.SystemTray
 import Quickshell.DBusMenu
+import "../widgets"
 import "../../../components/ui" as UI
 
 PanelWindow {
@@ -31,7 +32,7 @@ PanelWindow {
 
     Timer {
         id: subMenuCloseTimer
-        interval: 160
+        interval: 350
         repeat: false
         onTriggered: activeSubMenuItem = null
     }
@@ -39,6 +40,7 @@ PanelWindow {
     readonly property alias subMenuCloseTimer: subMenuCloseTimer
 
     function openSubMenu(item, yCoord) {
+        closeTimer.stop();
         subMenuCloseTimer.stop();
         activeSubMenuItem = item;
         subMenuTargetY = yCoord;
@@ -50,6 +52,7 @@ PanelWindow {
 
     property alias menuOpener: menuOpener
     property alias closeTimer: closeTimer
+    property alias morphAnchorRef: morphAnchor
 
     function formatAppTitle(item) {
         if (!item) return "Application";
@@ -60,20 +63,24 @@ PanelWindow {
     }
 
     readonly property int safeWidth: trayMenuWindow.width > 0 ? trayMenuWindow.width : 1920
-    readonly property int expandedWidth: 230
+    readonly property int expandedWidth: 244
     readonly property int collapsedWidth: 34
-    readonly property int expandedHeight: Math.min(500, (menuListView ? menuListView.contentHeight : 200) + 56)
+    readonly property int subMenuWidth: 224
+    readonly property int expandedHeight: Math.min(500, (menuListView ? menuListView.contentHeight : 200) + 64)
 
     Timer {
         id: closeTimer
-        interval: 180
+        interval: 35
         repeat: false
-        onTriggered: trayMenuWindow.active = false
+        onTriggered: {
+            trayMenuWindow.active = false;
+            activeSubMenuItem = null;
+        }
     }
 
     Timer {
         id: openGuard
-        interval: 150
+        interval: 20
         repeat: false
     }
 
@@ -97,6 +104,7 @@ PanelWindow {
         if (active) {
             openGuard.restart();
             closeTimer.stop();
+            subMenuCloseTimer.stop();
         } else {
             activeSubMenuItem = null;
         }
@@ -105,20 +113,27 @@ PanelWindow {
     Shortcut { sequence: "Escape"; enabled: trayMenuWindow.active; onActivated: trayMenuWindow.active = false }
 
     MouseArea {
+        id: backdropMouseArea
         anchors.fill: parent
         enabled: trayMenuWindow.active
         hoverEnabled: true
-        onClicked: trayMenuWindow.active = false
+        onClicked: {
+            trayMenuWindow.active = false;
+            activeSubMenuItem = null;
+        }
         onEntered: {
             if (trayMenuWindow.active && !openGuard.running) {
                 trayMenuWindow.closeTimer.restart();
+                trayMenuWindow.subMenuCloseTimer.restart();
             }
         }
     }
 
     Item {
         id: morphAnchor
-        x: targetX > 0 ? Math.max(trayMenuWindow.expandedWidth + 10, Math.min(targetX, safeWidth - 10)) : (safeWidth - 10)
+        x: targetX > 0
+            ? Math.max(trayMenuWindow.expandedWidth + 10, Math.min(targetX, safeWidth - trayMenuWindow.subMenuWidth - 12))
+            : (safeWidth - trayMenuWindow.subMenuWidth - 12)
         y: 6
         width: 1
         height: 1
@@ -129,15 +144,15 @@ PanelWindow {
             anchors.top: parent.top
             width: trayMenuWindow.active ? trayMenuWindow.expandedWidth : trayMenuWindow.collapsedWidth
             height: trayMenuWindow.active ? trayMenuWindow.expandedHeight : 34
-            radius: trayMenuWindow.active ? 14 : 17
+            radius: trayMenuWindow.active ? 16 : 17
             color: trayMenuWindow.theme ? trayMenuWindow.theme.getColor("surface") : "#1e1e2e"
             clip: true
             opacity: (trayMenuWindow.active || width > (trayMenuWindow.collapsedWidth + 2)) ? 1.0 : 0.0
 
-            Behavior on width { NumberAnimation { duration: 240; easing.type: Easing.OutQuint } }
-            Behavior on height { NumberAnimation { duration: 280; easing.type: Easing.OutQuint } }
-            Behavior on radius { NumberAnimation { duration: 200; easing.type: Easing.OutQuint } }
-            Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutQuad } }
+            Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutQuint } }
+            Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutQuint } }
+            Behavior on radius { NumberAnimation { duration: 160; easing.type: Easing.OutQuint } }
+            Behavior on opacity { NumberAnimation { duration: 70; easing.type: Easing.OutQuad } }
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -152,8 +167,12 @@ PanelWindow {
                 anchors.fill: parent
                 hoverEnabled: true
                 z: -1
-                onEntered: trayMenuWindow.closeTimer.stop()
-                onPositionChanged: trayMenuWindow.closeTimer.stop()
+                onEntered: {
+                    trayMenuWindow.closeTimer.stop();
+                }
+                onPositionChanged: {
+                    trayMenuWindow.closeTimer.stop();
+                }
             }
 
             Column {
@@ -161,9 +180,10 @@ PanelWindow {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.topMargin: 8
-                anchors.leftMargin: 2
-                anchors.rightMargin: 2
+                anchors.topMargin: 10
+                anchors.bottomMargin: 10
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
                 spacing: 6
                 opacity: trayMenuWindow.active ? 1.0 : 0.0
                 visible: opacity > 0.001
@@ -172,12 +192,13 @@ PanelWindow {
 
                 Item {
                     width: parent.width
-                    height: 22
+                    height: 24
 
                     RowLayout {
                         anchors.fill: parent
                         anchors.leftMargin: 6
-                        spacing: 6
+                        anchors.rightMargin: 6
+                        spacing: 8
 
                         IconImage {
                             width: 16
@@ -217,9 +238,9 @@ PanelWindow {
                     width: parent.width
                     height: contentHeight
                     implicitHeight: contentHeight
-                    spacing: 2
+                    spacing: 3
                     pillMargin: 0
-                    pillRadius: 8
+                    pillRadius: 9
                     showBottomFade: false
                     pillColor: trayMenuWindow.theme ? trayMenuWindow.theme.getColor("surfaceVariant") : "#302f38"
                     model: menuOpener.children
@@ -230,6 +251,7 @@ PanelWindow {
                         itemModel: modelData
                         popupWindow: trayMenuWindow
                         menuOpener: menuOpener
+                        isSubMenu: false
                         onHovered: (yPos, itemH) => {
                             menuListView.currentIndex = index;
                             menuListView.hoverItem(index, yPos, itemH);
@@ -240,18 +262,45 @@ PanelWindow {
             }
         }
 
+        Corner {
+            id: subMenuTopCorner
+            cornerRadius: 14
+            anchors.bottom: subMenuContainer.top
+            anchors.left: morphContainer.right
+            anchors.leftMargin: -0.5
+            alignBottom: true
+            alignRight: false
+            color: trayMenuWindow.theme ? trayMenuWindow.theme.getColor("surface") : "#1e1e2e"
+            visible: subMenuContainer.visible && subMenuContainer.width > 20 && subMenuContainer.y > 4
+            z: 2
+        }
+
+        Corner {
+            id: subMenuBottomCorner
+            cornerRadius: 14
+            anchors.top: subMenuContainer.bottom
+            anchors.left: morphContainer.right
+            anchors.leftMargin: -0.5
+            alignBottom: false
+            alignRight: false
+            color: trayMenuWindow.theme ? trayMenuWindow.theme.getColor("surface") : "#1e1e2e"
+            visible: subMenuContainer.visible && subMenuContainer.width > 20 && (subMenuContainer.y + subMenuContainer.height < morphContainer.height - 4)
+            z: 2
+        }
+
         Rectangle {
             id: subMenuContainer
-            anchors.right: morphContainer.left
-            anchors.rightMargin: 6
-            y: Math.max(0, Math.min(trayMenuWindow.height - height - 20, trayMenuWindow.subMenuTargetY))
-            width: (trayMenuWindow.active && Boolean(trayMenuWindow.activeSubMenuItem)) ? 210 : 0
-            height: (trayMenuWindow.active && Boolean(trayMenuWindow.activeSubMenuItem)) ? Math.min(420, Math.max(34, (subMenuList ? subMenuList.contentHeight : 0) + 16)) : 0
-            radius: 14
+            anchors.left: morphContainer.right
+            anchors.leftMargin: -0.5
+            y: Math.max(0, Math.min(morphContainer.height - height, trayMenuWindow.subMenuTargetY))
+            width: (trayMenuWindow.active && Boolean(trayMenuWindow.activeSubMenuItem)) ? trayMenuWindow.subMenuWidth : 0
+            height: (trayMenuWindow.active && Boolean(trayMenuWindow.activeSubMenuItem)) ? Math.min(420, Math.max(40, (subMenuList ? subMenuList.contentHeight : 0) + 20)) : 0
+            radius: 16
             color: trayMenuWindow.theme ? trayMenuWindow.theme.getColor("surface") : "#1e1e2e"
             clip: true
             opacity: width > 10 ? 1.0 : 0.0
             visible: opacity > 0.01
+            z: 1
 
             Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutQuint } }
             Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutQuint } }
@@ -265,23 +314,41 @@ PanelWindow {
                 shadowVerticalOffset: 8
             }
 
+            Rectangle {
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                width: parent.radius
+                color: parent.color
+                z: 0
+            }
+
             MouseArea {
                 id: subMenuMouseArea
                 anchors.fill: parent
                 hoverEnabled: true
                 z: -1
-                onEntered: trayMenuWindow.closeTimer.stop()
-                onPositionChanged: trayMenuWindow.closeTimer.stop()
+                onEntered: {
+                    trayMenuWindow.closeTimer.stop();
+                    trayMenuWindow.subMenuCloseTimer.stop();
+                }
+                onPositionChanged: {
+                    trayMenuWindow.closeTimer.stop();
+                    trayMenuWindow.subMenuCloseTimer.stop();
+                }
             }
 
             UI.AnimatedListView {
                 id: subMenuList
                 anchors.fill: parent
-                anchors.margins: 8
+                anchors.topMargin: 10
+                anchors.bottomMargin: 10
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
                 height: contentHeight
-                spacing: 2
+                spacing: 3
                 pillMargin: 0
-                pillRadius: 8
+                pillRadius: 9
                 showBottomFade: false
                 pillColor: trayMenuWindow.theme ? trayMenuWindow.theme.getColor("surfaceVariant") : "#302f38"
                 model: subMenuOpener.children
@@ -292,6 +359,7 @@ PanelWindow {
                     itemModel: modelData
                     popupWindow: trayMenuWindow
                     menuOpener: subMenuOpener
+                    isSubMenu: true
                     onHovered: (yPos, itemH) => {
                         subMenuList.currentIndex = index;
                         subMenuList.hoverItem(index, yPos, itemH);

@@ -39,7 +39,6 @@ hl.bind(
 ----------------------------------
 ---- CLIPBOARD & NOTIFICATIONS ---
 ----------------------------------
--- for cliphist
 hl.bind(
 	mainMod .. " + V",
 	hl.dsp.exec_cmd("qs ipc call shell toggleClipboard")

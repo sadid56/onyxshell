@@ -34,7 +34,7 @@ PanelWindow {
 
     Timer {
         id: closeTimer
-        interval: 80
+        interval: 15
         running: false
         repeat: false
         onTriggered: {
@@ -81,10 +81,10 @@ PanelWindow {
 
         opacity: mediaWindow.active ? 1.0 : 0.0
 
-        Behavior on width { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
-        Behavior on height { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
-        Behavior on radius { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
-        Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
+        Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutQuint } }
+        Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutQuint } }
+        Behavior on radius { NumberAnimation { duration: 160; easing.type: Easing.OutQuint } }
+        Behavior on opacity { NumberAnimation { duration: 70; easing.type: Easing.OutQuad } }
 
         layer.enabled: true
         layer.effect: MultiEffect {
