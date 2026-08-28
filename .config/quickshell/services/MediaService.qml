@@ -27,44 +27,39 @@ Item {
         }
     }
 
-    Timer {
-        id: pollTimer
-        interval: mediaService.isPlaying ? 1000 : 2500
+    Process {
+        id: mediaFollower
+        command: ["playerctl", "metadata", "--follow", "--format", "{{status}}::{{title}}::{{artist}}::{{position}}::{{mpris:length}}::{{mpris:artUrl}}"]
         running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            mediaFetcher.running = false;
-            mediaFetcher.running = true;
+
+        onExited: (exitCode, exitStatus) => {
+            restartTimer.restart();
+        }
+
+        stdout: SplitParser {
+            onRead: data => {
+                var text = data ? data.trim() : "";
+                if (text === "") return;
+                var parts = text.split("::");
+                mediaService.mediaStatus = parts[0] || "Stopped";
+                mediaService.mediaTitle = parts[1] || "No media playing";
+                mediaService.mediaArtist = parts[2] || "";
+                var posUs = parseInt(parts[3]) || 0;
+                var lenUs = parseInt(parts[4]) || 0;
+                mediaService.mediaPosition = Math.round(posUs / 1000000);
+                mediaService.mediaLength = Math.round(lenUs / 1000000);
+                mediaService.mediaArtUrl = parts[5] || "";
+            }
         }
     }
 
-    Process {
-        id: mediaFetcher
-        command: ["playerctl", "metadata", "--format", "{{status}}::{{title}}::{{artist}}::{{position}}::{{mpris:length}}::{{mpris:artUrl}}"]
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var text = this.text ? this.text.trim() : "";
-                if (text !== "") {
-                    var parts = text.split('::');
-                    mediaService.mediaStatus = parts[0] || "Stopped";
-                    mediaService.mediaTitle = parts[1] || "No media playing";
-                    mediaService.mediaArtist = parts[2] || "";
-                    var posUs = parseInt(parts[3]) || 0;
-                    var lenUs = parseInt(parts[4]) || 0;
-                    mediaService.mediaPosition = Math.round(posUs / 1000000);
-                    mediaService.mediaLength = Math.round(lenUs / 1000000);
-                    mediaService.mediaArtUrl = parts[5] || "";
-                } else {
-                    mediaService.mediaStatus = "Stopped";
-                    mediaService.mediaTitle = "No media playing";
-                    mediaService.mediaArtist = "";
-                    mediaService.mediaPosition = 0;
-                    mediaService.mediaLength = 0;
-                    mediaService.mediaArtUrl = "";
-                }
-            }
+    Timer {
+        id: restartTimer
+        interval: 3000
+        repeat: false
+        onTriggered: {
+            mediaFollower.running = false;
+            mediaFollower.running = true;
         }
     }
 
@@ -73,9 +68,28 @@ Item {
         interval: 350
         repeat: false
         onTriggered: {
-            pollTimer.restart();
-            mediaFetcher.running = false;
-            mediaFetcher.running = true;
+            positionFetcher.running = false;
+            positionFetcher.running = true;
+        }
+    }
+
+    Process {
+        id: positionFetcher
+        command: ["playerctl", "metadata", "--format", "{{status}}::{{title}}::{{artist}}::{{position}}::{{mpris:length}}::{{mpris:artUrl}}"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var text = this.text ? this.text.trim() : "";
+                if (text === "") return;
+                var parts = text.split("::");
+                mediaService.mediaStatus = parts[0] || "Stopped";
+                mediaService.mediaTitle = parts[1] || "No media playing";
+                mediaService.mediaArtist = parts[2] || "";
+                var posUs = parseInt(parts[3]) || 0;
+                var lenUs = parseInt(parts[4]) || 0;
+                mediaService.mediaPosition = Math.round(posUs / 1000000);
+                mediaService.mediaLength = Math.round(lenUs / 1000000);
+                mediaService.mediaArtUrl = parts[5] || "";
+            }
         }
     }
 
@@ -96,7 +110,7 @@ Item {
             running = false;
             running = true;
             mediaService.mediaPosition = seconds;
-            pollTimer.restart();
+            postActionFetchTimer.restart();
         }
     }
 
@@ -118,7 +132,7 @@ Item {
     }
 
     function refresh() {
-        mediaFetcher.running = false;
-        mediaFetcher.running = true;
+        positionFetcher.running = false;
+        positionFetcher.running = true;
     }
 }

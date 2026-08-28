@@ -1,0 +1,70 @@
+{
+  "accentColor": "#cba6f7",
+  "cornerRadius": 20,
+  "borderWidth": 0,
+  "gapsIn": 6,
+  "gapsOut": 8,
+  "activeOpacity": 1,
+  "inactiveOpacity": 1,
+  "layout": "dwindle",
+  "animationsPreset": "bouncy",
+  "followMouse": true,
+  "dndEnabled": false,
+  "mutedApps": [
+    "antigravity-ide"
+  ],
+  "displayOutput": "eDP-1",
+  "displayRes": "1920x1080",
+  "displayHz": 144,
+  "nightLightEnabled": false,
+  "nightLightTemp": 4495,
+  "touchpadNaturalScroll": false,
+  "touchpadTapToClick": true,
+  "touchpadSpeed": 0.8,
+  "fontFamily": "Inter",
+  "fontMono": "Noto Sans Mono",
+  "fontSize": 12,
+  "dockEnabled": true,
+  "dockLivePreview": true,
+  "dockAutoShowEmpty": true,
+  "dockIconSize": 26,
+  "dockSpacing": 6,
+  "dockPinnedApps": [
+    {
+      "name": "Google Chrome",
+      "icon": "google-chrome",
+      "exec": "google-chrome-stable",
+      "comment": "Web Browser"
+    },
+    {
+      "name": "Kitty",
+      "icon": "kitty",
+      "exec": "kitty",
+      "comment": "Terminal"
+    },
+    {
+      "name": "Visual Studio Code",
+      "icon": "vscode",
+      "exec": "code",
+      "comment": "Code Editor"
+    },
+    {
+      "name": "Files",
+      "icon": "org.gnome.Nautilus",
+      "exec": "nautilus",
+      "comment": "File Manager"
+    },
+    {
+      "name": "Discord",
+      "icon": "discord",
+      "exec": "discord",
+      "comment": "Chat & Voice"
+    },
+    {
+      "name": "Neovim",
+      "icon": "/usr/share/icons/hicolor/128x128/apps/nvim.png",
+      "exec": "nvim",
+      "comment": "Edit text files"
+    }
+  ]
+}

@@ -1,67 +1,97 @@
 import QtQuick
+import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell.Widgets
+import "../../components/ui" as UI
 
 Item {
-    id: delegateRoot
-    width: 280
-    height: 200
+    id: cardRoot
 
     property var wallpaperWindow
     property var wallpapersListInst
-    property bool isCurrent: ListView.isCurrentItem
+
+    width: 280
+    height: 180
+    anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+
+    readonly property bool isSelected: Boolean((wallpapersListInst && wallpapersListInst.currentIndex === index) || ListView.isCurrentItem)
+    readonly property bool isHovered: mouseArea ? mouseArea.containsMouse : false
+
+    scale: isSelected ? 1.05 : (isHovered ? 1.02 : 1.0)
+    opacity: isSelected ? 1.0 : (isHovered ? 0.9 : 0.75)
+    z: isSelected ? 5 : (isHovered ? 2 : 1)
+
+    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+    Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutQuad } }
 
     ClippingRectangle {
-        id: cardContainer
-        width: 280
-        height: 158
-        radius: 18
-        color: (wallpaperWindow && wallpaperWindow.theme) ? wallpaperWindow.theme.getColor("surfaceVariant") : "#2b2a27"
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        scale: delegateRoot.isCurrent ? 1.10 : (hoverArea.containsMouse ? 1.03 : 0.96)
-        opacity: delegateRoot.isCurrent ? 1.0 : (hoverArea.containsMouse ? 0.90 : 0.65)
-
-        Behavior on scale { NumberAnimation { duration: 240; easing.type: Easing.OutQuint } }
-        Behavior on opacity { NumberAnimation { duration: 240; easing.type: Easing.OutQuint } }
+        id: cardBg
+        anchors.fill: parent
+        radius: 16
+        color: (wallpaperWindow && wallpaperWindow.theme) ? wallpaperWindow.theme.getColor("surfaceVariant") : "#24232a"
 
         Image {
-            id: imgSource
             anchors.fill: parent
-            source: (modelData && modelData.path) ? ("file://" + modelData.path) : ""
+            source: modelData ? ("file://" + modelData.path) : ""
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
-            cache: true
-            sourceSize.width: 320
-            sourceSize.height: 180
+            smooth: true
+            mipmap: true
         }
 
         Rectangle {
-            anchors.fill: parent
-            radius: 18
-            color: "transparent"
-            border.color: delegateRoot.isCurrent
-                          ? ((wallpaperWindow && wallpaperWindow.theme) ? wallpaperWindow.theme.getColor("primary") : "#ffb3b4")
-                          : "transparent"
-            border.width: delegateRoot.isCurrent ? 2.5 : 0
-            Behavior on border.color { ColorAnimation { duration: 160 } }
-        }
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 42
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "transparent" }
+                GradientStop { position: 1.0; color: "#d0000000" }
+            }
 
-        MouseArea {
-            id: hoverArea
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                if (wallpapersListInst) {
-                    wallpapersListInst.currentIndex = index;
-                    if (wallpaperWindow && typeof wallpaperWindow.getScrollTarget === "function") {
-                        wallpapersListInst.contentX = wallpaperWindow.getScrollTarget(index);
-                    }
-                }
-                if (wallpaperWindow && wallpaperWindow.wallpaperSetter && modelData && modelData.path) {
-                    wallpaperWindow.wallpaperSetter.applyWallpaper(modelData.path, true);
-                }
+            UI.Typography {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: 10
+                theme: wallpaperWindow ? wallpaperWindow.theme : null
+                text: modelData ? modelData.name : ""
+                variant: "labelMedium"
+                font.bold: cardRoot.isSelected
+                color: "#ffffff"
+                elide: Text.ElideRight
+            }
+        }
+    }
+
+    Rectangle {
+        id: selectionRing
+        anchors.fill: parent
+        radius: 16
+        color: "transparent"
+        border.width: cardRoot.isSelected ? 3 : (cardRoot.isHovered ? 2 : 0)
+        border.color: cardRoot.isSelected
+            ? ((wallpaperWindow && wallpaperWindow.theme) ? wallpaperWindow.theme.getColor("primary") : "#ffb3b4")
+            : ((wallpaperWindow && wallpaperWindow.theme) ? wallpaperWindow.theme.getColor("outlineVariant") : "#ffffff50")
+        z: 10
+
+        Behavior on border.width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+        Behavior on border.color { ColorAnimation { duration: 180; easing.type: Easing.OutQuad } }
+    }
+
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        z: 11
+        onClicked: {
+            if (wallpapersListInst) {
+                wallpapersListInst.currentIndex = index;
+                wallpapersListInst.contentX = wallpaperWindow ? wallpaperWindow.getScrollTarget(index) : 0;
+            }
+            if (wallpaperWindow && wallpaperWindow.wallpaperSetter && modelData) {
+                wallpaperWindow.wallpaperSetter.applyWallpaper(modelData.path, true);
             }
         }
     }

@@ -1,10 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
+import "../../../components/ui" as UI
 
 Item {
     id: rowRoot
-    Layout.fillWidth: true
-    implicitHeight: 28
+
+    width: ListView.view ? ListView.view.width : (parent ? parent.width : 280)
+    height: 28
 
     property var theme
     property var appData: ({})
@@ -23,11 +25,12 @@ Item {
         id: rowMouse
         anchors.fill: parent
         hoverEnabled: true
-        acceptedButtons: Qt.RightButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: mouse => {
             if (mouse.button === Qt.RightButton) {
-                var gPos = rowRoot.mapToItem(null, mouse.x, mouse.y);
-                rowRoot.rightClicked(rowRoot.appData, gPos.x, gPos.y);
+                var targetContainer = (typeof morphContainer !== "undefined") ? morphContainer : (ListView.view ? ListView.view.parent : null);
+                var pos = targetContainer ? rowRoot.mapToItem(targetContainer, mouse.x, mouse.y) : ({ x: mouse.x, y: mouse.y });
+                rowRoot.rightClicked(rowRoot.appData, pos.x, pos.y);
             }
         }
     }
@@ -38,39 +41,42 @@ Item {
         anchors.rightMargin: 6
         spacing: 0
 
-        Text {
+        UI.Typography {
+            theme: rowRoot.theme
             text: String(rowRoot.rank)
-            font.family: "Google Sans Flex, sans-serif"
+            variant: "caption"
             font.pixelSize: 10
-            color: rowRoot.theme ? rowRoot.theme.getColor("outline") : "#8c909f"
+            colorRole: "outline"
             Layout.preferredWidth: 16
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Text {
+        UI.Typography {
+            theme: rowRoot.theme
             text: rowRoot.appData.name || "—"
-            font.family: "Google Sans Flex, sans-serif"
-            font.pixelSize: 11
-            color: rowRoot.theme ? rowRoot.theme.getColor("onSurface") : "#FFFFFF"
+            variant: "bodySmall"
+            colorRole: "onSurface"
             Layout.fillWidth: true
             elide: Text.ElideRight
             maximumLineCount: 1
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Text {
+        UI.Typography {
+            theme: rowRoot.theme
             visible: (rowRoot.appData.count || 1) > 1
             text: "×" + (rowRoot.appData.count || 1)
-            font.family: "Google Sans Flex, sans-serif"
+            variant: "caption"
             font.pixelSize: 9
-            color: rowRoot.theme ? rowRoot.theme.getColor("outline") : "#8c909f"
+            colorRole: "outline"
             Layout.preferredWidth: 22
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Text {
+        UI.Typography {
+            theme: rowRoot.theme
             text: (rowRoot.appData.cpu || 0).toFixed(1) + "%"
-            font.family: "Google Sans Flex, sans-serif"
+            variant: "caption"
             font.pixelSize: 10
             font.bold: (rowRoot.appData.cpu || 0) > 10
             color: (rowRoot.appData.cpu || 0) > 15
@@ -81,12 +87,13 @@ Item {
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Text {
+        UI.Typography {
+            theme: rowRoot.theme
             text: {
                 var mb = rowRoot.appData.rss_mb || 0;
                 return mb >= 1024 ? (mb / 1024).toFixed(1) + " GB" : mb.toFixed(0) + " MB";
             }
-            font.family: "Google Sans Flex, sans-serif"
+            variant: "caption"
             font.pixelSize: 10
             font.bold: (rowRoot.appData.rss_mb || 0) > 1000
             color: (rowRoot.appData.rss_mb || 0) > 1000

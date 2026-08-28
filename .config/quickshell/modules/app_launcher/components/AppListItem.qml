@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Widgets
+import "../../../components/ui" as UI
 
 Item {
     id: appItemRoot
@@ -27,6 +28,19 @@ Item {
         onClicked: appItemRoot.clicked()
     }
 
+    Rectangle {
+        id: highlightBg
+        anchors.fill: parent
+        radius: 12
+        color: appItemRoot.theme ? appItemRoot.theme.getColor("secondaryContainer") : "#3d3a48"
+        opacity: (appItemRoot.isSelected || mouseArea.containsMouse) ? 1.0 : 0.0
+        z: 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
+        }
+    }
+
     function getCategoriesText(cats) {
         if (!cats) return "";
         if (Array.isArray(cats)) return cats.join(" • ");
@@ -49,11 +63,10 @@ Item {
         spacing: 12
         z: 2
 
-        // App Icon
         Rectangle {
-            width: 32
-            height: 32
-            radius: 8
+            width: 34
+            height: 34
+            radius: 9
             color: appItemRoot.theme ? appItemRoot.theme.getColor("surfaceVariant") : "#2b2b35"
             clip: true
             Layout.alignment: Qt.AlignVCenter
@@ -72,29 +85,28 @@ Item {
             }
         }
 
-        // App Details (Name + Description/Category)
         ColumnLayout {
             Layout.fillWidth: true
             spacing: 1
             Layout.alignment: Qt.AlignVCenter
 
-            Text {
+            UI.Typography {
+                theme: appItemRoot.theme
                 text: (appItem && appItem.name) ? appItem.name : ""
-                font.family: "Google Sans Flex, sans-serif"
-                font.pixelSize: 13
+                variant: "bodyMedium"
                 font.bold: true
-                color: appItemRoot.theme ? appItemRoot.theme.getColor("onSurface") : "#f0dede"
+                colorRole: "onSurface"
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
 
-            Text {
+            UI.Typography {
+                theme: appItemRoot.theme
                 text: (appItem && appItem.comment && appItem.comment !== "")
                     ? appItem.comment
                     : appItemRoot.getCategoriesText(appItem ? appItem.categories : null)
-                font.family: "Google Sans Flex, sans-serif"
-                font.pixelSize: 11
-                color: appItemRoot.theme ? appItemRoot.theme.getColor("onSurfaceVariant") : "#8f8f9f"
+                variant: "bodySmall"
+                colorRole: "onSurfaceVariant"
                 elide: Text.ElideRight
                 Layout.fillWidth: true
                 visible: text !== ""

@@ -24,7 +24,6 @@ def focus_address(addr):
         return True
     return False
 
-# 1. Query all open clients in Hyprland
 clients_raw = run_cmd(["hyprctl", "clients", "-j"])
 clients = []
 if clients_raw:
@@ -36,11 +35,9 @@ if clients_raw:
 if not clients:
     sys.exit(0)
 
-# 2. Smart Scoring System to find the exact target window
 best_client = None
 best_score = 0
 
-# Extract search words from notification
 notif_words = [w for w in re.findall(r'[\w]+', combined_lower) if len(w) >= 2]
 summary_lower = summary.strip().lower()
 
@@ -50,23 +47,19 @@ for c in clients:
     cls = (c.get("class") or "").lower()
     init_title = (c.get("initialTitle") or "").lower()
 
-    # Exact sender name in window title (e.g. "Bow - Messenger", "Sadid Khan")
     if summary_lower and len(summary_lower) > 2 and summary_lower in title:
         score += 200
 
-    # Facebook / Messenger matching
     if any(k in combined_lower for k in ["facebook", "messenger", "fb"]):
         if "facebook" in title or "facebook" in cls:
             score += 150
         if "messenger" in title or "messenger" in cls:
             score += 150
 
-    # WhatsApp matching
     if "whatsapp" in combined_lower:
         if "whatsapp" in title or "whatsapp" in cls:
             score += 150
 
-    # Telegram / Discord / Spotify / Code matching
     if "telegram" in combined_lower and "telegram" in cls:
         score += 120
     if ("discord" in combined_lower or "vesktop" in combined_lower) and ("discord" in cls or "vesktop" in cls):
@@ -76,19 +69,16 @@ for c in clients:
     if ("antigravity" in combined_lower or "code" in combined_lower) and ("antigravity" in cls or "code" in cls):
         score += 120
 
-    # Matching browser tabs when notification comes from browser
     if any(b in combined_lower for b in ["brave", "chrome", "firefox", "chromium"]):
         if any(b in cls for b in ["brave", "chrome", "firefox", "chromium"]):
             score += 60
 
-    # General word match between notification and window title/class
     for w in notif_words:
         if w in title:
             score += 30
         if w in cls:
             score += 20
 
-    # If title has "facebook" and notification comes from Brave, boost Facebook tab
     if "facebook" in title and any(b in cls for b in ["brave", "chrome", "firefox"]):
         score += 40
     if "whatsapp" in title and any(b in cls for b in ["brave", "chrome", "firefox"]):
@@ -98,13 +88,11 @@ for c in clients:
         best_score = score
         best_client = c
 
-# 3. Focus the highest scoring window
 if best_client and best_score > 0:
     addr = best_client.get("address")
     if addr and focus_address(addr):
         sys.exit(0)
 
-# 4. Fallback if no window matched: open URL or launch app
 url_match = re.search(r'(https?://[^\s]+|www\.[^\s]+)', combined)
 if url_match:
     u = url_match.group(1)

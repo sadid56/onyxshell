@@ -41,10 +41,15 @@ Popup {
     function copyEmoji(emojiChar, emojiName) {
         copyProc.command = ["sh", "-c", "echo -n '" + emojiChar + "' | wl-copy"];
         copyProc.running = true;
-        if (typeof popupManager !== "undefined" && popupManager.toastPopup) {
-            popupManager.toastPopup.showToast({
-                summary: "Emoji Copied " + emojiChar,
-                body: "Copied \"" + emojiName + "\" to clipboard."
+        var pMgr = (typeof popupManager !== "undefined" && popupManager) ? popupManager : ((typeof root !== "undefined" && root.popupManager) ? root.popupManager : null);
+        if (pMgr && typeof pMgr.showNotification === "function") {
+            pMgr.showNotification({
+                appName: "Emoji",
+                summary: "Copied to Clipboard",
+                body: emojiChar + "  " + emojiName,
+                emojiChar: emojiChar,
+                isEmoji: true,
+                appIcon: ""
             });
         }
         emojiWindow.active = false;
@@ -205,7 +210,7 @@ Popup {
                 parent: emojiGrid.contentItem
                 z: 0
                 radius: 10
-                color: emojiWindow.theme ? emojiWindow.theme.getColor("surfaceVariant") : "#2b2a27"
+                color: emojiWindow.theme ? emojiWindow.theme.getColor("secondaryContainer") : "#3d3a48"
 
                 property real targetX: 0
                 property real targetY: 0

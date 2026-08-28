@@ -13,6 +13,7 @@ ListView {
     property real pillMargin: 6
     property int hoveredIndex: -1
     property int activeTargetIndex: currentIndex >= 0 ? currentIndex : hoveredIndex
+    property bool showBottomFade: true
 
     currentIndex: -1
     clip: true
@@ -157,7 +158,7 @@ ListView {
         height: 48
         z: 10
         enabled: false
-        visible: listViewRoot.count > 3
+        visible: listViewRoot.showBottomFade && listViewRoot.count > 3 && (listViewRoot.contentHeight > listViewRoot.height + 8)
 
         readonly property color surfaceColor: (listViewRoot.theme && typeof listViewRoot.theme.getColor === "function")
             ? listViewRoot.theme.getColor("surface")

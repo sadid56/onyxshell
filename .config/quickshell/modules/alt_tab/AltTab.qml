@@ -133,7 +133,7 @@ PanelWindow {
             border.width: 1
             border.color: altTabWindow.theme ? altTabWindow.theme.getColor("outline") : "#574142"
 
-            layer.enabled: true
+            layer.enabled: altTabWindow.active
             layer.effect: MultiEffect {
                 shadowEnabled: true
                 shadowColor: "#80000000"

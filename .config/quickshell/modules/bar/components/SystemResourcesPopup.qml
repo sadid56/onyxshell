@@ -3,15 +3,35 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
+import Quickshell.Wayland
 import Quickshell.Io
-import "../../../components/containers"
+import "../../../components/ui" as UI
 import "../../../core"
+import "../widgets"
 import "./"
 
-Popup {
+PanelWindow {
     id: resourceWindow
-    popupWidth: 380
-    popupHeight: 490
+
+    anchors { top: true; bottom: true; left: true; right: true }
+    color: "transparent"
+
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.keyboardFocus: active ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    exclusiveZone: 0
+
+    property bool active: false
+    visible: active || morphContainer.height > 40.5
+
+    property var theme
+    property real targetX: -1
+    property var statusBar: null
+
+    readonly property int safeWidth: resourceWindow.width > 0 ? resourceWindow.width : 1920
+    readonly property int expandedWidth: 380
+    readonly property int collapsedWidth: (statusBar && statusBar.rightIslandBaseWidth > 0) ? statusBar.rightIslandBaseWidth : 230
+    readonly property int expandedHeight: 490
 
     property var telemetryData: ({
         "cpu": { "usage": 0, "cores": 0, "freq": 0 },
@@ -22,6 +42,15 @@ Popup {
 
     ListModelUtils { id: modelUtils }
     ListModel { id: appsModel }
+
+    property alias closeTimer: closeTimer
+
+    Timer {
+        id: closeTimer
+        interval: 220
+        repeat: false
+        onTriggered: resourceWindow.active = false
+    }
 
     function applyTelemetry(parsed) {
         resourceWindow.telemetryData = parsed;
@@ -34,7 +63,7 @@ Popup {
 
     property var resourceProc: Process {
         id: resourceProc
-        command: ["python", shellConfig.getScript("sys_resources.py")]
+        command: ["python", ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getScript("sys_resources.py")]
         running: resourceWindow.active
         stdout: SplitParser {
             onRead: data => {
@@ -48,6 +77,7 @@ Popup {
 
     onActiveChanged: {
         if (active) {
+            closeTimer.stop();
             resourceProc.running = false;
             resourceProc.running = true;
         } else {
@@ -56,135 +86,198 @@ Popup {
             appsModel.clear();
         }
     }
-    ColumnLayout {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        spacing: 0
-        RowLayout {
-            Layout.fillWidth: true; Layout.bottomMargin: 16; spacing: 8
-            IconImage {
-                width: 15; height: 15; Layout.alignment: Qt.AlignVCenter
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getCpuIcon()
-                layer.enabled: true
-                layer.effect: MultiEffect { colorization: 1.0; colorizationColor: resourceWindow.theme ? resourceWindow.theme.getColor("primary") : "#adc6ff" }
-            }
-            Text {
-                text: "System Resources"; font.family: "Google Sans Flex, sans-serif"; font.pixelSize: 13; font.bold: true
-                color: resourceWindow.theme ? resourceWindow.theme.getColor("onSurface") : "#FFFFFF"
-            }
-            Item { Layout.fillWidth: true }
-            Text {
-                text: (resourceWindow.telemetryData.cpu.cores || 0) + " Cores · " + (resourceWindow.telemetryData.cpu.freq || 0) + " GHz"
-                font.family: "Google Sans Flex, sans-serif"; font.pixelSize: 10
-                color: resourceWindow.theme ? resourceWindow.theme.getColor("outline") : "#8c909f"
-            }
-        }
-        ResourceGaugeCard {
-            theme: resourceWindow.theme
-            title: "CPU"
-            valueText: Math.round(resourceWindow.telemetryData.cpu.usage || 0) + "%"
-            subText: (resourceWindow.telemetryData.cpu.freq || 0) + " GHz"
-            iconSource: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getCpuIcon()
-            progress: resourceWindow.telemetryData.cpu.usage || 0
-            Layout.bottomMargin: 6
-        }
-        ResourceGaugeCard {
-            theme: resourceWindow.theme
-            title: "Memory"
-            valueText: Math.round(resourceWindow.telemetryData.memory.usage || 0) + "%"
-            subText: (resourceWindow.telemetryData.memory.used_gb || 0) + " / " + (resourceWindow.telemetryData.memory.total_gb || 0) + " GB"
-            iconSource: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getMemoryIcon()
-            progress: resourceWindow.telemetryData.memory.usage || 0
-            Layout.bottomMargin: 6
-        }
-        ResourceGaugeCard {
-            theme: resourceWindow.theme
-            title: "ZRAM"
-            valueText: Math.round(resourceWindow.telemetryData.swap.usage || 0) + "%"
-            subText: (resourceWindow.telemetryData.swap.used_gb || 0) + " / " + (resourceWindow.telemetryData.swap.total_gb || 0) + " GB"
-            iconSource: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getSwapIcon()
-            progress: resourceWindow.telemetryData.swap.usage || 0
-            Layout.bottomMargin: 14
+
+    Shortcut { sequence: "Escape"; enabled: resourceWindow.active; onActivated: resourceWindow.active = false }
+
+    MouseArea {
+        anchors.fill: parent
+        enabled: resourceWindow.active
+        hoverEnabled: true
+        onClicked: resourceWindow.active = false
+        onEntered: { if (resourceWindow.active) closeTimer.restart(); }
+    }
+
+    Corner {
+        anchors.top: parent.top
+        anchors.right: morphContainer.left
+        alignRight: true
+        alignBottom: false
+        color: morphContainer.color
+        cornerRadius: (typeof root !== "undefined" && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : 16
+        visible: resourceWindow.active || morphContainer.height > 40.5
+        opacity: morphContainer.opacity
+    }
+
+    Corner {
+        id: resourceBottomRightCorner
+        anchors.top: morphContainer.bottom
+        anchors.right: parent.right
+        alignRight: true
+        alignBottom: false
+        color: morphContainer.color
+        cornerRadius: (typeof root !== "undefined" && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : 16
+        visible: resourceWindow.active || morphContainer.height > 40.5
+        opacity: morphContainer.opacity
+    }
+
+    Rectangle {
+        id: morphContainer
+        anchors.top: parent.top
+        anchors.right: parent.right
+        width: resourceWindow.active ? resourceWindow.expandedWidth : resourceWindow.collapsedWidth
+        height: resourceWindow.active ? resourceWindow.expandedHeight : 40
+        radius: (typeof root !== "undefined" && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : 16
+        color: resourceWindow.theme ? resourceWindow.theme.getColor("surface") : "#1e1e2e"
+        clip: true
+        opacity: (resourceWindow.active || morphContainer.height > 40.5) ? 1.0 : 0.0
+
+        Behavior on width { NumberAnimation { duration: 320; easing.type: Easing.OutQuint } }
+        Behavior on height { NumberAnimation { duration: 340; easing.type: Easing.OutQuint } }
+        Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutQuad } }
+
+        Rectangle {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: parent.radius
+            color: parent.color
         }
         Rectangle {
-            Layout.fillWidth: true
-            height: 1
-            color: Qt.rgba(1, 1, 1, 0.06)
-            Layout.bottomMargin: 10
-        }
-        RowLayout {
-            Layout.fillWidth: true; Layout.bottomMargin: 4; Layout.leftMargin: 6; Layout.rightMargin: 6; spacing: 0
-            Text { text: "Top Processes"; font.family: "Google Sans Flex, sans-serif"; font.pixelSize: 11; font.bold: true; color: resourceWindow.theme ? resourceWindow.theme.getColor("onSurface") : "#FFFFFF" }
-            Item { Layout.fillWidth: true }
-            Text { text: "CPU"; font.family: "Google Sans Flex, sans-serif"; font.pixelSize: 9; color: resourceWindow.theme ? resourceWindow.theme.getColor("outline") : "#8c909f"; Layout.preferredWidth: 40; horizontalAlignment: Text.AlignRight }
-            Text { text: "RAM"; font.family: "Google Sans Flex, sans-serif"; font.pixelSize: 9; color: resourceWindow.theme ? resourceWindow.theme.getColor("outline") : "#8c909f"; Layout.preferredWidth: 52; horizontalAlignment: Text.AlignRight }
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            width: parent.radius
+            color: parent.color
         }
 
-        ListView {
-            id: topAppsList
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            clip: true
-            spacing: 1
-            boundsBehavior: Flickable.StopAtBounds
-            model: appsModel
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: resourceWindow.active
+            shadowColor: "#60000000"
+            shadowBlur: 1.0
+            shadowVerticalOffset: 8
+        }
 
-            add: Transition {
-                ParallelAnimation {
-                    NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 200; easing.type: Easing.OutQuad }
-                    NumberAnimation { property: "scale"; from: 0.95; to: 1.0; duration: 220; easing.type: Easing.OutCubic }
-                }
-            }
-            remove: Transition {
-                ParallelAnimation {
-                    NumberAnimation { property: "opacity"; to: 0.0; duration: 160; easing.type: Easing.OutQuad }
-                    NumberAnimation { property: "scale"; to: 0.95; duration: 160; easing.type: Easing.OutCubic }
-                }
-            }
-            move: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
-            moveDisplaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
-            displaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
-            removeDisplaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
-            addDisplaced: Transition { NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic } }
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: closeTimer.stop()
+            onPositionChanged: closeTimer.stop()
+        }
 
-            delegate: TopAppItemRow {
-                width: ListView.view.width
-                theme: resourceWindow.theme
-                appData: ({ "name": model.name, "cpu": model.cpu, "mem": model.mem, "rss_mb": model.rss_mb, "count": model.count })
-                rank: index + 1
-                onRightClicked: (data, gx, gy) => {
-                    var local = resourceWindow.contentRect.mapFromItem(null, gx, gy);
-                    processCtxMenu.show(data, Math.min(local.x, resourceWindow.popupWidth - 170), Math.min(local.y, resourceWindow.popupHeight - 140));
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 14
+            spacing: 12
+            opacity: resourceWindow.active ? 1.0 : 0.0
+            Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }
+
+            RowLayout {
+                Layout.fillWidth: true
+                height: 24
+
+                RowLayout {
+                    spacing: 8
+                    Layout.alignment: Qt.AlignVCenter
+
+                    IconImage {
+                        width: 16
+                        height: 16
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/cpu.svg")
+                        layer.enabled: true
+                        layer.effect: MultiEffect { colorization: 1.0; colorizationColor: resourceWindow.theme ? resourceWindow.theme.getColor("primary") : "#adc6ff" }
+                    }
+
+                    UI.Typography {
+                        theme: resourceWindow.theme
+                        text: "System Monitor"
+                        variant: "titleMedium"
+                        font.pixelSize: 14
+                        font.bold: true
+                        colorRole: "onSurface"
+                    }
                 }
             }
 
             Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: 42
-                z: 10
-                enabled: false
-                visible: topAppsList.count > 3
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: Qt.rgba(resourceWindow.theme ? resourceWindow.theme.getColor("surface").r : 0.11, resourceWindow.theme ? resourceWindow.theme.getColor("surface").g : 0.11, resourceWindow.theme ? resourceWindow.theme.getColor("surface").b : 0.11, 0.0) }
-                    GradientStop { position: 1.0; color: resourceWindow.theme ? resourceWindow.theme.getColor("surface") : "#1b1b1b" }
+                Layout.fillWidth: true
+                height: 1
+                color: resourceWindow.theme ? resourceWindow.theme.getColor("outlineVariant") : "#20FFFFFF"
+                opacity: 0.35
+            }
+
+            SystemResourceGauges {
+                theme: resourceWindow.theme
+                telemetryData: resourceWindow.telemetryData
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                UI.Typography {
+                    theme: resourceWindow.theme
+                    text: "Top Processes"
+                    variant: "labelSmall"
+                    font.bold: true
+                    colorRole: "outline"
+                }
+                Item { Layout.fillWidth: true }
+                UI.Typography {
+                    theme: resourceWindow.theme
+                    text: "Right click for actions"
+                    variant: "labelSmall"
+                    font.italic: true
+                    colorRole: "outline"
+                }
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+
+                ListView {
+                    id: appsListView
+                    anchors.fill: parent
+                    spacing: 2
+                    model: appsModel
+                    boundsBehavior: Flickable.StopAtBounds
+                    move: Transition {
+                        NumberAnimation { properties: "y"; duration: 260; easing.type: Easing.OutCubic }
+                    }
+                    moveDisplaced: Transition {
+                        NumberAnimation { properties: "y"; duration: 260; easing.type: Easing.OutCubic }
+                    }
+                    displaced: Transition {
+                        NumberAnimation { properties: "y"; duration: 260; easing.type: Easing.OutCubic }
+                    }
+                    add: Transition {
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
+                    }
+                    remove: Transition {
+                        NumberAnimation { property: "opacity"; to: 0; duration: 150 }
+                    }
+                    delegate: TopAppItemRow {
+                        theme: resourceWindow.theme
+                        appData: model
+                        rank: index + 1
+                        onRightClicked: (app, lx, ly) => {
+                            processCtxMenu.show(app, lx, ly);
+                        }
+                    }
                 }
             }
         }
-    }
 
-    ProcessContextMenu {
-        id: processCtxMenu
-        parent: resourceWindow.contentRect
-        theme: resourceWindow.theme
-    }
+        MouseArea {
+            anchors.fill: parent
+            enabled: processCtxMenu.visible
+            z: 999
+            onClicked: processCtxMenu.hide()
+        }
 
-    MouseArea {
-        parent: resourceWindow.contentRect
-        anchors.fill: parent
-        visible: processCtxMenu.visible
-        z: 99
-        onClicked: processCtxMenu.hide()
+        ProcessContextMenu {
+            id: processCtxMenu
+            theme: resourceWindow.theme
+        }
     }
 }

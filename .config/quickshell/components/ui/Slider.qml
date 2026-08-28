@@ -17,6 +17,7 @@ Item {
     property int max: 100
 
     signal moved(int val)
+    signal released(int val)
 
     Rectangle {
         id: track
@@ -83,19 +84,20 @@ Item {
                 }
             }
 
-            Text {
+            Typography {
+                theme: sliderRoot.theme
                 text: sliderRoot.icon
-                font.family: "Noto Sans"
+                mono: true
                 font.pixelSize: 19
                 color: fillBar.width > 36 ? sliderRoot.theme.getColor("onPrimary") : sliderRoot.theme.getColor("primary")
                 visible: sliderRoot.icon !== "" && sliderRoot.icon.length <= 2
                 Layout.alignment: Qt.AlignVCenter
             }
 
-            Text {
+            Typography {
+                theme: sliderRoot.theme
                 text: sliderRoot.title
-                font.family: "Google Sans Flex, sans-serif"
-                font.pixelSize: 13
+                variant: "bodyMedium"
                 font.bold: true
                 color: fillBar.width > 120 ? sliderRoot.theme.getColor("onPrimary") : sliderRoot.theme.getColor("onSurface")
                 visible: sliderRoot.title !== ""
@@ -106,10 +108,10 @@ Item {
                 Layout.fillWidth: true
             }
 
-            Text {
+            Typography {
+                theme: sliderRoot.theme
                 text: sliderRoot.value + "%"
-                font.family: "Google Sans Flex, sans-serif"
-                font.pixelSize: 12
+                variant: "labelMedium"
                 font.bold: true
                 color: fillBar.width > (track.width - 45)
                     ? (sliderRoot.theme ? sliderRoot.theme.getColor("onPrimary") : "#FFFFFF")
@@ -128,6 +130,7 @@ Item {
                 var ratio = Math.max(0.0, Math.min(1.0, mouseX / track.width));
                 var newVal = Math.round(sliderRoot.min + ratio * (sliderRoot.max - sliderRoot.min));
                 if (newVal !== sliderRoot.value) {
+                    sliderRoot.value = newVal;
                     sliderRoot.moved(newVal);
                 }
             }
@@ -141,6 +144,14 @@ Item {
                     updateValue(mouse.x);
                 }
             }
+
+            onReleased: mouse => {
+                var ratio = Math.max(0.0, Math.min(1.0, mouse.x / track.width));
+                var newVal = Math.round(sliderRoot.min + ratio * (sliderRoot.max - sliderRoot.min));
+                sliderRoot.value = newVal;
+                sliderRoot.released(newVal);
+            }
+
         }
     }
 }

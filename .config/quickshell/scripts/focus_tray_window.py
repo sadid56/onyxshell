@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import sys
 import json
 import subprocess
@@ -36,8 +37,7 @@ def focus_tray_window(tray_id, tray_title="", tray_icon=""):
                     c_class in term or c_init_class in term):
                     addr = c.get("address")
                     if addr:
-                        cmd = f'hl.dispatch(hl.dsp.focus({  window = "address:{addr}" } ))'
-                        subprocess.run(["hyprctl", "eval", cmd], timeout=1)
+                        subprocess.run(["hyprctl", "dispatch", "focuswindow", f"address:{addr}"], timeout=1)
                         return True
     except Exception:
         pass

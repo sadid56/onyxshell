@@ -5,14 +5,17 @@ import Quickshell.Widgets
 
 Rectangle {
     id: buttonRoot
-    implicitWidth: buttonRoot.text !== "" ? (btnRow.implicitWidth + 20) : 32
+    implicitWidth: buttonRoot.text !== "" ? (btnRow.implicitWidth + 24) : 32
     implicitHeight: 32
     radius: 10
     color: active
-        ? buttonRoot.theme.getColor("primary")
-        : (hoverArea.containsMouse ? buttonRoot.theme.getColor("surfaceVariant") : buttonRoot.theme.getColor("surfaceVariant"))
+        ? (buttonRoot.theme ? buttonRoot.theme.getColor("primary") : "#c5c5d8")
+        : (hoverArea.containsMouse
+            ? (buttonRoot.theme ? buttonRoot.theme.getColor("surfaceVariant") : "#353642")
+            : (buttonRoot.theme ? buttonRoot.theme.getColor("surfaceVariant") + "66" : "#282932"))
     opacity: 1.0
-    border.width: 0
+    border.width: 1
+    border.color: buttonRoot.theme ? buttonRoot.theme.getColor("outlineVariant") + "33" : "#ffffff15"
 
     property var theme
     property string icon: ""
@@ -24,6 +27,21 @@ Rectangle {
 
     Behavior on color { ColorAnimation { duration: 150 } }
 
+    readonly property string resolvedIcon: {
+        if (!icon || icon === "") return "";
+        if (icon.indexOf("/") === 0) return "file://" + icon;
+        if (icon.indexOf("file://") === 0 || icon.indexOf("http://") === 0 || icon.indexOf("https://") === 0 || icon.indexOf("qrc:/") === 0) {
+            return icon;
+        }
+        var cfg = (typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : ((typeof root !== "undefined" && root.shellConfig) ? root.shellConfig : null);
+        if (cfg && typeof cfg.getIcon === "function") {
+            return cfg.getIcon(icon);
+        }
+        return icon;
+    }
+
+    readonly property bool isSvgIcon: resolvedIcon.endsWith(".svg") || resolvedIcon.startsWith("file://") || resolvedIcon.startsWith("/")
+
     RowLayout {
         id: btnRow
         anchors.fill: parent
@@ -33,40 +51,41 @@ Rectangle {
         visible: buttonRoot.text !== ""
 
         IconImage {
-            width: 17
-            height: 17
-            source: buttonRoot.icon.length > 2 ? buttonRoot.icon : ""
-            visible: buttonRoot.icon !== "" && buttonRoot.icon.length > 2
+            width: buttonRoot.iconSize
+            height: buttonRoot.iconSize
+            source: buttonRoot.isSvgIcon ? buttonRoot.resolvedIcon : ""
+            visible: buttonRoot.isSvgIcon
             Layout.alignment: Qt.AlignVCenter
+            asynchronous: true
             layer.enabled: true
             layer.effect: MultiEffect {
                 colorization: 1.0
                 colorizationColor: buttonRoot.active
-                    ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#000000")
-                    : "#FFFFFF"
+                    ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#1b1b22")
+                    : (buttonRoot.theme ? buttonRoot.theme.getColor("onSurface") : "#ffffff")
             }
         }
 
-        Text {
+        Typography {
+            theme: buttonRoot.theme
             text: buttonRoot.icon
-            font.family: "JetBrainsMono Nerd Font"
+            mono: true
             font.pixelSize: 14
             font.bold: true
             color: buttonRoot.active
-                ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#000000")
-                : "#FFFFFF"
-            visible: buttonRoot.icon !== "" && buttonRoot.icon.length <= 2
+                ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#1b1b22")
+                : (buttonRoot.theme ? buttonRoot.theme.getColor("onSurface") : "#ffffff")
+            visible: buttonRoot.icon !== "" && !buttonRoot.isSvgIcon
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Text {
+        Typography {
+            theme: buttonRoot.theme
             text: buttonRoot.text
-            font.family: "Noto Sans"
-            font.pixelSize: 11
-            font.bold: true
+            variant: "labelMedium"
             color: buttonRoot.active
-                ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#000000")
-                : "#FFFFFF"
+                ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#1b1b22")
+                : (buttonRoot.theme ? buttonRoot.theme.getColor("onSurface") : "#ffffff")
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
             horizontalAlignment: Text.AlignLeft
@@ -81,27 +100,29 @@ Rectangle {
 
         IconImage {
             anchors.fill: parent
-            source: buttonRoot.icon.length > 2 ? buttonRoot.icon : ""
-            visible: buttonRoot.icon !== "" && buttonRoot.icon.length > 2
+            source: buttonRoot.isSvgIcon ? buttonRoot.resolvedIcon : ""
+            visible: buttonRoot.isSvgIcon
+            asynchronous: true
             layer.enabled: true
             layer.effect: MultiEffect {
                 colorization: 1.0
                 colorizationColor: buttonRoot.active
-                    ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#000000")
-                    : "#FFFFFF"
+                    ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#1b1b22")
+                    : (buttonRoot.theme ? buttonRoot.theme.getColor("onSurface") : "#ffffff")
             }
         }
 
-        Text {
+        Typography {
+            theme: buttonRoot.theme
             anchors.centerIn: parent
             text: buttonRoot.icon
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: 16
+            mono: true
+            font.pixelSize: 15
             font.bold: true
             color: buttonRoot.active
-                ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#000000")
-                : "#FFFFFF"
-            visible: buttonRoot.icon !== "" && buttonRoot.icon.length <= 2
+                ? (buttonRoot.theme ? buttonRoot.theme.getColor("onPrimary") : "#1b1b22")
+                : (buttonRoot.theme ? buttonRoot.theme.getColor("onSurface") : "#ffffff")
+            visible: buttonRoot.icon !== "" && !buttonRoot.isSvgIcon
         }
     }
 

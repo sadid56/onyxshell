@@ -11,6 +11,7 @@ PanelWindow {
     color: "transparent"
 
     WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.exclusionMode: ExclusionMode.Ignore
     WlrLayershell.keyboardFocus: active ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
     exclusiveZone: 0
 
@@ -25,22 +26,24 @@ PanelWindow {
 
     property int popupWidth: 380
     property int popupHeight: 420
-    property int topOverlap: (root && root.shellConfig) ? root.shellConfig.cornerRadius : 16
+    property int topOverlap: (root && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : ((root && root.shellConfig) ? root.shellConfig.cornerRadius : 16)
     property bool flatBottom: false
     property bool slideFromRight: false
     property bool showCorners: true
+    property bool showTopCorners: showCorners
     property bool closeOnHoverOutside: true
+    property int contentMargin: 16
 
     readonly property int safeWidth: popupWindow.width > 0 ? popupWindow.width : 1920
 
     property real contentRectX: targetX > 0 ? Math.max(10, Math.min(targetX - popupWidth / 2, safeWidth - popupWidth - 10)) : ((safeWidth - popupWidth) / 2)
-    property real contentRectY: popupWindow.showCorners ? (popupWindow.active ? -popupWindow.topOverlap : -(popupWindow.topOverlap + 20)) : (popupWindow.active ? 10 : -20)
+    property real contentRectY: popupWindow.showCorners ? (popupWindow.active ? -popupWindow.topOverlap : -(popupWindow.topOverlap + 80)) : (popupWindow.active ? 46 : 20)
 
     default property alias contentData: columnLayout.data
 
     Timer {
         id: closeTimer
-        interval: 150
+        interval: 80
         running: false
         repeat: false
         onTriggered: {
@@ -50,7 +53,7 @@ PanelWindow {
 
     Timer {
         id: openGuard
-        interval: 300
+        interval: 100
         running: false
         repeat: false
     }
@@ -83,8 +86,9 @@ PanelWindow {
         width: popupWindow.popupWidth
         height: popupWindow.popupHeight
 
-        Behavior on height { enabled: !popupWindow.flatBottom; NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
-        radius: (root && root.shellConfig) ? root.shellConfig.cornerRadius : 16
+        Behavior on height { enabled: !popupWindow.flatBottom; NumberAnimation { duration: 340; easing.type: Easing.OutQuint } }
+        radius: (root && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : ((root && root.shellConfig) ? root.shellConfig.cornerRadius : 16)
+
         color: popupWindow.theme.getColor("surface")
         border.width: 0
 
@@ -99,20 +103,20 @@ PanelWindow {
         }
 
         opacity: popupWindow.active ? 1.0 : 0.0
-        scale: popupWindow.slideFromRight ? 1.0 : (popupWindow.active ? 1.0 : 0.96)
+        scale: popupWindow.slideFromRight ? 1.0 : (popupWindow.active ? 1.0 : 0.88)
         transformOrigin: Item.Top
 
         transform: Translate {
             id: slideTranslate
             x: popupWindow.slideFromRight ? (popupWindow.active ? 0 : (popupWindow.popupWidth + 40)) : 0
             Behavior on x {
-                NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: 340; easing.type: Easing.OutQuint }
             }
         }
 
-        Behavior on opacity { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
-        Behavior on y { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: 380; easing.type: Easing.OutQuint } }
+        Behavior on y { NumberAnimation { duration: 380; easing.type: Easing.OutQuint } }
 
         Corner {
             anchors.top: parent.top
@@ -122,7 +126,7 @@ PanelWindow {
             alignRight: true
             cornerRadius: contentRect.radius
             color: popupWindow.theme.getColor("surface")
-            visible: popupWindow.showCorners && (contentRect.x > 0)
+            visible: popupWindow.showTopCorners && (contentRect.x > 0)
         }
 
         Corner {
@@ -133,7 +137,7 @@ PanelWindow {
             alignRight: false
             cornerRadius: contentRect.radius
             color: popupWindow.theme.getColor("surface")
-            visible: popupWindow.showCorners && !popupWindow.slideFromRight
+            visible: popupWindow.showTopCorners && !popupWindow.slideFromRight
         }
 
         Rectangle {
@@ -243,11 +247,12 @@ PanelWindow {
         ColumnLayout {
             id: columnLayout
             anchors.fill: parent
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            anchors.bottomMargin: 20
-            anchors.topMargin: popupWindow.showCorners ? (popupWindow.topOverlap + 10) : 20
-            spacing: 14
+            anchors.leftMargin: popupWindow.contentMargin
+            anchors.rightMargin: popupWindow.contentMargin
+            anchors.bottomMargin: popupWindow.contentMargin
+            anchors.topMargin: popupWindow.showCorners ? (popupWindow.topOverlap + 12) : popupWindow.contentMargin
+            spacing: 12
         }
+
     }
 }

@@ -5,6 +5,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import "../components/containers"
+import "../components/ui" as UI
 
 Popup {
     id: errorWindow
@@ -61,8 +62,8 @@ Popup {
 
             ColumnLayout {
                 spacing: 2; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter
-                Text { text: "Configuration Error"; font.family: "Noto Sans"; font.pixelSize: 13; font.bold: true; color: errorWindow.theme.getColor("onSurface") }
-                Text { text: "Reload failed, system reverted to last safe config."; font.family: "Noto Sans"; font.pixelSize: 9; color: errorWindow.theme.getColor("outline") }
+                UI.Typography { theme: errorWindow.theme; text: "Configuration Error"; variant: "bodyMedium"; font.pixelSize: 13; font.bold: true; colorRole: "onSurface" }
+                UI.Typography { theme: errorWindow.theme; text: "Reload failed, system reverted to last safe config."; variant: "caption"; font.pixelSize: 9; colorRole: "outline" }
             }
 
             Rectangle {
@@ -91,11 +92,12 @@ Popup {
 
             ScrollView {
                 anchors.fill: parent; anchors.margins: 12; clip: true
-                Text {
+                UI.Typography {
                     id: errorMsgText
+                    theme: errorWindow.theme
                     width: parent.width - 24
                     text: errorWindow.errorText
-                    font.family: "JetBrainsMono Nerd Font, monospace"
+                    mono: true
                     font.pixelSize: 11
                     color: errorWindow.theme.getColor("onErrorContainer") || "#ffb4ab"
                     wrapMode: Text.WrapAnywhere
@@ -124,7 +126,7 @@ Popup {
                         layer.enabled: true
                         layer.effect: MultiEffect { colorization: 1.0; colorizationColor: errorWindow.isCopied ? errorWindow.theme.getColor("primary") : errorWindow.theme.getColor("onSurface") }
                     }
-                    Text { text: errorWindow.isCopied ? "Copied!" : "Copy Error"; font.family: "Noto Sans"; font.pixelSize: 11; font.bold: true; color: errorWindow.isCopied ? errorWindow.theme.getColor("primary") : errorWindow.theme.getColor("onSurface") }
+                    UI.Typography { theme: errorWindow.theme; text: errorWindow.isCopied ? "Copied!" : "Copy Error"; variant: "labelMedium"; font.pixelSize: 11; font.bold: true; color: errorWindow.isCopied ? errorWindow.theme.getColor("primary") : errorWindow.theme.getColor("onSurface") }
                 }
                 MouseArea {
                     id: copyBtnHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -137,7 +139,7 @@ Popup {
                 Layout.preferredWidth: 100; height: 34; radius: 8
                 color: dismissBtnHover.containsMouse ? Qt.rgba(errorWindow.theme.getColor("error").r, errorWindow.theme.getColor("error").g, errorWindow.theme.getColor("error").b, 0.8) : errorWindow.theme.getColor("error")
                 Behavior on color { ColorAnimation { duration: 150 } }
-                Text { anchors.centerIn: parent; text: "Dismiss"; font.family: "Noto Sans"; font.pixelSize: 11; font.bold: true; color: errorWindow.theme.getColor("onError") || "white" }
+                UI.Typography { theme: errorWindow.theme; anchors.centerIn: parent; text: "Dismiss"; variant: "labelMedium"; font.pixelSize: 11; font.bold: true; color: errorWindow.theme.getColor("onError") || "white" }
                 MouseArea { id: dismissBtnHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: errorWindow.active = false }
             }
         }

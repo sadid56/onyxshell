@@ -9,6 +9,7 @@ Item {
     property var theme
     property var mediaService
     property var toggleMedia
+    property bool showDivider: false
 
     readonly property bool isPlaying: mediaBarRoot.mediaService ? Boolean(mediaBarRoot.mediaService.isPlaying) : false
     readonly property bool hasMedia: mediaBarRoot.mediaService ? Boolean(mediaBarRoot.mediaService.hasMedia) : false
@@ -57,6 +58,7 @@ Item {
         spacing: 8
 
         Rectangle {
+            visible: mediaBarRoot.showDivider
             width: 1
             height: 16
             radius: 0.5
@@ -66,16 +68,51 @@ Item {
             Layout.rightMargin: 2
         }
 
-        UI.Icon {
-            size: 15
-            icon: "media/music.svg"
-            color: mediaBarRoot.theme ? mediaBarRoot.theme.getColor("primary") : "#ffb3b4"
+        Row {
+            spacing: 2
+            height: 14
             Layout.alignment: Qt.AlignVCenter
+
+            Repeater {
+                model: [
+                    { minH: 3, maxH: 13, dur: 450 },
+                    { minH: 5, maxH: 15, dur: 360 },
+                    { minH: 3, maxH: 12, dur: 520 },
+                    { minH: 4, maxH: 14, dur: 410 }
+                ]
+                delegate: Rectangle {
+                    id: eqBar
+                    width: 3
+                    radius: 1.5
+                    anchors.bottom: parent.bottom
+                    color: mediaBarRoot.theme
+                        ? (mediaBarRoot.isPlaying ? mediaBarRoot.theme.getColor("primary") : mediaBarRoot.theme.getColor("outline"))
+                        : "#adc6ff"
+                    opacity: mediaBarRoot.isPlaying ? 1.0 : 0.5
+
+                    height: mediaBarRoot.isPlaying ? modelData.maxH : 3
+
+                    SequentialAnimation on height {
+                        loops: Animation.Infinite
+                        running: mediaBarRoot.isPlaying
+                        NumberAnimation { from: modelData.minH; to: modelData.maxH; duration: modelData.dur; easing.type: Easing.InOutSine }
+                        NumberAnimation { from: modelData.maxH; to: modelData.minH; duration: modelData.dur; easing.type: Easing.InOutSine }
+                    }
+
+                    Behavior on height {
+                        enabled: !mediaBarRoot.isPlaying
+                        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+                    }
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    Behavior on color { ColorAnimation { duration: 200 } }
+                }
+            }
         }
 
-        Text {
+        UI.Typography {
+            theme: mediaBarRoot.theme
             Layout.fillWidth: true
-            Layout.maximumWidth: 160
+            Layout.maximumWidth: 170
             Layout.alignment: Qt.AlignVCenter
             text: {
                 if (!mediaBarRoot.mediaService) return "";
@@ -84,11 +121,12 @@ Item {
                 if (t === "No media playing" || t === "") return "";
                 return a ? (t + " • " + a) : t;
             }
-            font.family: "Google Sans Flex, sans-serif"
-            font.pixelSize: 13
+            variant: "bodyMedium"
             font.bold: true
-            color: mediaBarRoot.theme ? mediaBarRoot.theme.getColor("onSurface") : "#FFFFFF"
+            colorRole: mediaBarRoot.isPlaying ? "onSurface" : "outline"
+            opacity: mediaBarRoot.isPlaying ? 1.0 : 0.65
             elide: Text.ElideRight
+            Behavior on opacity { NumberAnimation { duration: 200 } }
         }
     }
 }

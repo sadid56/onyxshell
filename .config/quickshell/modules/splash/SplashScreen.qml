@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import Quickshell.Io
 import Quickshell.Widgets
 import "../../core"
+import "../../components/ui" as UI
 
 Scope {
     id: splashScope
@@ -85,20 +86,20 @@ Scope {
                         Layout.alignment: Qt.AlignHCenter
                         spacing: 6
 
-                        Text {
+                        UI.Typography {
+                            theme: splashScope.theme
                             text: "Welcome"
-                            font.family: "Google Sans Flex, sans-serif"
+                            variant: "titleLarge"
                             font.pixelSize: 20
-                            font.bold: true
-                            color: splashScope.theme ? splashScope.theme.getColor("onSurface") : "#FFFFFF"
+                            colorRole: "onSurface"
                             Layout.alignment: Qt.AlignHCenter
                         }
 
-                        Text {
+                        UI.Typography {
+                            theme: splashScope.theme
                             text: "Starting desktop session..."
-                            font.family: "Google Sans Flex, sans-serif"
-                            font.pixelSize: 12
-                            color: splashScope.theme ? splashScope.theme.getColor("outline") : "#938F99"
+                            variant: "labelMedium"
+                            colorRole: "outline"
                             Layout.alignment: Qt.AlignHCenter
                         }
                     }

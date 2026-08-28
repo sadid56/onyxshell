@@ -9,7 +9,9 @@ QUICKSHELL_RELOAD=1 quickshell &
 killall hypridle 2>/dev/null || true
 hypridle -c ~/.config/hypr/config/hypridle.conf &
 
-killall power_auto.sh 2>/dev/null || true
-~/.config/hypr/scripts/power_auto.sh &
+if [ -f ~/.config/hypr/scripts/power_auto.sh ]; then
+    killall power_auto.sh 2>/dev/null || true
+    ~/.config/hypr/scripts/power_auto.sh &
+fi
 
 notify-send -u low "Desktop Reloaded" "Quickshell, Hypridle, and Hyprland configuration reloaded."

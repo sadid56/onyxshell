@@ -8,7 +8,7 @@ output_path = '~/.config/quickshell/colors.json'
 [templates.kitty]
 input_path = '~/.config/matugen/templates/kitty-colors.conf'
 output_path = '~/.config/kitty/kitty-colors.conf'
-post_hook = 'kitty @ --to=unix:@mykitty set-colors -a "$HOME/.config/kitty/kitty-colors.conf"'
+post_hook = 'kitty @ --to=unix:@mykitty set-colors -a "$HOME/.config/kitty/kitty-colors.conf" || true'
 
 [templates.fish]
 input_path = '~/.config/matugen/templates/fish-colors.fish'
@@ -17,5 +17,5 @@ output_path = '~/.config/fish/conf.d/matugen_colors.fish'
 [templates.hypr]
 input_path = '~/.config/matugen/templates/hypr-colors.lua'
 output_path = '~/.config/hypr/theme/colors.lua'
-post_hook = 'hyprctl reload config-only'
+post_hook = 'hyprctl reload config-only || true'
 

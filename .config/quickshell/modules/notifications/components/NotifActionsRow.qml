@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
+import "../../../components/ui" as UI
 
 Item {
     id: actionColWrapper
@@ -55,10 +56,10 @@ Item {
                         }
                     }
 
-                    Text {
+                    UI.Typography {
+                        theme: actionColWrapper.theme
                         text: actionColWrapper.cardItem.copiedFeedback ? "Copied" : "Copy"
-                        font.family: "Google Sans Flex, sans-serif"
-                        font.pixelSize: 11
+                        variant: "bodySmall"
                         font.weight: Font.DemiBold
                         color: actionColWrapper.cardItem.copiedFeedback ?
                                (actionColWrapper.theme ? actionColWrapper.theme.getColor("primary") : "#ffb3b4") :
@@ -103,12 +104,12 @@ Item {
                         }
                     }
 
-                    Text {
+                    UI.Typography {
+                        theme: actionColWrapper.theme
                         text: "Dismiss"
-                        font.family: "Google Sans Flex, sans-serif"
-                        font.pixelSize: 11
+                        variant: "bodySmall"
                         font.weight: Font.DemiBold
-                        color: actionColWrapper.theme ? actionColWrapper.theme.getColor("onSurface") : "#f0dede"
+                        colorRole: "onSurface"
                     }
                 }
 

@@ -3,134 +3,116 @@
 <div align="center">
 
 ![Hyprland](https://img.shields.io/badge/Hyprland-Wayland-00c8ff?style=for-the-badge&logo=hyprland&logoColor=white)
-![Quickshell](https://img.shields.io/badge/Quickshell-Modular_UI-7b2cbf?style=for-the-badge)
+![Quickshell](https://img.shields.io/badge/Quickshell-Official_Package-7b2cbf?style=for-the-badge)
+![Arch Linux](https://img.shields.io/badge/Arch_Linux-100%25_Official_Repo-1793d1?style=for-the-badge&logo=archlinux&logoColor=white)
 ![Lua](https://img.shields.io/badge/Lua-5.4-000080?style=for-the-badge&logo=lua&logoColor=white)
 ![Fish Shell](https://img.shields.io/badge/Fish-Shell-38bdf8?style=for-the-badge&logo=gnubash&logoColor=white)
 
-**A sleek, modular, and dynamic desktop suite for Hyprland — crafted for daily driving with maximum stability, fluid animations, and modern aesthetics.**
-
-[Features](#-features) • [1-Line Installation](#-installation) • [Keybindings](#-keybindings) • [Customization](#-customization)
+**An ultra-modern, fluid, and battery-efficient desktop suite for Hyprland powered by Quickshell. Tailored for daily driving with seamless animations, dynamic islands, smart dock, and Material You theming — 100% installable via official Arch Linux repositories without any AUR dependency.**
 
 ---
 
 </div>
 
-## 📸 Screenshots
+## ✨ Key Highlights
 
-<table align="center">
-  <tr>
-    <td align="center" width="50%">
-      <img src="assets/app-launcher.png" alt="App Launcher" width="100%"/>
-      <p><em>App Launcher</em></p>
-    </td>
-    <td align="center" width="50%">
-      <img src="assets/control-center.png" alt="Control Center" width="100%"/>
-      <p><em>Control Center</em></p>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="50%">
-      <img src="assets/wallpaper-selector.png" alt="Wallpaper Selector" width="100%"/>
-      <p><em>Wallpaper Selector</em></p>
-    </td>
-    <td align="center" width="50%">
-      <img src="assets/wifi-menu.png" alt="Wi-Fi Menu" width="100%"/>
-      <p><em>Wi-Fi Menu</em></p>
-    </td>
-  </tr>
-</table>
+- 🏝️ **Dynamic Island Top Bar**: 
+  - **Left Island**: Real-time workspaces, active window title pill, and event-driven MPRIS Media visualizer.
+  - **Center Notch**: Sleek clock pill expanding into a full calendar with quick action controls.
+  - **Right Island**: Live network telemetry, system resource monitor with real-time graphs & process manager, system tray, and power menu.
+  - **Smart Spacing**: Leftward smooth island displacement whenever right popups expand, preventing any visual overlaps.
+- 🚢 **Smart Dock**:
+  - Auto-hides when windows are present on workspace; auto-shows on empty desktop.
+  - Live window thumbnail previews, running indicators, pinned apps, and dynamic unpinned client tracking.
+  - Complete dropdown scratchpad isolation.
+- ⚡ **Scratchpad & Dropdown**:
+  - Dedicated dropdown terminal (`SUPER + Q`).
+  - Special workspace (`special:magic`) with quick move and toggle shortcuts.
+- 🎨 **Settings GUI**:
+  - Full graphical settings app (`SUPER + I` or via control center) for live accent color, border width, corner radius, window opacity, and dock preferences.
+- 🔤 **Crisp Font Rendering**:
+  - Built-in fontconfig and Qt/KDE global profiles ensuring perfect subpixel rendering, antialiasing, and hinting across Qt (Kdenlive, Dolphin) and GTK apps.
 
 ---
 
-## ✨ Features
+## 📦 Installation (Arch Linux / Arch-based Distros)
 
-- **Compositor:** [Hyprland](https://hyprland.org/) configured with clean, modular **Lua** scripts.
-- **Desktop Shell:** Custom [Quickshell](https://git.outfoxxed.me/quickshell/quickshell) QtQuick/QML modular suite:
-  - 🚀 **App Launcher:** Fast fuzzy search with desktop categories and keyboard navigation (`Alt + Space`).
-  - 📊 **Status Bar:** Dynamic workspaces, active window title, system telemetry, clock, and quick tray popups.
-  - 📋 **Clipboard Manager:** Searchable clipboard history with inline image thumbnails (`Super + V`).
-  - 🎛️ **Control Center:** Quick action toggles, live media controls, volume/brightness sliders, and power grid (`Super + M`).
-  - 🔔 **Notification Center & Toast HUD:** Interactive notifications with actions, mute toggles, and smooth popup animations (`Super + N`).
-  - 📶 **Live Wi-Fi Manager:** Scan, select, and connect to Wi-Fi networks directly from the bar.
-  - 🖼️ **Wallpaper Selector:** Visual thumbnail wallpaper gallery with automatic [Matugen](https://github.com/InioX/matugen) dynamic palette generation (`Super + Shift + W`).
-  - ⌨️ **Keybinds Cheat Sheet HUD:** Instant search popup displaying all configured keybindings (`Super + /`).
-- **Terminal:** [Kitty](https://sw.kovidgoyal.net/kitty/) with dropdown terminal scratchpad (`Super + Q`).
-- **Shell & Prompt:** [Fish Shell](https://fishshell.com/) & [Starship Prompt](https://starship.rs/) with fuzzy finding (`fzf`), Matugen live colors, and productivity aliases.
-- **Wallpaper Engine:** Native [Quickshell](https://git.outfoxxed.me/quickshell/quickshell) background renderer with fluid animated crossfades and live Matugen theming.
-- **Dynamic Theming:** `matugen` material color palette extraction synchronized across Quickshell, Hyprland Lua, Kitty, Fish, and desktop components.
-- **Screen Locker & Idle:** `hyprlock` & `hypridle`.
-- **Screenshots:** `hyprshot` with region, window, and full-screen capture (`Super + Shift + S`).
+> [!NOTE]
+> Onyxshell is 100% installable using the official **Arch Linux `pacman`** repository without needing `yay`, `paru`, or any AUR helpers. All core desktop packages (including `quickshell`, `hyprland`, and fonts) are pulled from official repos.
 
----
-
-## 🚀 Installation
-
-### ⚡ 1-Line Quick Install
-
-Run this single command in your terminal to clone and install 100% of the desktop environment:
+### Quick Install
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sadid56/onyxshell/main/install.sh)"
-```
-
-Or for automated installation accepting all defaults without prompts:
-
-```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sadid56/onyxshell/main/install.sh)" -- --yes
-```
-
----
-
-### 📦 Manual Installation
-
-```bash
-git clone https://github.com/sadid56/onyxshell.git
-cd onyxshell
+git clone https://github.com/sadid56/onyxshell.git ~/onyxshell
+cd ~/onyxshell
 chmod +x install.sh
 ./install.sh
 ```
 
+The installer will:
+1. Detect Arch Linux and install all required official packages (`hyprland`, `quickshell`, `kitty`, `fish`, `python-psutil`, fonts, etc.) via `pacman`.
+2. Automatically back up any existing configurations in `~/.config/`.
+3. Copy all dotfiles into place and configure executable permissions.
 
 ---
 
-## ⌨️ Keybindings
+## ⌨️ Keybindings Cheat Sheet
 
-Press <kbd>Super</kbd> + <kbd>/</kbd> at any time inside Hyprland to bring up the interactive Keybinds HUD.
-
-### 🚀 App Launchers & Menus
-
-| Keybinding | Action |
+### Application Launchers
+| Shortcut | Description |
 | :--- | :--- |
-| <kbd>Alt</kbd> + <kbd>Space</kbd> | **Quickshell App Launcher** |
-| <kbd>Super</kbd> + <kbd>Return</kbd> | Open Terminal (`kitty`) |
-| <kbd>Super</kbd> + <kbd>Q</kbd> | Toggle Dropdown Quake Terminal |
-| <kbd>Super</kbd> + <kbd>E</kbd> | Open File Manager (`nautilus`) |
-| <kbd>Super</kbd> + <kbd>B</kbd> | Open Web Browser (`firefox`) |
-| <kbd>Super</kbd> + <kbd>L</kbd> | Lock Screen (`hyprlock`) |
-| <kbd>Super</kbd> + <kbd>/</kbd> | Show Keybindings Cheat Sheet |
+| `SUPER + RETURN` | Open Default Terminal (`$TERMINAL` / Kitty) |
+| `ALT + SPACE` | Open Quickshell Application Launcher |
+| `SUPER + E` | Open File Manager (Yazi / Dolphin) |
+| `SUPER + B` | Launch Default Browser |
+| `SUPER + Q` | Toggle Dropdown Terminal |
+| `SUPER + V` | Open Clipboard History |
+| `SUPER + PERIOD` | Open Emoji Picker |
 
+### Window Management
+| Shortcut | Description |
+| :--- | :--- |
+| `SUPER + C` | Close Focused Window |
+| `SUPER + SPACE` | Toggle Window Floating |
+| `SUPER + F` | Toggle Fullscreen |
+| `SUPER + P` | Pin Window across All Workspaces |
+| `SUPER + J` | Toggle Split Layout |
+
+### Workspaces & Special Scratchpad
+| Shortcut | Description |
+| :--- | :--- |
+| `SUPER + 1..9` | Switch to Workspace 1-9 |
+| `SUPER + SHIFT + 1..9` | Move Focused Window to Workspace 1-9 |
+| `SUPER + S` | **Toggle Special Workspace (Scratchpad)** |
+| `SUPER + CTRL + S` | **Move Window to Special Workspace** |
+| `SUPER + CTRL + Y` | **Move Window out of Special Workspace** |
+
+### System & Power
+| Shortcut | Description |
+| :--- | :--- |
+| `SUPER + M` | Open Power Menu (with Arrow Keys & Enter navigation) |
+| `SUPER + L` | Lock Screen (Hyprlock) |
+| `SUPER + SHIFT + S` | Interactive Region Screenshot |
+| `PRINT` | Fullscreen Screenshot |
+| `SUPER + SHIFT + R` | Reload Hyprland & Desktop Shell |
 
 ---
 
-## 🎨 Customization & Theming
+## 🔄 Sync & Update
 
-### Changing Wallpapers & Dynamic Colors
-- Press <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>W</kbd> to open the Wallpaper Selector.
-- Select any wallpaper from your `~/Pictures/wallpapers` directory.
-- `matugen` will automatically generate harmonized color palettes in `.config/quickshell/colors.json`, `~/.config/kitty/kitty-colors.conf`, and `~/.config/fish/conf.d/matugen_colors.fish` in real time.
+To synchronize your live `~/.config/` modifications back into the local `onyxshell` repository:
 
-
----
-
-## 🙏 Credits & Acknowledgements
-
-> [!NOTE]
-> This configuration and desktop suite is inspired by:
-> - [caelestia-dots / caelestia-shell](https://github.com/caelestia-dots/shell) – Beautiful Quickshell components and design patterns.
-> - [end-4 / dots-hyprland](https://github.com/end-4/dots-hyprland) – Incredible Hyprland desktop experience, theming workflows, and aesthetic inspiration.
+```bash
+cd ~/onyxshell
+./update.sh
+```
 
 ---
 
-## 📜 License
+## 🛠️ Stack & Technologies
 
-This project is licensed under the [MIT License](LICENSE).
+- **Compositor**: Hyprland (Configured via modular Lua)
+- **Shell & UI**: Quickshell (QML / QtQuick)
+- **Terminal**: Kitty / Yazi / Fastfetch / Cava
+- **Shell**: Fish with Starship prompt
+- **Dependencies**: `python-psutil`, `playerctl`, `wl-clipboard`, `cliphist`, `wireplumber`

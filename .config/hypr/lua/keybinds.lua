@@ -23,10 +23,17 @@ hl.bind(
 	mainMod .. " + SHIFT + B",
 	hl.dsp.exec_cmd("qs ipc call shell toggleBar")
 )
--- Show keybinds cheat sheet
+
+-- Settings Popup
 hl.bind(
-	mainMod .. " + slash",
-	hl.dsp.exec_cmd("qs ipc call shell toggleKeybinds")
+	secondMod .. " + SHIFT + S",
+	hl.dsp.exec_cmd("qs ipc call shell toggleSettings")
+)
+
+-- Power Menu
+hl.bind(
+	mainMod .. " + M",
+	hl.dsp.exec_cmd("qs ipc call shell togglePowerMenu")
 )
 
 ----------------------------------
@@ -128,12 +135,12 @@ end
 hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }))
 
 -- Special Workspace (Scratchpad)
-hl.bind(secondMod .. " + S", function()
+hl.bind(mainMod .. " + S", function()
 	hl.config({ decoration = { dim_special = 0.65, blur = { special = true } } })
 	hl.dispatch(hl.dsp.workspace.toggle_special("magic"))
 end)
-hl.bind(secondMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
-hl.bind(mainMod .. " + SHIFT + Y", hl.dsp.window.move({ workspace = "+0" }))
+hl.bind(mainMod .. " + CTRL + S", hl.dsp.window.move({ workspace = "special:magic" }))
+hl.bind(mainMod .. " + CTRL + Y", hl.dsp.window.move({ workspace = "+0" }))
 
 -- Scroll Workspaces
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
@@ -168,7 +175,10 @@ hl.bind(
 	mainMod .. " + SHIFT + W",
 	hl.dsp.exec_cmd("qs ipc call shell toggleWallpaperSelector")
 )
-hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("~/.config/hypr/scripts/shutdown.sh"))
+hl.bind(
+	mainMod .. " + SHIFT + E",
+	hl.dsp.exec_cmd("qs ipc call shell confirmShutdown")
+)
 
 -- Screenshots
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh -m region"))

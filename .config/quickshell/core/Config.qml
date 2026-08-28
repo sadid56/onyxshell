@@ -17,6 +17,17 @@ QtObject {
     readonly property string defaultAppIcon: iconsDir + "/system/default-app.svg"
 
     readonly property int cornerRadius: parseInt(Quickshell.env("ROUNDED")) || 16
+    readonly property string defaultFont: "Inter"
+    readonly property string defaultFontMono: "JetBrainsMono Nerd Font"
+
+    readonly property int animDurationFast: 120
+    readonly property int animDurationNormal: 160
+    readonly property int animDurationSmooth: 240
+    readonly property int animDurationSlow: 320
+
+    readonly property int easingOutCubic: Easing.OutCubic
+    readonly property int easingOutQuad: Easing.OutQuad
+    readonly property int easingOutQuint: Easing.OutQuint
 
     property string currentDistro: "linux"
 

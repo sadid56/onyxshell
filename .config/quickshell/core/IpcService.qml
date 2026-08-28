@@ -18,8 +18,7 @@ QtObject {
 
         function toggleDashboard(): void {
             if (ipcServiceRoot.popupManager) {
-                var distroX = ipcServiceRoot.statusBar ? ipcServiceRoot.statusBar.getDistroX() : undefined;
-                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.dashboardLoader, distroX);
+                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.dashboardLoader);
             }
         }
 
@@ -60,9 +59,15 @@ QtObject {
             }
         }
 
-        function toggleKeybinds(): void {
+        function toggleSettings(): void {
             if (ipcServiceRoot.popupManager) {
-                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.keybindsLoader);
+                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.settingsLoader);
+            }
+        }
+
+        function togglePowerMenu(): void {
+            if (ipcServiceRoot.popupManager) {
+                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.powerMenuLoader);
             }
         }
 
@@ -81,6 +86,24 @@ QtObject {
         function reloadTheme(): void {
             if (ipcServiceRoot.theme && typeof ipcServiceRoot.theme.reloadColors === "function") {
                 ipcServiceRoot.theme.reloadColors();
+            }
+        }
+
+        function confirmShutdown(): void {
+            if (ipcServiceRoot.popupManager && ipcServiceRoot.popupManager.confirmationModal) {
+                ipcServiceRoot.popupManager.closeAllPopupsExcept(null);
+                ipcServiceRoot.popupManager.confirmationModal.ask({
+                    title: "Power Off",
+                    message: "Are you sure you want to power off the system?",
+                    icon: "system/power.svg",
+                    confirmText: "Power Off",
+                    cancelText: "Cancel",
+                    isDanger: true,
+                    onConfirm: () => {
+                        var home = Quickshell.env("HOME") || "/home";
+                        Quickshell.execDetached(["bash", home + "/.config/hypr/scripts/shutdown.sh"]);
+                    }
+                });
             }
         }
     }

@@ -10,6 +10,7 @@ import "modules/bar/components"
 import "components/ui"
 import "modules/wallpaper"
 import "modules/splash"
+import "modules/dock"
 
 QtObject {
     id: root
@@ -19,6 +20,10 @@ QtObject {
     property var clipboardService: clipService
     property MediaService mediaService: MediaService { id: mediaService }
     property Config shellConfig: Config { id: shellConfig }
+    property SettingsService settingsService: settingsService
+    property AppService appService: appService
+    property Theme rootTheme: rootTheme
+    property alias theme: rootTheme
 
     property alias splashScreen: splashScreen
     property alias wallpaperBackground: wallpaperBackground
@@ -31,9 +36,10 @@ QtObject {
     property alias emojiLoader: popupManager.emojiLoader
     property alias clipboardLoader: popupManager.clipboardLoader
     property alias wallpaperSelectorLoader: popupManager.wallpaperSelectorLoader
-    property alias keybindsLoader: popupManager.keybindsLoader
+    property alias settingsLoader: popupManager.settingsLoader
+    property alias powerMenuLoader: popupManager.powerMenuLoader
     property alias altTabLoader: popupManager.altTabLoader
-    property alias toastPopup: popupManager.toastPopup
+
     property alias errorPopup: popupManager.errorPopup
     property alias trayMenuPopup: popupManager.trayMenuPopup
     property alias confirmationModal: popupManager.confirmationModal
@@ -123,10 +129,15 @@ QtObject {
         function onReloadCompleted() {
             Quickshell.inhibitReloadPopup();
             Qt.callLater(() => {
-                popupManager.toastPopup.showToast({
-                    summary: "Configuration Reloaded",
-                    body: "Quickshell reloaded successfully."
-                });
+                if (statusBar && typeof statusBar.showNotification === "function") {
+                    var cfg = ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig);
+                    statusBar.showNotification({
+                        appName: "Quickshell",
+                        summary: "Configuration Reloaded",
+                        body: "Quickshell reloaded successfully.",
+                        appIcon: cfg ? cfg.getIcon("system/info.svg") : ""
+                    });
+                }
             });
         }
     }
@@ -153,6 +164,15 @@ QtObject {
             id: clipService
         },
 
+        SettingsService {
+            id: settingsService
+            rootTheme: rootTheme
+        },
+
+        AppService {
+            id: appService
+        },
+
         PopupManager {
             id: popupManager
             theme: rootTheme
@@ -160,6 +180,8 @@ QtObject {
             mediaService: root.mediaService
             clipboardService: root.clipboardService
             activeNotifs: root.activeNotifs
+            settingsService: settingsService
+            appService: appService
         },
 
         IpcService {
@@ -174,9 +196,10 @@ QtObject {
             theme: rootTheme
             sysStats: sysStats
             mediaService: root.mediaService
+            popupManager: popupManager
             notifCount: root.activeNotifs.length
 
-            toggleLauncher: () => { popupManager.toggleLoaderActive(popupManager.dashboardLoader, statusBar.getDistroX()); }
+            toggleLauncher: () => { popupManager.toggleLoaderActive(popupManager.dashboardLoader); }
             toggleNotifications: () => { popupManager.toggleLoaderActive(popupManager.notifsLoader, statusBar.getNotifX()); }
             toggleCalendar: () => { popupManager.toggleLoaderActive(popupManager.calendarLoader, statusBar.getClockX()); }
             toggleWifi: () => { popupManager.toggleLoaderActive(popupManager.wifiLoader, statusBar.getWifiX()); }
@@ -185,8 +208,15 @@ QtObject {
 
         ScreenCorners {
             id: screenCorners
-            radius: shellConfig.cornerRadius
+            visible: false
+            radius: (settingsService && settingsService.cornerRadius !== undefined) ? settingsService.cornerRadius : shellConfig.cornerRadius
             color: rootTheme.getColor("surface")
+        },
+
+        Loader {
+            id: dockLoader
+            active: (settingsService && settingsService.dockEnabled !== undefined) ? settingsService.dockEnabled : true
+            source: "modules/dock/Dock.qml"
         },
 
         NotificationServer {
@@ -196,13 +226,28 @@ QtObject {
             actionsSupported: true
             imageSupported: true
             onNotification: notification => {
+
+                if (settingsService && (settingsService.isAppMuted(notification) || settingsService.isAppMuted(notification.appName) || settingsService.isAppMuted(notification.applicationName) || settingsService.isAppMuted(notification.desktopEntry) || settingsService.isAppMuted(notification.appIcon))) {
+                    if (typeof notification.dismiss === "function") notification.dismiss();
+                    return;
+                }
+
+                if (root.dndEnabled || (settingsService && settingsService.dndEnabled)) {
+                    if (typeof notification.dismiss === "function") notification.dismiss();
+                    return;
+                }
+
                 notification.tracked = true;
                 notification._uid = "notif_id_" + (notifServer._notifSeq++);
                 var arr = root.activeNotifs.slice();
+                if (arr.length >= 50) {
+                    var old = arr.shift();
+                    if (old && typeof old.dismiss === "function") old.dismiss();
+                }
                 arr.push(notification);
                 root.activeNotifs = arr;
-                if (!root.dndEnabled) {
-                    popupManager.toastPopup.showToast(notification);
+                if (statusBar && typeof statusBar.showNotification === "function") {
+                    statusBar.showNotification(notification);
                 }
 
                 notification.closed.connect(() => {

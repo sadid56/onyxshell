@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../../../components/ui" as UI
 
 Rectangle {
     id: cellRect
@@ -29,11 +30,11 @@ Rectangle {
     Behavior on color { ColorAnimation { duration: 120 } }
     Behavior on border.width { NumberAnimation { duration: 120 } }
 
-    Text {
+    UI.Typography {
+        theme: calWindow.theme
         anchors.centerIn: parent
         text: String(modelData.dayNumber)
-        font.family: "Google Sans Flex, sans-serif"
-        font.pixelSize: 12
+        variant: "labelMedium"
         font.bold: cellRect.isTodayDate || cellRect.isSelectedDate || modelData.isCurrentMonth
         color: cellRect.isTodayDate ?
                    (calWindow.theme ? calWindow.theme.getColor("onPrimary") : "#380d15") :

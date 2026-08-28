@@ -8,11 +8,11 @@ import "../../components/ui" as UI
 import "./components"
 Popup {
     id: notifWindow
-    popupWidth: 440
-    popupHeight: 650
-    showCorners: false
+    popupWidth: 540
+    popupHeight: 560
+    showCorners: true
     flatBottom: false
-    contentRectX: notifWindow.safeWidth - notifWindow.popupWidth - 10
+    contentRectX: Math.round((safeWidth - popupWidth) / 2)
     readonly property var activeNotifs: (typeof root !== "undefined" && root.activeNotifs) ? root.activeNotifs : ((typeof popupManager !== "undefined" && popupManager.activeNotifs) ? popupManager.activeNotifs : [])
     property int notifCount: activeNotifs.length
     property int volumeValue: 50

@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
+import "../../../components/ui" as UI
 
 Item {
     id: profileRoot
@@ -97,10 +98,10 @@ Item {
                             }
                         }
 
-                        Text {
+                        UI.Typography {
+                            theme: profileRoot.theme
                             text: modelData.name
-                            font.family: "Google Sans Flex, sans-serif"
-                            font.pixelSize: 11
+                            variant: "bodySmall"
                             font.bold: profileRoot.currentProfile === modelData.profileId
                             color: profileRoot.currentProfile === modelData.profileId ?
                                    (profileRoot.theme ? profileRoot.theme.getColor("onPrimary") : "#561d21") :

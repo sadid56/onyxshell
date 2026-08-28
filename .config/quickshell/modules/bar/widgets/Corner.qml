@@ -2,9 +2,10 @@ import QtQuick
 
 Canvas {
     id: cornerCanvas
-    property int cornerRadius: (typeof root !== "undefined" && root && root.shellConfig) ? root.shellConfig.cornerRadius : 16
+    property int cornerRadius: (typeof root !== "undefined" && root && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : ((typeof root !== "undefined" && root && root.shellConfig) ? root.shellConfig.cornerRadius : 16)
     width: cornerRadius
     height: cornerRadius
+
     antialiasing: true
     renderTarget: Canvas.Image
 

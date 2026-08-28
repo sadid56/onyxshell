@@ -2,22 +2,53 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell.Widgets
+import "../../../components/ui" as UI
 
 RowLayout {
     id: netRow
-    spacing: 12
+    spacing: 8
     Layout.alignment: Qt.AlignVCenter
 
     property var theme
     property var sysStats
 
+    function formatSpeed(raw) {
+        if (!raw) return "0.0K";
+        var s = raw.toString().trim();
+        s = s.replace(/\/s/i, "").trim();
+        var match = s.match(/^([\d.]+)\s*([a-zA-Z]+)?$/);
+        if (!match) return "0.0K";
+        var num = parseFloat(match[1]);
+        var unit = (match[2] || "B").toUpperCase();
+        if (isNaN(num) || num <= 0) return "0.0K";
+
+        if (unit === "B") {
+            num = num / 1024.0;
+            unit = "K";
+        } else if (unit.startsWith("K")) {
+            unit = "K";
+        } else if (unit.startsWith("M")) {
+            unit = "M";
+        } else if (unit.startsWith("G")) {
+            unit = "G";
+        }
+
+        if (num < 10) {
+            return num.toFixed(1) + unit;
+        } else if (num < 1000) {
+            return Math.round(num).toString() + unit;
+        } else {
+            return (num / 1024.0).toFixed(1) + (unit === "K" ? "M" : "G");
+        }
+    }
+
     RowLayout {
-        spacing: 4
+        spacing: 3
         Layout.alignment: Qt.AlignVCenter
 
         IconImage {
-            width: 10
-            height: 10
+            width: 11
+            height: 11
             source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/arrow-down.svg")
             Layout.alignment: Qt.AlignVCenter
             layer.enabled: true
@@ -27,21 +58,21 @@ RowLayout {
             }
         }
 
-        Text {
+        UI.Typography {
             id: netDownText
-            text: netRow.sysStats.networkDown
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: 11
-            font.bold: true
+            theme: netRow.theme
+            text: netRow.formatSpeed(netRow.sysStats.networkDown)
+            variant: "labelMedium"
+            font.weight: Font.Bold
             Layout.alignment: Qt.AlignVCenter
             color: {
                 var s = netRow.sysStats.networkDown;
-                if (s.indexOf("MB/s") !== -1) {
+                if (s.indexOf("MB") !== -1) {
                     var valMb = parseFloat(s);
                     if (valMb >= 5.0) return netRow.theme.getColor("error");
                     return netRow.theme.getColor("secondary");
                 }
-                if (s.indexOf("KB/s") !== -1) {
+                if (s.indexOf("KB") !== -1) {
                     var valKb = parseFloat(s);
                     if (valKb >= 500.0) return netRow.theme.getColor("secondary");
                     if (valKb >= 100.0) return netRow.theme.getColor("primary");
@@ -52,12 +83,12 @@ RowLayout {
     }
 
     RowLayout {
-        spacing: 4
+        spacing: 3
         Layout.alignment: Qt.AlignVCenter
 
         IconImage {
-            width: 10
-            height: 10
+            width: 11
+            height: 11
             source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("actions/arrow-up.svg")
             Layout.alignment: Qt.AlignVCenter
             layer.enabled: true
@@ -67,21 +98,21 @@ RowLayout {
             }
         }
 
-        Text {
+        UI.Typography {
             id: netUpText
-            text: netRow.sysStats.networkUp
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: 11
-            font.bold: true
+            theme: netRow.theme
+            text: netRow.formatSpeed(netRow.sysStats.networkUp)
+            variant: "labelMedium"
+            font.weight: Font.Bold
             Layout.alignment: Qt.AlignVCenter
             color: {
                 var s = netRow.sysStats.networkUp;
-                if (s.indexOf("MB/s") !== -1) {
+                if (s.indexOf("MB") !== -1) {
                     var valMb = parseFloat(s);
                     if (valMb >= 5.0) return netRow.theme.getColor("error");
                     return netRow.theme.getColor("secondary");
                 }
-                if (s.indexOf("KB/s") !== -1) {
+                if (s.indexOf("KB") !== -1) {
                     var valKb = parseFloat(s);
                     if (valKb >= 500.0) return netRow.theme.getColor("secondary");
                     if (valKb >= 100.0) return netRow.theme.getColor("primary");
@@ -93,8 +124,8 @@ RowLayout {
 
     IconImage {
         id: wifiIcon
-        width: 20
-        height: 20
+        width: 16
+        height: 16
         Layout.alignment: Qt.AlignVCenter
         source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getWifiIcon(
             netRow.sysStats.wifiSignal,

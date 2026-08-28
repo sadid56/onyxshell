@@ -31,20 +31,20 @@ ColumnLayout {
         passwordInput.forceFocus();
     }
 
-    Text {
+    UI.Typography {
+        theme: promptRoot.theme
         text: "Connect to Network"
-        font.family: "Noto Sans"
+        variant: "titleMedium"
         font.pixelSize: 15
-        font.bold: true
-        color: promptRoot.theme ? promptRoot.theme.getColor("onSurface") : "#FFFFFF"
+        colorRole: "onSurface"
     }
 
-    Text {
+    UI.Typography {
+        theme: promptRoot.theme
         text: promptRoot.selectedSsid
-        font.family: "Google Sans Flex, sans-serif"
-        font.pixelSize: 13
+        variant: "bodyMedium"
         font.bold: true
-        color: promptRoot.theme ? promptRoot.theme.getColor("primary") : "#ADC6FF"
+        colorRole: "primary"
         elide: Text.ElideRight
         Layout.fillWidth: true
     }
@@ -91,13 +91,13 @@ ColumnLayout {
             }
         }
 
-        Text {
+        UI.Typography {
+            theme: promptRoot.theme
             Layout.fillWidth: true
             text: promptRoot.errorMessage
-            font.family: "Google Sans Flex, sans-serif"
-            font.pixelSize: 11
+            variant: "bodySmall"
             font.bold: true
-            color: promptRoot.theme ? promptRoot.theme.getColor("error") : "#FF5555"
+            colorRole: "error"
             wrapMode: Text.Wrap
             Layout.alignment: Qt.AlignVCenter
         }
@@ -113,13 +113,13 @@ ColumnLayout {
             radius: 8
             color: promptRoot.theme ? promptRoot.theme.getColor("surfaceVariant") : "#333333"
 
-            Text {
+            UI.Typography {
+                theme: promptRoot.theme
                 anchors.centerIn: parent
                 text: "Cancel"
-                font.family: "Noto Sans"
-                font.pixelSize: 12
+                variant: "labelMedium"
                 font.bold: true
-                color: promptRoot.theme ? promptRoot.theme.getColor("onSurface") : "#FFFFFF"
+                colorRole: "onSurface"
             }
 
             MouseArea {
@@ -146,11 +146,11 @@ ColumnLayout {
             Behavior on opacity { NumberAnimation { duration: 150 } }
             Behavior on color { ColorAnimation { duration: 150 } }
 
-            Text {
+            UI.Typography {
+                theme: promptRoot.theme
                 anchors.centerIn: parent
                 text: promptRoot.isConnecting ? "Connecting..." : "Connect"
-                font.family: "Noto Sans"
-                font.pixelSize: 12
+                variant: "labelMedium"
                 font.bold: true
                 color: promptRoot.isValidPassword
                        ? (promptRoot.theme ? promptRoot.theme.getColor("onPrimary") : "#000000")

@@ -11,6 +11,8 @@ Rectangle {
     property int iconSize: 16
     property int buttonSize: 28
     property int customRadius: -1
+    property alias size: btnRoot.buttonSize
+    property alias radius: btnRoot.customRadius
     property color iconColor: theme ? theme.getColor("onSurface") : "#ffffff"
     property color hoverIconColor: theme ? theme.getColor("primary") : iconColor
     property color normalBgColor: "transparent"
@@ -23,7 +25,6 @@ Rectangle {
     implicitHeight: buttonSize
     width: buttonSize
     height: buttonSize
-    radius: customRadius >= 0 ? customRadius : (buttonSize / 2)
 
     color: (mouseArea.containsMouse || active) ? hoverBgColor : normalBgColor
     Behavior on color { ColorAnimation { duration: 120 } }

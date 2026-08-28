@@ -3,17 +3,35 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
+import Quickshell.Wayland
 import Quickshell.Io
-import "../../../components/containers"
 import "../../../components/ui" as UI
 
-Popup {
+PanelWindow {
     id: wifiWindow
-    popupWidth: 320
-    popupHeight: {
-        if (showPasswordPrompt) return (pwdPrompt.errorMessage !== "") ? 250 : 220;
+
+    anchors { top: true; bottom: true; left: true; right: true }
+    color: "transparent"
+
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.keyboardFocus: active ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    exclusiveZone: 0
+
+    property bool active: false
+    visible: active || morphContainer.opacity > 0.01
+
+    property var theme
+    property real targetX: -1
+
+    readonly property int safeWidth: wifiWindow.width > 0 ? wifiWindow.width : 1920
+    readonly property int expandedWidth: 320
+    readonly property int collapsedWidth: 140
+    readonly property int expandedHeight: {
+        if (showPasswordPrompt) return (pwdPrompt.errorMessage !== "") ? 260 : 230;
         var count = Math.min(wifiList.length, 6);
-        return 24 + 10 + 30 + 1 + 12 + (count > 0 ? (count * 48 + 12) : 100) + 20;
+        if (count === 0 && isScanning) count = 3;
+        return 40 + 1 + 12 + (count > 0 ? (count * 48 + 12) : 100) + 16;
     }
 
     property var wifiList: []
@@ -22,6 +40,17 @@ Popup {
     property string selectedSsid: ""
     property string selectedSecurity: ""
     property bool showPasswordPrompt: false
+    property string activeConnectedSsid: ""
+
+    property alias closeTimer: closeTimer
+    readonly property var pwdPromptRef: pwdPrompt
+
+    Timer {
+        id: closeTimer
+        interval: 80
+        repeat: false
+        onTriggered: wifiWindow.active = false
+    }
 
     Timer {
         id: bgScanTimer
@@ -64,8 +93,6 @@ Popup {
         stdout: StdioCollector { onStreamFinished: wifiWindow.parseWifiList(this.text) }
     }
 
-    property string activeConnectedSsid: ""
-
     property var wifiConnector: Process {
         id: wifiConnector
         property string errorOutput: ""
@@ -82,16 +109,12 @@ Popup {
         }
         stderr: StdioCollector {
             onStreamFinished: {
-                if (this.text && this.text.trim() !== "") {
-                    wifiConnector.errorOutput = this.text.trim();
-                }
+                if (this.text && this.text.trim() !== "") wifiConnector.errorOutput = this.text.trim();
             }
         }
         stdout: StdioCollector {
             onStreamFinished: {
-                if (this.text && this.text.indexOf("Error") !== -1) {
-                    wifiConnector.errorOutput = this.text.trim();
-                }
+                if (this.text && this.text.indexOf("Error") !== -1) wifiConnector.errorOutput = this.text.trim();
             }
         }
         onExited: (exitCode, exitStatus) => {
@@ -100,20 +123,14 @@ Popup {
                 wifiWindow.active = false;
                 wifiWindow.refreshWifi();
             } else {
-                if (targetSsid && targetSsid !== "") {
-                    Quickshell.execDetached(["nmcli", "connection", "delete", "id", targetSsid]);
-                }
-                if (fallbackSsid && fallbackSsid !== "" && fallbackSsid !== targetSsid) {
-                    Quickshell.execDetached(["nmcli", "connection", "up", "id", fallbackSsid]);
-                }
+                if (targetSsid && targetSsid !== "") Quickshell.execDetached(["nmcli", "connection", "delete", "id", targetSsid]);
+                if (fallbackSsid && fallbackSsid !== "" && fallbackSsid !== targetSsid) Quickshell.execDetached(["nmcli", "connection", "up", "id", fallbackSsid]);
 
                 if (wifiWindow.showPasswordPrompt) {
                     var msg = "Incorrect password. Please try again.";
                     if (errorOutput.indexOf("timeout") !== -1) msg = "Connection timed out. Please try again.";
                     pwdPrompt.showError(msg);
-                } else {
-                    wifiWindow.active = false;
-                }
+                } else wifiWindow.active = false;
             }
         }
     }
@@ -123,102 +140,122 @@ Popup {
             showPasswordPrompt = false;
             selectedSsid = "";
             selectedSecurity = "";
+            closeTimer.stop();
             refreshWifi();
         }
     }
 
     Shortcut { sequence: "Escape"; enabled: wifiWindow.active; onActivated: wifiWindow.active = false }
 
-    ColumnLayout {
-        Layout.fillWidth: true
-        spacing: 12
-        visible: !wifiWindow.showPasswordPrompt
-
-        RowLayout {
-            Layout.fillWidth: true
-            Text {
-                text: "Wi-Fi Networks"
-                font.family: "Noto Sans"
-                font.pixelSize: 15
-                font.bold: true
-                color: wifiWindow.theme.getColor("onSurface")
-                Layout.fillWidth: true
-            }
-
-            IconImage {
-                width: 16
-                height: 16
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/arrow-clockwise-filled.svg")
-                layer.enabled: true
-                layer.effect: MultiEffect { colorization: 1.0; colorizationColor: wifiWindow.theme.getColor("primary") }
-                RotationAnimation on rotation { running: wifiWindow.isScanning; from: 0; to: 360; duration: 1000; loops: Animation.Infinite }
-                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: wifiWindow.refreshWifi() }
-            }
-        }
-
-        Rectangle { Layout.fillWidth: true; height: 1; color: wifiWindow.theme.getColor("surfaceVariant") }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            visible: wifiWindow.wifiList.length === 0
-            spacing: 8
-            Layout.topMargin: 12
-
-            IconImage {
-                width: 32
-                height: 32
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("wifi/wifi-off.svg")
-                Layout.alignment: Qt.AlignHCenter
-                layer.enabled: true
-                layer.effect: MultiEffect { colorization: 1.0; colorizationColor: wifiWindow.theme.getColor("outline") }
-            }
-
-            Text {
-                text: wifiWindow.isScanning ? "Scanning for networks..." : "No networks found"
-                font.family: "Google Sans Flex, sans-serif"
-                font.pixelSize: 13
-                font.bold: true
-                color: wifiWindow.theme.getColor("outline")
-                Layout.fillWidth: true
-                horizontalAlignment: Text.AlignHCenter
-            }
-        }
-
-        UI.AnimatedListView {
-            id: wifiListView
-            theme: wifiWindow.theme
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            visible: wifiWindow.wifiList.length > 0
-            clip: true
-            pillColor: wifiWindow.theme ? wifiWindow.theme.getColor("surfaceVariant") : "#2b2a27"
-            pillRadius: 10
-            pillMargin: 4
-            spacing: 4
-            model: wifiWindow.wifiList
-            delegate: WifiItemDelegate {
-                parentListView: wifiListView
-                theme: wifiWindow.theme
-                onItemClicked: info => {
-                    if (info.active) return;
-                    wifiWindow.selectedSsid = info.ssid;
-                    wifiWindow.selectedSecurity = info.security;
-                    if (info.saved || info.security === "") wifiWindow.wifiConnector.connectTo(wifiWindow.selectedSsid, "");
-                    else { wifiWindow.showPasswordPrompt = true; pwdPrompt.focusInput(); }
-                }
-            }
-        }
+    MouseArea {
+        anchors.fill: parent
+        enabled: wifiWindow.active
+        hoverEnabled: true
+        onClicked: wifiWindow.active = false
+        onEntered: closeTimer.restart()
     }
 
-    WifiPasswordPrompt {
-        id: pwdPrompt
-        theme: wifiWindow.theme
-        selectedSsid: wifiWindow.selectedSsid
-        wifiConnector: wifiWindow.wifiConnector
-        visible: wifiWindow.showPasswordPrompt
-        onCancelRequested: wifiWindow.showPasswordPrompt = false
-        onConnectRequested: pwd => {
-            wifiWindow.wifiConnector.connectTo(wifiWindow.selectedSsid, pwd);
+    Rectangle {
+        id: morphContainer
+        x: targetX > 0 ? Math.max(10, Math.min(targetX - width, safeWidth - width - 10)) : (safeWidth - expandedWidth - 10)
+        y: 6
+        width: wifiWindow.active ? wifiWindow.expandedWidth : wifiWindow.collapsedWidth
+        height: wifiWindow.active ? wifiWindow.expandedHeight : 34
+        radius: wifiWindow.active ? 20 : 16
+        color: wifiWindow.theme ? wifiWindow.theme.getColor("surface") : "#1e1e2e"
+        clip: true
+        opacity: wifiWindow.active ? 1.0 : 0.0
+
+        Behavior on width { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+        Behavior on height { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+        Behavior on radius { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: wifiWindow.active
+            shadowColor: "#60000000"
+            shadowBlur: 1.0
+            shadowVerticalOffset: 8
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: closeTimer.stop()
+            onPositionChanged: closeTimer.stop()
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 14
+            spacing: 10
+
+            RowLayout {
+                Layout.fillWidth: true
+                height: 24
+
+                RowLayout {
+                    spacing: 8
+                    Layout.alignment: Qt.AlignVCenter
+
+                    IconImage {
+                        width: 16
+                        height: 16
+                        source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/globe.svg")
+                        layer.enabled: true
+                        layer.effect: MultiEffect { colorization: 1.0; colorizationColor: wifiWindow.theme ? wifiWindow.theme.getColor("primary") : "#adc6ff" }
+                    }
+
+                    UI.Typography {
+                        theme: wifiWindow.theme
+                        text: "Wi-Fi Networks"
+                        variant: "titleMedium"
+                        font.pixelSize: 14
+                        font.bold: true
+                        colorRole: "onSurface"
+                    }
+                }
+
+                Item { Layout.fillWidth: true }
+
+                IconImage {
+                    width: 16
+                    height: 16
+                    source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/arrow-clockwise-filled.svg")
+                    layer.enabled: true
+                    layer.effect: MultiEffect { colorization: 1.0; colorizationColor: wifiWindow.theme ? wifiWindow.theme.getColor("primary") : "#adc6ff" }
+                    RotationAnimation on rotation { running: wifiWindow.isScanning; from: 0; to: 360; duration: 1000; loops: Animation.Infinite }
+                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: wifiWindow.refreshWifi() }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                color: wifiWindow.theme ? wifiWindow.theme.getColor("outlineVariant") : "#20FFFFFF"
+                opacity: 0.35
+            }
+
+            WifiNetworksList {
+                wifiWindow: wifiWindow
+                theme: wifiWindow.theme
+                visible: !wifiWindow.showPasswordPrompt
+                opacity: wifiWindow.active ? 1.0 : 0.0
+                Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }
+            }
+
+            WifiPasswordPrompt {
+                id: pwdPrompt
+                theme: wifiWindow.theme
+                selectedSsid: wifiWindow.selectedSsid
+                wifiConnector: wifiWindow.wifiConnector
+                visible: wifiWindow.showPasswordPrompt
+                onCancelRequested: wifiWindow.showPasswordPrompt = false
+                onConnectRequested: pwd => {
+                    wifiWindow.wifiConnector.connectTo(wifiWindow.selectedSsid, pwd);
+                }
+            }
         }
     }
 }

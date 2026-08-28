@@ -4,6 +4,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import "./"
+import "../../../components/ui" as UI
 
 Rectangle {
     id: groupCardRoot
@@ -82,12 +83,12 @@ Rectangle {
                     }
                 }
 
-                Text {
+                UI.Typography {
+                    theme: groupCardRoot.theme
                     text: groupCardRoot.groupName
-                    font.family: "Google Sans Flex, sans-serif"
-                    font.pixelSize: 12
+                    variant: "labelMedium"
                     font.bold: true
-                    color: groupCardRoot.theme ? groupCardRoot.theme.getColor("onSurface") : "#FFFFFF"
+                    colorRole: "onSurface"
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
@@ -101,14 +102,14 @@ Rectangle {
                     visible: groupCardRoot.groupCount > 1
                     Layout.alignment: Qt.AlignVCenter
 
-                    Text {
+                    UI.Typography {
                         id: countText
+                        theme: groupCardRoot.theme
                         anchors.centerIn: parent
                         text: String(groupCardRoot.groupCount)
-                        font.family: "Google Sans Flex, sans-serif"
-                        font.pixelSize: 10
+                        variant: "caption"
                         font.bold: true
-                        color: groupCardRoot.theme ? groupCardRoot.theme.getColor("primary") : "#ffb3b4"
+                        colorRole: "primary"
                     }
                 }
 

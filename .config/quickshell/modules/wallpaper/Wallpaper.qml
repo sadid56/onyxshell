@@ -50,7 +50,9 @@ Scope {
                 right: true
             }
             WlrLayershell.layer: WlrLayer.Background
+            WlrLayershell.exclusionMode: ExclusionMode.Ignore
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+            exclusiveZone: 0
             color: "#1b1111"
 
             visible: !wallpaperRoot.isSplashActive
@@ -107,6 +109,7 @@ Scope {
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: false
                 cache: true
+                sourceSize: Qt.size(wallpaperWindow.width > 0 ? wallpaperWindow.width : 1920, wallpaperWindow.height > 0 ? wallpaperWindow.height : 1080)
                 opacity: 1
             }
 
@@ -115,7 +118,8 @@ Scope {
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
-                cache: true
+                cache: false
+                sourceSize: Qt.size(wallpaperWindow.width > 0 ? wallpaperWindow.width : 1920, wallpaperWindow.height > 0 ? wallpaperWindow.height : 1080)
                 opacity: 0
 
                 onStatusChanged: {

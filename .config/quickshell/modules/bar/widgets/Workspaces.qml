@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import "../../../components/ui" as UI
 import "../../../utils"
 
 Row {
@@ -123,9 +124,9 @@ Row {
 
                 Repeater {
                     model: dot.windowIcons
-                    Text {
+                    UI.Typography {
+                        theme: workspacesRoot.theme
                         text: modelData
-                        font.family: "JetBrainsMono Nerd Font"
                         font.pixelSize: 13
                         Layout.alignment: Qt.AlignVCenter
                         color: dot.isActive

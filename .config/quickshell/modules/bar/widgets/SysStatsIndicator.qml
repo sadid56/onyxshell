@@ -1,119 +1,127 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
-import Quickshell.Services.SystemTray
 import "../../../components/ui" as UI
 
-Row {
+Item {
     id: sysStatsRoot
-    spacing: 16
 
     property var theme
     property var sysStats
-    property var toggleNotifications
-    property var toggleWifi
+    property var toggleNotifications: null
+    property var toggleWifi: null
     property int notifCount: 0
 
-    function getWifiX() { var pos = netClickArea.mapToItem(null, 0, 0); return pos.x + netClickArea.width / 2; }
-    function getResourcesX() { var pos = resourcesClickArea.mapToItem(null, 0, 0); return pos.x + resourcesClickArea.width / 2; }
-    function getNotifX() { var pos = notifButton.mapToItem(null, 0, 0); return pos.x + notifButton.width / 2; }
+    implicitHeight: 32
+    implicitWidth: rowLayout.implicitWidth
+
+    function getResourcesX() {
+        var pos = sysStatsRoot.mapToItem(null, 0, 0);
+        return pos.x + sysStatsRoot.width / 2;
+    }
+
+    MouseArea {
+        id: sysStatsMouseArea
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onEntered: {
+            if (typeof root !== "undefined" && root.stopLoaderTimerAndActivate && typeof resourcesLoader !== "undefined" && typeof statusBar !== "undefined") {
+                root.stopLoaderTimerAndActivate(resourcesLoader, statusBar.getResourcesX());
+                if (typeof powerMenuLoader !== "undefined") root.setLoaderInactive(powerMenuLoader);
+                if (typeof wifiLoader !== "undefined") root.setLoaderInactive(wifiLoader);
+            }
+        }
+        onExited: {
+            if (typeof root !== "undefined" && root.restartLoaderTimer && typeof resourcesLoader !== "undefined") {
+                root.restartLoaderTimer(resourcesLoader);
+            }
+        }
+        onClicked: {
+            if (typeof root !== "undefined" && root.toggleLoaderActive && typeof resourcesLoader !== "undefined" && typeof statusBar !== "undefined") {
+                root.toggleLoaderActive(resourcesLoader, statusBar.getResourcesX());
+            }
+        }
+    }
 
     RowLayout {
-        spacing: 16
-        Layout.alignment: Qt.AlignVCenter
+        id: rowLayout
+        anchors.fill: parent
+        spacing: 12
 
-        MouseArea {
-            id: netClickArea
-            Layout.preferredWidth: netIndicator.implicitWidth
-            Layout.preferredHeight: netIndicator.implicitHeight
+        RowLayout {
+            spacing: 5
             Layout.alignment: Qt.AlignVCenter
-            cursorShape: Qt.PointingHandCursor
-            hoverEnabled: true
-            onEntered: root.stopLoaderTimerAndActivate(wifiLoader, statusBar.getWifiX())
-            onExited: root.restartLoaderTimer(wifiLoader)
-            onClicked: root.toggleLoaderActive(wifiLoader, statusBar.getWifiX())
-
-            NetworkIndicator { id: netIndicator; theme: sysStatsRoot.theme; sysStats: sysStatsRoot.sysStats }
-        }
-
-        MouseArea {
-            id: resourcesClickArea
-            Layout.preferredWidth: resourcesRow.implicitWidth
-            Layout.preferredHeight: resourcesRow.implicitHeight
-            Layout.alignment: Qt.AlignVCenter
-            cursorShape: Qt.PointingHandCursor
-            hoverEnabled: true
-            onEntered: root.stopLoaderTimerAndActivate(resourcesLoader, statusBar.getResourcesX())
-            onExited: root.restartLoaderTimer(resourcesLoader)
-            onClicked: root.toggleLoaderActive(resourcesLoader, statusBar.getResourcesX())
-
-            RowLayout {
-                id: resourcesRow
-                spacing: 14
-                anchors.centerIn: parent
-
-                RowLayout {
-                    spacing: 4
-                    Layout.alignment: Qt.AlignVCenter
-                    UI.Icon {
-                        size: 15
-                        icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getCpuIcon()
-                        color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-                    Text {
-                        text: Math.round(sysStatsRoot.sysStats.cpuUsage) + "%"
-                        font.family: "Noto Sans"
-                        font.pixelSize: 13
-                        font.bold: true
-                        color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-                }
-
-                RowLayout {
-                    spacing: 4
-                    Layout.alignment: Qt.AlignVCenter
-                    UI.Icon {
-                        size: 15
-                        icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getSwapIcon()
-                        color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-                    Text {
-                        text: Math.round(sysStatsRoot.sysStats.swapUsage || 0) + "%"
-                        font.family: "Noto Sans"
-                        font.pixelSize: 13
-                        font.bold: true
-                        color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-                }
-
-                RowLayout {
-                    spacing: 4
-                    Layout.alignment: Qt.AlignVCenter
-                    UI.Icon {
-                        size: 15
-                        icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getMemoryIcon()
-                        color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-                    Text {
-                        text: Math.round(sysStatsRoot.sysStats.memUsage) + "%"
-                        font.family: "Noto Sans"
-                        font.pixelSize: 13
-                        font.bold: true
-                        color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-                }
+            UI.Icon {
+                size: 15
+                icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getCpuIcon()
+                color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
+                Layout.alignment: Qt.AlignVCenter
+            }
+            UI.Typography {
+                theme: sysStatsRoot.theme
+                text: Math.round(sysStatsRoot.sysStats.cpuUsage) + "%"
+                variant: "labelMedium"
+                font.weight: Font.Bold
+                Layout.preferredWidth: 28
+                Layout.minimumWidth: 28
+                Layout.maximumWidth: 28
+                horizontalAlignment: Text.AlignLeft
+                colorRole: "onSurface"
+                Layout.alignment: Qt.AlignVCenter
             }
         }
 
         RowLayout {
-            spacing: 4
+            spacing: 5
+            Layout.alignment: Qt.AlignVCenter
+            UI.Icon {
+                size: 15
+                icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getSwapIcon()
+                color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
+                Layout.alignment: Qt.AlignVCenter
+            }
+            UI.Typography {
+                theme: sysStatsRoot.theme
+                text: Math.round(sysStatsRoot.sysStats.swapUsage || 0) + "%"
+                variant: "labelMedium"
+                font.weight: Font.Bold
+                Layout.preferredWidth: 28
+                Layout.minimumWidth: 28
+                Layout.maximumWidth: 28
+                horizontalAlignment: Text.AlignLeft
+                colorRole: "onSurface"
+                Layout.alignment: Qt.AlignVCenter
+            }
+        }
+
+        RowLayout {
+            spacing: 5
+            Layout.alignment: Qt.AlignVCenter
+            UI.Icon {
+                size: 15
+                icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getMemoryIcon()
+                color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
+                Layout.alignment: Qt.AlignVCenter
+            }
+            UI.Typography {
+                theme: sysStatsRoot.theme
+                text: Math.round(sysStatsRoot.sysStats.memUsage) + "%"
+                variant: "labelMedium"
+                font.weight: Font.Bold
+                Layout.preferredWidth: 28
+                Layout.minimumWidth: 28
+                Layout.maximumWidth: 28
+                horizontalAlignment: Text.AlignLeft
+                colorRole: "onSurface"
+                Layout.alignment: Qt.AlignVCenter
+            }
+        }
+
+        RowLayout {
+            spacing: 5
             Layout.alignment: Qt.AlignVCenter
 
             UI.Icon {
@@ -128,88 +136,20 @@ Row {
                 Layout.alignment: Qt.AlignVCenter
             }
 
-            Text {
+            UI.Typography {
+                theme: sysStatsRoot.theme
                 text: sysStatsRoot.sysStats.batteryPercentage + "%"
-                font.family: "Noto Sans"
-                font.pixelSize: 13
-                font.bold: true
+                variant: "labelMedium"
+                font.weight: Font.Bold
+                Layout.preferredWidth: 28
+                Layout.minimumWidth: 28
+                Layout.maximumWidth: 28
+                horizontalAlignment: Text.AlignLeft
                 color: sysStatsRoot.sysStats.batteryPercentage < 20
                     ? (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("error") : "#ff5555")
                     : (sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF")
                 Layout.alignment: Qt.AlignVCenter
             }
-        }
-    }
-
-    Row {
-        spacing: 12
-        anchors.verticalCenter: parent.verticalCenter
-
-        Repeater {
-            model: SystemTray.items
-            delegate: Item {
-                id: trayItemDelegate
-                width: 20
-                height: 20
-
-                IconImage {
-                    anchors.fill: parent
-                    source: {
-                        var ic = modelData.icon || "";
-                        if (!ic) return "";
-                        if (ic.startsWith("/") || ic.startsWith("file://") || ic.startsWith("image://") || ic.startsWith("qrc:/")) return ic;
-                        return "image://icon/" + ic;
-                    }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onEntered: {
-                        var pos = trayItemDelegate.mapToItem(null, 0, 0);
-                        root.showTrayMenu(modelData, pos.x + trayItemDelegate.width / 2);
-                    }
-                    onExited: root.hideTrayMenu()
-                    onClicked: {
-                        modelData.activate();
-                        var scriptPath = ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getScript("focus_tray_window.py");
-                        Quickshell.execDetached([
-                            "python", scriptPath,
-                            modelData.id || "",
-                            modelData.title || "",
-                            modelData.icon || ""
-                        ]);
-                    }
-                }
-            }
-        }
-    }
-
-    Item {
-        id: notifButton
-        width: 20
-        height: 20
-        Layout.alignment: Qt.AlignVCenter
-
-        UI.Icon {
-            anchors.centerIn: parent
-            size: 18
-            icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getNotificationIcon(
-                (typeof root !== "undefined" && root.dndEnabled),
-                sysStatsRoot.notifCount > 0
-            )
-            color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("primary") : "#ffb3b4"
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            anchors.rightMargin: -20
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onEntered: root.stopLoaderTimerAndActivate(notifsLoader, sysStatsRoot.getNotifX())
-            onExited: root.restartLoaderTimer(notifsLoader)
-            onClicked: root.toggleLoaderActive(notifsLoader, sysStatsRoot.getNotifX())
         }
     }
 }

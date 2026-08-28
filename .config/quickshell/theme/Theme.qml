@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import Quickshell.Io
 
 Item {
@@ -7,26 +8,47 @@ Item {
     property var colors: ({})
 
     readonly property var defaults: {
-        "primary": "#3574d4",
-        "onPrimary": "#ffffff",
-        "primaryContainer": "#dbe1ff",
-        "onPrimaryContainer": "#00174c",
-        "secondary": "#595d72",
-        "onSecondary": "#ffffff",
-        "secondaryContainer": "#dde1f9",
-        "onSecondaryContainer": "#161b2c",
-        "error": "#ba1a1a",
-        "onError": "#ffffff",
-        "errorContainer": "#ffdad6",
-        "onErrorContainer": "#410002",
-        "background": "#fbf8fd",
-        "onBackground": "#1b1b21",
-        "surface": "#fbf8fd",
-        "onSurface": "#1b1b21",
-        "surfaceVariant": "#e2e1ec",
-        "onSurfaceVariant": "#45464f",
-        "outline": "#757680",
+        "primary": "#c5c5d8",
+        "onPrimary": "#2e2f3e",
+        "primaryContainer": "#434453",
+        "onPrimaryContainer": "#e1dfe7",
+        "secondary": "#c7c5ce",
+        "onSecondary": "#303036",
+        "secondaryContainer": "#46464d",
+        "onSecondaryContainer": "#e1dfe7",
+        "error": "#ffb4ab",
+        "onError": "#690005",
+        "errorContainer": "#93000a",
+        "onErrorContainer": "#ffdad6",
+        "background": "#131314",
+        "onBackground": "#e5e1e3",
+        "surface": "#131314",
+        "onSurface": "#e5e1e3",
+        "surfaceVariant": "#28292e",
+        "onSurfaceVariant": "#c8c5cc",
+        "outline": "#919096",
+        "outlineVariant": "#46464c",
         "shadow": "#000000"
+    }
+
+    property string fontFamily: (typeof root !== "undefined" && root && root.settingsService && root.settingsService.fontFamily)
+        ? root.settingsService.fontFamily
+        : ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig.defaultFont : "")
+
+    property string fontMono: (typeof root !== "undefined" && root && root.settingsService && root.settingsService.fontMono)
+        ? root.settingsService.fontMono
+        : ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig.defaultFontMono : "")
+
+    property int fontSize: (typeof root !== "undefined" && root && root.settingsService && root.settingsService.fontSize)
+        ? root.settingsService.fontSize
+        : 12
+
+    function getFont() {
+        return fontFamily;
+    }
+
+    function getFontMono() {
+        return fontMono;
     }
 
     function getColor(key) {
@@ -36,27 +58,40 @@ Item {
         return defaults[key];
     }
 
+    readonly property string colorsJsonPath: ((typeof root !== "undefined" && root && root.shellConfig) ? root.shellConfig.quickshellDir : (Quickshell.env("HOME") + "/.config/quickshell")) + "/colors.json"
+
     FileView {
         id: colorsFile
-        path: root.shellConfig.quickshellDir + "/colors.json"
-        watchChanges: true
-        onTextChanged: {
-            var fileText = (typeof colorsFile.text === "function") ? colorsFile.text() : colorsFile.text;
-            if (fileText && typeof fileText.trim === "function" && fileText.trim().length > 0) {
-                try {
-                    theme.colors = JSON.parse(fileText);
-                } catch (e) {
-                    theme.colors = theme.defaults;
+        path: theme.colorsJsonPath
+        blockLoading: true
+        onLoaded: {
+            loadFromFile();
+        }
+    }
+
+    Process {
+        id: colorReader
+        command: ["cat", theme.colorsJsonPath]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var content = this.text;
+                if (content && content.trim().length > 0) {
+                    try {
+                        theme.colors = JSON.parse(content.trim());
+                    } catch (e) {
+                        console.log("Failed to parse colors JSON:", e);
+                    }
                 }
             }
         }
     }
 
-    Component.onCompleted: {
+    function loadFromFile() {
         var fileText = (typeof colorsFile.text === "function") ? colorsFile.text() : colorsFile.text;
         if (fileText && fileText.trim().length > 0) {
             try {
-                theme.colors = JSON.parse(fileText);
+                theme.colors = JSON.parse(fileText.trim());
+                return;
             } catch (e) {
                 theme.colors = theme.defaults;
             }
@@ -65,8 +100,21 @@ Item {
         }
     }
 
+    Component.onCompleted: {
+        loadFromFile();
+    }
+
     function reloadColors() {
-        colorsFile.path = "";
-        colorsFile.path = root.shellConfig.quickshellDir + "/colors.json";
+        if (colorsFile && typeof colorsFile.reload === "function") {
+            colorsFile.reload();
+            var fileText = (typeof colorsFile.text === "function") ? colorsFile.text() : colorsFile.text;
+            if (fileText && fileText.trim().length > 0) {
+                try {
+                    theme.colors = JSON.parse(fileText.trim());
+                } catch (e) {}
+            }
+        }
+        colorReader.running = false;
+        colorReader.running = true;
     }
 }

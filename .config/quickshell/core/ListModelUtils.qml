@@ -70,4 +70,20 @@ QtObject {
             listModel.remove(listModel.count - 1);
         }
     }
+
+    function formatBytes(bytes) {
+        if (!bytes || isNaN(bytes) || bytes <= 0) return "0 B";
+        var units = ["B", "KB", "MB", "GB", "TB"];
+        var i = Math.floor(Math.log(bytes) / Math.log(1024));
+        if (i < 0) i = 0;
+        if (i >= units.length) i = units.length - 1;
+        var p = Math.pow(1024, i);
+        var s = (bytes / p).toFixed(i === 0 ? 0 : 1);
+        return s + " " + units[i];
+    }
+
+    function formatPercent(val) {
+        if (!val || isNaN(val)) return "0%";
+        return Math.round(val) + "%";
+    }
 }

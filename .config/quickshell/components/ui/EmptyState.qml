@@ -37,23 +37,23 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: 3
 
-        Text {
+        Typography {
+            theme: emptyStateRoot.theme
             text: emptyStateRoot.title !== ""
                 ? emptyStateRoot.title
                 : (emptyStateRoot.searchQuery === "" ? "No items found" : "No matching items found")
-            font.family: "Google Sans Flex, sans-serif"
-            font.pixelSize: 13
+            variant: "bodyMedium"
             font.bold: true
-            color: emptyStateRoot.theme ? emptyStateRoot.theme.getColor("onSurface") : "#f0dede"
+            colorRole: "onSurface"
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
         }
 
-        Text {
+        Typography {
+            theme: emptyStateRoot.theme
             text: emptyStateRoot.subtitle
-            font.family: "Google Sans Flex, sans-serif"
-            font.pixelSize: 11
-            color: emptyStateRoot.theme ? emptyStateRoot.theme.getColor("outline") : "#757680"
+            variant: "bodySmall"
+            colorRole: "outline"
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
             visible: emptyStateRoot.subtitle !== ""

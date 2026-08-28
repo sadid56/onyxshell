@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell.Widgets
+import "../../../components/ui" as UI
 
 RowLayout {
     id: headerRow
@@ -38,12 +39,12 @@ RowLayout {
             Layout.fillWidth: true
             spacing: 6
 
-            Text {
+            UI.Typography {
+                theme: headerRow.cardItem.theme
                 text: headerRow.cardItem.summaryText
-                font.family: "Google Sans Flex, sans-serif"
-                font.pixelSize: 12
+                variant: "labelMedium"
                 font.bold: true
-                color: headerRow.cardItem.theme ? headerRow.cardItem.theme.getColor("onSurface") : "#FFFFFF"
+                colorRole: "onSurface"
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -82,11 +83,11 @@ RowLayout {
             }
         }
 
-        Text {
+        UI.Typography {
+            theme: headerRow.cardItem.theme
             text: headerRow.cardItem.bodyText
-            font.family: "Google Sans Flex, sans-serif"
-            font.pixelSize: 11
-            color: headerRow.cardItem.theme ? headerRow.cardItem.theme.getColor("onSurfaceVariant") : "#8f8f9f"
+            variant: "bodySmall"
+            colorRole: "onSurfaceVariant"
             elide: headerRow.cardItem.expanded ? Text.ElideNone : Text.ElideRight
             maximumLineCount: headerRow.cardItem.expanded ? 8 : 2
             wrapMode: Text.Wrap

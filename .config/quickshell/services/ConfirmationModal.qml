@@ -4,6 +4,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Wayland
+import "../components/ui" as UI
 
 PanelWindow {
     id: confirmModalRoot
@@ -104,7 +105,7 @@ PanelWindow {
                 NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
             }
 
-            layer.enabled: true
+            layer.enabled: confirmModalRoot.active
             layer.effect: MultiEffect {
                 shadowEnabled: true
                 shadowColor: "#40000000"
@@ -154,24 +155,25 @@ PanelWindow {
                     Layout.fillWidth: true
                     spacing: 6
 
-                    Text {
+                    UI.Typography {
                         Layout.fillWidth: true
+                        theme: confirmModalRoot.theme
                         text: confirmModalRoot.title
-                        font.family: "Google Sans Flex, sans-serif"
+                        variant: "titleMedium"
                         font.pixelSize: 18
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
-                        color: confirmModalRoot.theme ? confirmModalRoot.theme.getColor("onSurface") : "#FFFFFF"
+                        colorRole: "onSurface"
                     }
 
-                    Text {
+                    UI.Typography {
                         Layout.fillWidth: true
+                        theme: confirmModalRoot.theme
                         text: confirmModalRoot.message
-                        font.family: "Google Sans Flex, sans-serif"
-                        font.pixelSize: 13
+                        variant: "bodyMedium"
                         horizontalAlignment: Text.AlignHCenter
                         wrapMode: Text.WordWrap
-                        color: confirmModalRoot.theme ? confirmModalRoot.theme.getColor("outline") : "#999999"
+                        colorRole: "outline"
                     }
                 }
 
@@ -193,13 +195,14 @@ PanelWindow {
 
                         Behavior on color { ColorAnimation { duration: 140 } }
 
-                        Text {
+                        UI.Typography {
                             anchors.centerIn: parent
+                            theme: confirmModalRoot.theme
                             text: confirmModalRoot.cancelText
-                            font.family: "Google Sans Flex, sans-serif"
+                            variant: "labelMedium"
                             font.pixelSize: 13
                             font.bold: true
-                            color: confirmModalRoot.theme ? confirmModalRoot.theme.getColor("onSurface") : "#FFFFFF"
+                            colorRole: "onSurface"
                         }
 
                         MouseArea {
@@ -227,10 +230,11 @@ PanelWindow {
 
                         Behavior on color { ColorAnimation { duration: 140 } }
 
-                        Text {
+                        UI.Typography {
                             anchors.centerIn: parent
+                            theme: confirmModalRoot.theme
                             text: confirmModalRoot.confirmText
-                            font.family: "Google Sans Flex, sans-serif"
+                            variant: "labelMedium"
                             font.pixelSize: 13
                             font.bold: true
                             color: confirmModalRoot.isDanger

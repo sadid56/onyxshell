@@ -15,22 +15,21 @@ Popup {
 
     popupWidth: 580
 
-    readonly property int chromeHeight: 156
-    readonly property int itemRowHeight: 52
-    readonly property int maxVisibleItems: 6
-    popupHeight: dynamicAppsModel.count === 0
-        ? 240
-        : (chromeHeight + Math.min(maxVisibleItems, dynamicAppsModel.count) * itemRowHeight)
+    readonly property int chromeHeight: 120
+    readonly property int itemRowHeight: 50
+    readonly property int maxVisibleItems: 8
+    popupHeight: (allApps.length === 0)
+        ? (chromeHeight + 5 * itemRowHeight)
+        : (dynamicAppsModel.count === 0
+            ? 240
+            : (chromeHeight + Math.min(maxVisibleItems, dynamicAppsModel.count) * itemRowHeight))
 
-    showCorners: false
-    flatBottom: false
     closeOnHoverOutside: false
-
     contentRectX: Math.round((safeWidth - popupWidth) / 2)
-    contentRectY: active ? Math.round((Screen.height - popupHeight) / 2) : Math.round((Screen.height - popupHeight) / 2 - 20)
 
     property string searchQuery: ""
-    property var allApps: []
+    property var appService: (typeof root !== "undefined" && root.appService) ? root.appService : null
+    property var allApps: (appService && appService.apps && appService.apps.length > 0) ? appService.apps : []
 
     ListModelUtils { id: modelUtils }
 
@@ -116,102 +115,23 @@ Popup {
     onSearchQueryChanged: searchDebounceTimer.restart()
     onAllAppsChanged: updateAppsModel()
 
-    property var appsProc: Process {
-        id: appsProc
-        command: ["python", ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getScript("list_apps.py")]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    var txt = this.text ? this.text.trim() : "";
-                    if (!txt) return;
-                    var parsed = JSON.parse(txt);
-                    if (parsed && parsed.length > 0) {
-                        launcherWindow.allApps = parsed;
-                    }
-                } catch(e) {}
-            }
-        }
-    }
-
-    function refreshApps() {
-        appsProc.running = false;
-        appsProc.running = true;
-    }
-
     function launchApp(app) {
-        if (app && app.exec) {
-            launcherWindow.active = false;
-            var tokens = app.exec.split(/\s+/).filter(function(t) {
-                return t.length > 0 && !t.startsWith("%");
-            });
+        if (!app) return;
+        launcherWindow.active = false;
+        if (appService && typeof appService.launchApp === "function") {
+            appService.launchApp(app);
+        } else if (app.exec) {
+            var cmd = app.exec.replace(/%[a-zA-Z]/g, "").trim();
+            var tokens = cmd.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+            tokens = tokens.map(t => t.replace(/^"|"$/g, ""));
             if (tokens.length > 0) {
                 Quickshell.execDetached(tokens);
             }
         }
     }
 
-    function askConfirmation(options) {
-        launcherWindow.active = false;
-        if (typeof root !== "undefined" && typeof root.confirm === "function") {
-            root.confirm(options);
-        } else if (typeof popupManager !== "undefined" && popupManager.confirmationModal) {
-            popupManager.confirmationModal.ask(options);
-        }
-    }
-
-    function handlePowerAction(action) {
-        if (action === "lock") {
-            askConfirmation({
-                title: "Lock Screen",
-                message: "Are you sure you want to lock the screen?",
-                icon: "system/lock-closed.svg",
-                confirmText: "Lock",
-                isDanger: false,
-                onConfirm: () => {
-                    var cfg = ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig);
-                    var home = cfg ? cfg.homeDir : Quickshell.env("HOME");
-                    Quickshell.execDetached(["sh", "-c", "pidof hyprlock || hyprlock -c " + home + "/.config/hypr/config/hyprlock.conf"]);
-                }
-            });
-        } else if (action === "logout") {
-            askConfirmation({
-                title: "Log Out",
-                message: "Are you sure you want to log out of your session?",
-                icon: "system/logout.svg",
-                confirmText: "Log Out",
-                isDanger: false,
-                onConfirm: () => {
-                    Quickshell.execDetached(["sh", "-c", "hyprctl dispatch exit || loginctl terminate-user $USER || pkill -U $UID -9 -f Hyprland"]);
-                }
-            });
-        } else if (action === "reboot") {
-            askConfirmation({
-                title: "Restart Computer",
-                message: "Are you sure you want to restart your computer?",
-                icon: "system/arrow-clockwise-filled.svg",
-                confirmText: "Restart",
-                isDanger: false,
-                onConfirm: () => {
-                    Quickshell.execDetached(["systemctl", "reboot"]);
-                }
-            });
-        } else if (action === "shutdown") {
-            askConfirmation({
-                title: "Power Off",
-                message: "Are you sure you want to power off the system?",
-                icon: "system/power.svg",
-                confirmText: "Power Off",
-                isDanger: true,
-                onConfirm: () => {
-                    Quickshell.execDetached(["systemctl", "poweroff"]);
-                }
-            });
-        }
-    }
-
     onActiveChanged: {
         if (active) {
-            refreshApps();
             searchQuery = "";
             searchInput.text = "";
             updateAppsModel();
@@ -219,8 +139,10 @@ Popup {
         }
     }
 
-    Component.onCompleted: {
-        refreshApps();
+    Shortcut {
+        sequence: "Escape"
+        enabled: launcherWindow.active
+        onActivated: launcherWindow.active = false
     }
 
     ColumnLayout {
@@ -237,7 +159,6 @@ Popup {
             theme: launcherWindow.theme
             placeholder: "Search applications or commands..."
             icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getIcon("actions/search.svg")
-
             onTextChanged: launcherWindow.searchQuery = text
             onEscapePressed: launcherWindow.active = false
             onReturnPressed: {
@@ -263,25 +184,39 @@ Popup {
             Layout.fillWidth: true
             Layout.leftMargin: -2
             Layout.rightMargin: -2
+            Layout.topMargin: 6
+            Layout.bottomMargin: 6
             height: 1
             color: launcherWindow.theme ? launcherWindow.theme.getColor("outlineVariant") : "#20FFFFFF"
             opacity: 0.35
+        }
+
+        UI.SkeletonLoader {
+            id: skeletonContainer
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            theme: launcherWindow.theme
+            count: 5
+            itemHeight: 48
+            itemRadius: 12
+            iconSize: 34
+            iconRadius: 9
+            spacing: 4
+            visible: launcherWindow.allApps.length === 0
         }
 
         UI.EmptyState {
             id: emptyState
             theme: launcherWindow.theme
             searchQuery: launcherWindow.searchQuery
-            title: launcherWindow.searchQuery === "" ? "No applications found" : "No matching applications found"
+            title: "No matching applications found"
             subtitle: "Try searching with a different keyword"
-            visible: dynamicAppsModel.count === 0
+            visible: launcherWindow.allApps.length > 0 && dynamicAppsModel.count === 0
         }
 
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.topMargin: 2
-            Layout.bottomMargin: 4
             visible: dynamicAppsModel.count > 0
 
             UI.AnimatedListView {
@@ -292,7 +227,7 @@ Popup {
                 spacing: 4
                 pillMargin: 0
                 pillRadius: 12
-                pillColor: launcherWindow.theme ? launcherWindow.theme.getColor("surfaceVariant") : "#322f37"
+                pillColor: launcherWindow.theme ? launcherWindow.theme.getColor("secondaryContainer") : "#3d3a48"
 
                 delegate: Components.AppListItem {
                     width: appsListView.width
@@ -307,22 +242,6 @@ Popup {
                     onClicked: launcherWindow.launchApp(model)
                 }
             }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.leftMargin: -2
-            Layout.rightMargin: -2
-            height: 1
-            color: launcherWindow.theme ? launcherWindow.theme.getColor("outlineVariant") : "#20FFFFFF"
-            opacity: 0.35
-            visible: dynamicAppsModel.count > 0
-        }
-
-        Components.LauncherFooter {
-            theme: launcherWindow.theme
-            appCount: dynamicAppsModel.count
-            onPowerActionRequested: action => launcherWindow.handlePowerAction(action)
         }
     }
 }

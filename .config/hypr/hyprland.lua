@@ -11,9 +11,10 @@ hl.monitor({
 ---------------------
 ---- MY PROGRAMS ----
 ---------------------
-terminal = "kitty"
-fileManager = "kitty -e yazi"
-browser = "brave-origin"
+terminal = os.getenv("TERMINAL") or "kitty"
+fileManager = terminal .. " -e yazi"
+browser = os.getenv("BROWSER") or "brave-origin"
+hl.env("TERMINAL", terminal)
 
 -------------------
 ---- AUTOSTART ----
@@ -27,6 +28,10 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("systemctl --user start hyprpolkitagent")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'")
+	hl.exec_cmd("gsettings set org.gnome.desktop.interface font-name 'Inter 10'")
+	hl.exec_cmd("gsettings set org.gnome.desktop.interface font-antialiasing 'rgba'")
+	hl.exec_cmd("gsettings set org.gnome.desktop.interface font-hinting 'slight'")
+	hl.exec_cmd("~/.config/hypr/scripts/gestures.py")
 end)
 
 -------------------------------
@@ -48,6 +53,12 @@ hl.env("ROUNDED", "16")
 ------------------------
 ---- IMPORT MODULES ----
 ------------------------
+package.loaded["lua.keybinds"] = nil
+package.loaded["lua.windowrules"] = nil
+package.loaded["lua.settings"] = nil
+package.loaded["lua.animation"] = nil
+package.loaded["theme.colors"] = nil
+
 require("lua.keybinds")
 require("lua.windowrules")
 require("lua.settings")

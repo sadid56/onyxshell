@@ -1,8 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
-import Quickshell.Hyprland
-import Quickshell.Wayland
+import "../../../components/ui" as UI
 
 Rectangle {
     id: thumbItem
@@ -26,28 +25,16 @@ Rectangle {
         anchors.margins: 4
         clip: true
 
-        ScreencopyView {
-            id: winPreview
+        UI.WindowPreview {
             anchors.fill: parent
-            captureSource: {
-                if (ToplevelManager && ToplevelManager.toplevels && ToplevelManager.toplevels.values) {
-                    var rawAddr = (modelData && modelData.address) ? modelData.address.toLowerCase() : "";
-                    var strippedAddr = rawAddr.replace(/^0x/, "");
-                    var list = ToplevelManager.toplevels.values;
-                    for (var t = 0; t < list.length; t++) {
-                        var top = list[t];
-                        if (top && top.HyprlandToplevel) {
-                            var topAddr = (top.HyprlandToplevel.address || "").toLowerCase();
-                            if (topAddr === rawAddr || topAddr === strippedAddr || ("0x" + topAddr) === rawAddr) {
-                                return top;
-                            }
-                        }
-                    }
-                }
-                return null;
-            }
+            address: modelData ? (modelData.address || "") : ""
             live: altTabWindow.active
-            visible: captureSource !== null
+            cornerRadius: 10
+            fallbackIcon: {
+                if (!modelData) return "";
+                var cfg = ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : (typeof root !== "undefined" ? root.shellConfig : null));
+                return cfg ? ("file://" + cfg.defaultAppIcon) : "";
+            }
         }
     }
 

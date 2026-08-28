@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell.Widgets
+import "../../../components/ui" as UI
 
 Item {
     id: gaugeRoot
@@ -34,12 +35,12 @@ Item {
             }
         }
 
-        Text {
+        UI.Typography {
+            theme: gaugeRoot.theme
             text: gaugeRoot.title
-            font.family: "Google Sans Flex, sans-serif"
-            font.pixelSize: 12
+            variant: "labelMedium"
             font.weight: Font.Medium
-            color: gaugeRoot.theme ? gaugeRoot.theme.getColor("onSurface") : "#FFFFFF"
+            colorRole: "onSurface"
             Layout.preferredWidth: 52
             Layout.alignment: Qt.AlignVCenter
         }
@@ -62,10 +63,10 @@ Item {
             }
         }
 
-        Text {
+        UI.Typography {
+            theme: gaugeRoot.theme
             text: gaugeRoot.valueText
-            font.family: "Google Sans Flex, sans-serif"
-            font.pixelSize: 12
+            variant: "labelMedium"
             font.bold: true
             color: gaugeRoot.barColor
             horizontalAlignment: Text.AlignRight
@@ -73,12 +74,13 @@ Item {
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Text {
+        UI.Typography {
+            theme: gaugeRoot.theme
             visible: gaugeRoot.subText !== ""
             text: gaugeRoot.subText
-            font.family: "Google Sans Flex, sans-serif"
+            variant: "caption"
             font.pixelSize: 9
-            color: gaugeRoot.theme ? gaugeRoot.theme.getColor("outline") : "#8c909f"
+            colorRole: "outline"
             horizontalAlignment: Text.AlignRight
             Layout.preferredWidth: 72
             Layout.alignment: Qt.AlignVCenter

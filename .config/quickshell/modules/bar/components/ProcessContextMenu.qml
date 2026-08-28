@@ -4,6 +4,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Io
+import "../../../components/ui" as UI
 
 Rectangle {
     id: ctxMenu
@@ -14,7 +15,7 @@ Rectangle {
     border.width: 1
     border.color: Qt.rgba(1, 1, 1, 0.08)
     visible: false
-    z: 100
+    z: 1000
 
     property var theme
     property var processData: ({})
@@ -22,11 +23,15 @@ Rectangle {
 
     signal closed()
 
-    function show(data, gx, gy) {
+    function show(data, lx, ly) {
         processData = data;
-        processName = data.name || "";
-        ctxMenu.x = gx;
-        ctxMenu.y = gy;
+        processName = (data && data.name) ? data.name : "";
+        var parentW = parent ? parent.width : 380;
+        var parentH = parent ? parent.height : 490;
+        var posX = Math.min(lx, parentW - width - 12);
+        var posY = Math.min(ly, parentH - height - 12);
+        ctxMenu.x = Math.max(12, posX);
+        ctxMenu.y = Math.max(12, posY);
         visible = true;
     }
 
@@ -84,10 +89,10 @@ Rectangle {
                         layer.effect: MultiEffect { colorization: 1.0; colorizationColor: itemColor }
                     }
 
-                    Text {
+                    UI.Typography {
+                        theme: ctxMenu.theme
                         text: modelData.label
-                        font.family: "Google Sans Flex, sans-serif"
-                        font.pixelSize: 11
+                        variant: "bodySmall"
                         color: itemColor
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignVCenter
@@ -109,7 +114,8 @@ Rectangle {
                             killProc.command = ["pkill", "-9", "-x", name];
                             killProc.running = true;
                         } else if (cmd === "htop") {
-                            killProc.command = ["kitty", "--", "htop", "-t", "-p", String(ctxMenu.processData.pid || "")];
+                            var term = Quickshell.env("TERMINAL") || "kitty";
+                            killProc.command = [term, "-e", "htop", "-t", "-p", String(ctxMenu.processData.pid || "")];
                             killProc.running = true;
                             ctxMenu.hide();
                         } else if (cmd === "copy") {

@@ -176,11 +176,16 @@ for d in app_dirs:
                 comment_match = re.search(r"^Comment=(.+)$", content, re.MULTILINE)
                 cat_match = re.search(r"^Categories=(.+)$", content, re.MULTILINE)
                 nodisplay_match = re.search(r"^NoDisplay=(true|1)$", content, re.MULTILINE | re.IGNORECASE)
+                terminal_match = re.search(r"^Terminal=(true|1)$", content, re.MULTILINE | re.IGNORECASE)
 
                 if name_match and exec_match and not nodisplay_match:
                     name = name_match.group(1).strip()
                     exec_cmd = exec_match.group(1).strip()
                     exec_cmd = re.sub(r"%[a-zA-Z%]", "", exec_cmd).strip()
+
+                    if terminal_match and not exec_cmd.startswith(("kitty", "alacritty", "foot", "wezterm", "ghostty")):
+                        term_bin = os.getenv("TERMINAL", "kitty")
+                        exec_cmd = f"{term_bin} -e {exec_cmd}"
 
                     if name in seen_names:
                         continue
@@ -195,10 +200,13 @@ for d in app_dirs:
                     comment = comment_match.group(1).strip() if comment_match else ""
                     categories = parse_categories(cat_match.group(1).strip() if cat_match else "")
 
+                    desktop_id = f[:-8] if f.endswith(".desktop") else f
                     apps.append({
                         "name": name,
+                        "desktopId": desktop_id,
                         "exec": exec_cmd,
                         "icon": icon_path,
+                        "rawIcon": icon_name,
                         "comment": comment,
                         "categories": categories
                     })

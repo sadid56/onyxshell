@@ -21,13 +21,19 @@ def get_stats():
     freq_ghz = round(cpu_freq.current / 1000, 2) if cpu_freq else 0.0
 
     raw = {}
-    for p in psutil.process_iter(['name', 'cpu_percent', 'memory_percent', 'memory_info']):
+    for p in psutil.process_iter(['name', 'cpu_percent', 'memory_percent', 'memory_info', 'memory_full_info']):
         try:
             info = p.info
             name = info['name'] or 'process'
             cpu = info['cpu_percent'] or 0.0
             mem_pct = info['memory_percent'] or 0.0
-            rss = (info['memory_info'].rss if info['memory_info'] else 0) / (1024 * 1024)
+
+            mem_full = info.get('memory_full_info')
+            if mem_full and hasattr(mem_full, 'uss') and mem_full.uss:
+                rss = mem_full.uss / (1024 * 1024)
+            else:
+                rss = (info['memory_info'].rss if info.get('memory_info') else 0) / (1024 * 1024)
+
             if name in raw:
                 raw[name]['cpu'] += cpu
                 raw[name]['mem'] += mem_pct

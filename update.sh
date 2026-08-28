@@ -1,16 +1,10 @@
 #!/bin/bash
 
-# ====================================================
-# Onyxshell Dotfiles Sync & Update Script
-# https://github.com/sadid56/onyxshell
-# ====================================================
-
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$SCRIPT_DIR"
 
-# List of config folders inside ~/.config/ to sync
 CONFIG_DIRS=(
   "hypr"
   "quickshell"
@@ -22,16 +16,20 @@ CONFIG_DIRS=(
   "fish"
   "matugen"
   "htop"
+  "fontconfig"
+  "gtk-3.0"
+  "gtk-4.0"
+  "qt5ct"
+  "qt6ct"
 )
 
-# List of standalone config files inside ~/.config/ to sync
 CONFIG_FILES=(
   "starship.toml"
+  "kdeglobals"
 )
 
 echo "🚀 Starting dotfiles update from ~/.config..."
 
-# Check if the repository folder exists
 if [ ! -d "$REPO_DIR" ]; then
   echo "❌ Error: Could not find the repository at $REPO_DIR"
   exit 1
@@ -51,7 +49,6 @@ done
 
 for file in "${CONFIG_FILES[@]}"; do
   if [ -f "$HOME/.config/$file" ]; then
-    mkdir -p "$REPO_DIR/.config"
     cp "$HOME/.config/$file" "$REPO_DIR/.config/$file"
     echo "  ✔️ Synced $file"
   else
@@ -59,33 +56,5 @@ for file in "${CONFIG_FILES[@]}"; do
   fi
 done
 
-# Clean cache files
-find "$REPO_DIR" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-find "$REPO_DIR" -name ".DS_Store" -delete 2>/dev/null || true
-rm -f "$REPO_DIR/.config/quickshell/pinned_clips.json" 2>/dev/null || true
-
-# Git operations
-cd "$REPO_DIR"
-echo "🔍 Checking for changes..."
-
-if [ -z "$(git status --porcelain)" ]; then
-  echo "✨ No changes detected. Everything is already up to date!"
-  exit 0
-fi
-
-echo "📝 Staging changes..."
-git add .
-
-read -rp "Enter commit message (or press Enter for default): " CUSTOM_MESSAGE
-if [ -z "$CUSTOM_MESSAGE" ]; then
-  COMMIT_MSG="chore: update configs - $(date +'%Y-%m-%d %H:%M:%S')"
-else
-  COMMIT_MSG="$CUSTOM_MESSAGE"
-fi
-
-git commit -m "$COMMIT_MSG"
-
-echo "☁️ Pushing to GitHub..."
-git push origin main
-
-echo "✅ Done! Everything is safely backed up and pushed."
+echo ""
+echo "✨ Dotfiles synchronization completed successfully!"

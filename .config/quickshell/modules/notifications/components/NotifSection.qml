@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell.Widgets
+import "../../../components/ui" as UI
 
 ColumnLayout {
     id: notifSectionRoot
@@ -15,21 +16,21 @@ ColumnLayout {
     RowLayout {
         Layout.fillWidth: true
 
-        Text {
+        UI.Typography {
+            theme: notifSectionRoot.theme
             text: "Notifications"
-            font.family: "Noto Sans"
+            variant: "titleMedium"
             font.pixelSize: 15
-            font.bold: true
-            color: notifSectionRoot.theme.getColor("onSurface")
+            colorRole: "onSurface"
             Layout.fillWidth: true
         }
 
-        Text {
+        UI.Typography {
+            theme: notifSectionRoot.theme
             text: "Clear All"
-            font.family: "Noto Sans"
-            font.pixelSize: 11
+            variant: "bodySmall"
             font.bold: true
-            color: notifSectionRoot.theme.getColor("primary")
+            colorRole: "primary"
             visible: notifSectionRoot.activeNotifs.length > 0
 
             MouseArea {
@@ -71,12 +72,12 @@ ColumnLayout {
             }
         }
 
-        Text {
+        UI.Typography {
+            theme: notifSectionRoot.theme
             text: "No new notifications"
-            font.family: "Google Sans Flex, sans-serif"
-            font.pixelSize: 12
+            variant: "labelMedium"
             font.bold: true
-            color: notifSectionRoot.theme.getColor("outline")
+            colorRole: "outline"
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
         }

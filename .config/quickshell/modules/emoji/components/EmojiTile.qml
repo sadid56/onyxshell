@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../../../components/ui" as UI
 
 Item {
     id: emojiTileRoot
@@ -13,7 +14,8 @@ Item {
     signal hovered()
     signal unhovered()
 
-    Text {
+    UI.Typography {
+        theme: emojiTileRoot.theme
         anchors.centerIn: parent
         text: emojiTileRoot.emojiData.e || ""
         font.family: "Noto Color Emoji, Apple Color Emoji, Segoe UI Emoji, sans-serif"

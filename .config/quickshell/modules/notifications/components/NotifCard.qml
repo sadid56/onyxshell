@@ -3,7 +3,6 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
-import "../../../components/ui" as UI
 
 Rectangle {
     id: cardItem
