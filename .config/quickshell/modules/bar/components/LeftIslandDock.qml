@@ -47,20 +47,7 @@ Item {
 
             MouseArea {
                 anchors.fill: parent
-                hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onEntered: {
-                    if (typeof root !== "undefined") {
-                        root.stopLoaderTimerAndActivate(dashboardLoader);
-                        root.setLoaderInactive(calendarLoader);
-                        root.setLoaderInactive(notifsLoader);
-                        root.setLoaderInactive(wifiLoader);
-                        root.setLoaderInactive(mediaLoader);
-                    }
-                }
-                onExited: {
-                    if (typeof root !== "undefined") root.restartLoaderTimer(dashboardLoader);
-                }
                 onClicked: {
                     if (typeof root !== "undefined") root.toggleLoaderActive(dashboardLoader);
                 }

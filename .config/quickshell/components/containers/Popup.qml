@@ -26,7 +26,7 @@ PanelWindow {
 
     property int popupWidth: 380
     property int popupHeight: 420
-    property int topOverlap: (root && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : ((root && root.shellConfig) ? root.shellConfig.cornerRadius : 16)
+    property int topOverlap: 40
     property bool flatBottom: false
     property bool slideFromRight: false
     property bool showCorners: true

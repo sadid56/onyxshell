@@ -46,55 +46,23 @@ PanelWindow {
         { action: "shutdown", label: "Power Off", icon: "system/power.svg", key: "P", isDanger: true, colorRole: "error" }
     ]
 
-    function askConfirmation(options) {
-        powerWindow.active = false;
-        if (typeof root !== "undefined" && typeof root.confirm === "function") root.confirm(options);
-        else if (typeof popupManager !== "undefined" && popupManager.confirmationModal) popupManager.confirmationModal.ask(options);
-    }
-
     function executePowerAction(action) {
+        powerWindow.active = false;
+        closeTimer.stop();
+        if (typeof root !== "undefined" && typeof root.closeAllPopups === "function") {
+            root.closeAllPopups();
+        }
+
         if (action === "lock") {
-            askConfirmation({
-                title: "Lock Screen",
-                message: "Are you sure you want to lock the screen?",
-                icon: "system/lock-closed.svg",
-                confirmText: "Lock",
-                isDanger: false,
-                onConfirm: () => {
-                    var cfg = (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig);
-                    var home = cfg ? cfg.homeDir : Quickshell.env("HOME");
-                    Quickshell.execDetached(["sh", "-c", "pidof hyprlock || hyprlock -c " + home + "/.config/hypr/config/hyprlock.conf"]);
-                }
-            });
+            var cfg = (typeof shellConfig !== "undefined" ? shellConfig : (typeof root !== "undefined" ? root.shellConfig : null));
+            var home = cfg ? cfg.homeDir : Quickshell.env("HOME");
+            Quickshell.execDetached(["sh", "-c", "pidof hyprlock || hyprlock -c " + home + "/.config/hypr/config/hyprlock.conf"]);
         } else if (action === "logout") {
-            askConfirmation({
-                title: "Log Out",
-                message: "Are you sure you want to log out of your session?",
-                icon: "system/logout.svg",
-                confirmText: "Log Out",
-                isDanger: false,
-                onConfirm: () => {
-                    Quickshell.execDetached(["sh", "-c", "hyprctl dispatch exit || loginctl terminate-user $USER || pkill -U $UID -9 -f Hyprland"]);
-                }
-            });
+            Quickshell.execDetached(["sh", "-c", "hyprctl dispatch exit || loginctl terminate-user $USER || pkill -U $UID -9 -f Hyprland"]);
         } else if (action === "reboot") {
-            askConfirmation({
-                title: "Restart Computer",
-                message: "Are you sure you want to restart your computer?",
-                icon: "system/arrow-clockwise-filled.svg",
-                confirmText: "Restart",
-                isDanger: false,
-                onConfirm: () => { Quickshell.execDetached(["systemctl", "reboot"]); }
-            });
+            Quickshell.execDetached(["systemctl", "reboot"]);
         } else if (action === "shutdown") {
-            askConfirmation({
-                title: "Power Off",
-                message: "Are you sure you want to power off the system?",
-                icon: "system/power.svg",
-                confirmText: "Power Off",
-                isDanger: true,
-                onConfirm: () => { Quickshell.execDetached(["systemctl", "poweroff"]); }
-            });
+            Quickshell.execDetached(["systemctl", "poweroff"]);
         }
     }
 

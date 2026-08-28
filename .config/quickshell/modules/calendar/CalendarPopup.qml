@@ -16,6 +16,7 @@ Popup {
     property date selectedDate: new Date()
     property int displayedMonth: today.getMonth()
     property int displayedYear: today.getFullYear()
+    readonly property bool isTodaySelected: (selectedDate.getDate() === today.getDate() && selectedDate.getMonth() === today.getMonth() && selectedDate.getFullYear() === today.getFullYear())
 
     property var monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     property var dayFullNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
@@ -135,7 +136,8 @@ Popup {
 
         UI.Button {
             theme: calWindow.theme
-            text: "Today"
+            text: calWindow.isTodaySelected ? "Today" : "Jump to Today"
+            active: calWindow.isTodaySelected
             onClicked: {
                 calWindow.today = new Date();
                 calWindow.selectedDate = new Date();
@@ -146,23 +148,23 @@ Popup {
         }
 
         RowLayout {
-            spacing: 4
+            spacing: 6
 
             UI.IconButton {
                 theme: calWindow.theme
                 icon: "actions/chevron-left.svg"
-                size: 28
+                size: 30
                 iconSize: 14
-                radius: 8
+                radius: 15
                 onClicked: calWindow.navigateMonth(-1)
             }
 
             UI.IconButton {
                 theme: calWindow.theme
                 icon: "actions/chevron-right.svg"
-                size: 28
+                size: 30
                 iconSize: 14
-                radius: 8
+                radius: 15
                 onClicked: calWindow.navigateMonth(1)
             }
         }

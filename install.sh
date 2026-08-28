@@ -58,7 +58,7 @@ if confirm "Update system packages with pacman?"; then
 fi
 
 BASE_PKGS=(
-    base-devel git libinput-tools curl wget rsync jq socat
+    base-devel git curl wget rsync jq socat
     hyprland hypridle hyprlock hyprpolkitagent
     xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
     quickshell
@@ -81,6 +81,7 @@ CONFIG_ITEMS=(
     xdg-desktop-portal fish matugen htop
     fontconfig gtk-3.0 gtk-4.0 qt5ct qt6ct
     starship.toml kdeglobals
+    brave-flags.conf chrome-flags.conf chromium-flags.conf
 )
 
 if confirm "Backup existing configurations to $BACKUP_DIR and install Onyxshell configs?"; then
@@ -105,6 +106,51 @@ fi
 
 if [ -f "$HOME/.config/fontconfig/fonts.conf" ]; then
     fc-cache -fv &>/dev/null || true
+fi
+
+HAS_DM=false
+if systemctl is-enabled display-manager.service &>/dev/null || \
+   systemctl is-enabled greetd.service &>/dev/null || \
+   systemctl is-enabled sddm.service &>/dev/null || \
+   systemctl is-enabled gdm.service &>/dev/null || \
+   systemctl is-enabled lightdm.service &>/dev/null || \
+   systemctl is-enabled ly.service &>/dev/null; then
+    HAS_DM=true
+fi
+
+if [ "$HAS_DM" = false ]; then
+    if confirm "No active display manager detected. Install and configure Greetd (tuigreet)?"; then
+        echo -e "${BLUE}[+] Installing greetd and greetd-tuigreet...${RESET}"
+        sudo pacman -S --needed --noconfirm greetd greetd-tuigreet
+
+        sudo mkdir -p /etc/greetd
+        sudo tee /etc/greetd/config.toml >/dev/null << 'EOF_GREETD'
+[terminal]
+vt = 1
+
+[default_session]
+command = "tuigreet --time --remember --cmd start-hyprland --asterisks"
+user = "greeter"
+EOF_GREETD
+
+        sudo mkdir -p /etc/systemd/system/greetd.service.d
+        sudo tee /etc/systemd/system/greetd.service.d/override.conf >/dev/null << 'EOF_OVERRIDE'
+[Service]
+Type=idle
+StandardInput=tty
+StandardOutput=tty
+StandardError=journal
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+EOF_OVERRIDE
+
+        sudo systemctl daemon-reload
+        sudo systemctl enable greetd.service
+        echo -e "${GREEN}[✔️] Greetd (tuigreet) successfully installed and enabled!${RESET}"
+    fi
+else
+    echo -e "${YELLOW}[i] Existing display manager already enabled. Skipping greetd setup.${RESET}"
 fi
 
 if confirm "Set Fish as your default user shell?"; then
