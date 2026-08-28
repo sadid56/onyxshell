@@ -31,7 +31,6 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface font-name 'Inter 10'")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface font-antialiasing 'rgba'")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface font-hinting 'slight'")
-	hl.exec_cmd("~/.config/hypr/scripts/gestures.py")
 end)
 
 -------------------------------

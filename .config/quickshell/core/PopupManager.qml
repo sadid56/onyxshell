@@ -97,19 +97,15 @@ QtObject {
 
     function toggleAltTab() {
         var loader = altTabLoader;
-        if (!loader.loaded) {
-            closeAllPopupsExcept(loader);
-            loader.loaded = true;
-            Qt.callLater(() => {
-                if (loader.item) loader.item.active = true;
-                updateCenterPopupWidth();
-            });
-        } else if (loader.item) {
+        if (loader.item) {
             if (loader.item.active) {
                 if (typeof loader.item.nextWindow === "function") loader.item.nextWindow();
             } else {
                 closeAllPopupsExcept(loader);
                 loader.item.active = true;
+                if (loader.item.clientsList && loader.item.clientsList.length > 1) {
+                    loader.item.selectedIndex = 1;
+                }
             }
             updateCenterPopupWidth();
         }
@@ -226,8 +222,9 @@ QtObject {
             id: powerMenuLoader
             sourceComponent: PowerMenuPopup { theme: popupManager.theme; statusBar: popupManager.statusBar }
         },
-        AutoUnloadLoader {
+        Loader {
             id: altTabLoader
+            active: true
             sourceComponent: AltTab { theme: popupManager.theme }
         },
         ErrorPopup { id: errorPopup; theme: popupManager.theme },

@@ -43,7 +43,11 @@ PanelWindow {
                             }
                         }
                         filtered.sort((a, b) => (a.focusHistoryID || 0) - (b.focusHistoryID || 0));
+                        var wasZero = (altTabWindow.selectedIndex === 0);
                         altTabWindow.clientsList = filtered;
+                        if (altTabWindow.active && wasZero && filtered.length > 1) {
+                            altTabWindow.selectedIndex = 1;
+                        }
                     }
                 } catch(e) {}
             }
