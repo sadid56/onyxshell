@@ -42,6 +42,7 @@ QtObject {
         if (cls === "zoom") return "";
 
         if (cls === "obsidian" || cls === "notion-app") return "󱓧";
+        if (cls.indexOf("localsend") !== -1 || title.indexOf("localsend") !== -1) return "";
         if (cls === "thunar" || cls.indexOf("dolphin") !== -1 || cls.indexOf("nautilus") !== -1 || cls === "nautilus") return "";
 
         if (cls.indexOf("clock") !== -1 || title.indexOf("clock") !== -1) return "";

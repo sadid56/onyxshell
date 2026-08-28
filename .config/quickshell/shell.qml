@@ -208,7 +208,7 @@ QtObject {
 
         ScreenCorners {
             id: screenCorners
-            visible: false
+            showTop: false
             radius: (settingsService && settingsService.cornerRadius !== undefined) ? settingsService.cornerRadius : shellConfig.cornerRadius
             color: rootTheme.getColor("surface")
         },

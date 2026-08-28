@@ -15,7 +15,7 @@ Popup {
 
     popupWidth: 580
 
-    readonly property int chromeHeight: 120
+    readonly property int chromeHeight: 150
     readonly property int itemRowHeight: 50
     readonly property int maxVisibleItems: 8
     popupHeight: (allApps.length === 0)
