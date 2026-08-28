@@ -96,9 +96,17 @@ Popup {
 
     onActiveChanged: {
         if (active) {
-            searchInput.forceFocus();
+            searchQuery = "";
+            searchInput.text = "";
             clipService.refresh();
+            Qt.callLater(() => searchInput.forceFocus());
         }
+    }
+
+    Shortcut {
+        sequence: "Escape"
+        enabled: clipWindow.active
+        onActivated: clipWindow.active = false
     }
 
     ColumnLayout {
@@ -116,16 +124,25 @@ Popup {
             onEscapePressed: clipWindow.active = false
 
             onDownPressed: {
-                entriesList.focus = true;
-                if (entriesList.count > 0) entriesList.currentIndex = 0;
+                if (entriesList.count > 0) {
+                    entriesList.currentIndex = Math.min(entriesList.count - 1, (entriesList.currentIndex < 0 ? 0 : entriesList.currentIndex + 1));
+                }
+            }
+
+            onUpPressed: {
+                if (entriesList.count > 0) {
+                    entriesList.currentIndex = Math.max(0, entriesList.currentIndex - 1);
+                }
             }
 
             onReturnPressed: {
-                var filtered = clipWindow.getFilteredEntries();
-                if (filtered.length > 0) {
-                    var entry = filtered[0];
-                    clipWindow.clipService.copyEntry(entry);
-                    clipWindow.active = false;
+                if (entriesList.count > 0) {
+                    var targetIdx = (entriesList.currentIndex >= 0 && entriesList.currentIndex < entriesList.count) ? entriesList.currentIndex : 0;
+                    var entry = entriesList.getEntryAt(targetIdx);
+                    if (entry) {
+                        clipWindow.clipService.copyEntry(entry);
+                        clipWindow.active = false;
+                    }
                 }
             }
         }

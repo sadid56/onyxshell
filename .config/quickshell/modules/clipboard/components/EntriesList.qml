@@ -10,15 +10,13 @@ UI.AnimatedListView {
     Layout.fillHeight: true
     Layout.preferredHeight: Math.min(380, count * 54)
     spacing: 4
-    focus: true
-    pillColor: "transparent"
+    pillMargin: 0
+    pillRadius: 12
+    pillColor: entriesListRoot.theme ? entriesListRoot.theme.getColor("secondaryContainer") : "#3d3a48"
 
     property var clipService
     property string searchQuery: ""
     property var entriesModel: []
-
-    readonly property var unhoverTimer: unhoverTimer
-    readonly property var hoverPill: hoverPill
 
     function normalizeEntries(src) {
         if (!src) return [];
@@ -34,38 +32,18 @@ UI.AnimatedListView {
         syncListModel(dynamicClipModel, normalizeEntries(entriesModel), "entryData", 25);
         if (dynamicClipModel.count > 0) {
             currentIndex = 0;
-            updatePillPosition();
+            hoverItem(0, 0, 48);
             positionViewAtBeginning();
+            Qt.callLater(() => {
+                if (entriesListRoot && entriesListRoot.count > 0) {
+                    entriesListRoot.currentIndex = 0;
+                    entriesListRoot.hoverItem(0, 0, 48);
+                }
+            });
         } else {
             currentIndex = -1;
-            hoverPill.isHovered = false;
+            unhoverItem(0);
         }
-    }
-
-    function updatePillPosition() {
-        if (currentIndex >= 0 && currentIndex < count) {
-            unhoverTimer.stop();
-            hoverPill.targetY = currentIndex * (48 + spacing);
-            hoverPill.isHovered = true;
-        } else {
-            hoverPill.isHovered = false;
-        }
-    }
-
-    Timer {
-        id: unhoverTimer
-        interval: 100
-        repeat: false
-        onTriggered: {
-            if (currentIndex < 0) hoverPill.isHovered = false;
-        }
-    }
-
-    onCurrentIndexChanged: {
-        updatePillPosition();
-        if (currentIndex === 0) positionViewAtBeginning();
-        else if (currentIndex === count - 1) positionViewAtEnd();
-        else if (currentIndex > 0 && currentIndex < count) positionViewAtIndex(currentIndex, ListView.Contain);
     }
 
     signal entryClicked(string entryText)
@@ -79,36 +57,33 @@ UI.AnimatedListView {
         deleteClicked(entryText);
     }
 
+    function getEntryAt(idx) {
+        if (idx >= 0 && idx < dynamicClipModel.count) {
+            var item = dynamicClipModel.get(idx);
+            return item ? (item.entryData || "") : "";
+        }
+        return "";
+    }
+
     ListModel { id: dynamicClipModel }
 
     model: dynamicClipModel
     currentIndex: 0
 
-    Rectangle {
-        id: hoverPill
-        parent: entriesListRoot.contentItem
-        z: 0
-        x: 8
-        width: Math.max(0, entriesListRoot.width - 16)
-        height: 48
-        radius: 12
-        color: entriesListRoot.theme ? entriesListRoot.theme.getColor("secondaryContainer") : "#3d3a48"
-        visible: entriesListRoot.count > 0
-
-        property real targetY: 0
-        property bool isHovered: entriesListRoot.count > 0
-
-        y: targetY
-        opacity: isHovered ? 1.0 : 0.0
-
-        Behavior on y { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
-        Behavior on opacity { NumberAnimation { duration: 140 } }
-    }
-
     delegate: ClipboardEntryDelegate {
-        entriesListRoot: entriesListRoot
-        modelIndex: index
-        rawEntryData: entryData
+        width: entriesListRoot.width
+        theme: entriesListRoot.theme
+        clipService: entriesListRoot.clipService
+        rawEntryData: (typeof entryData !== "undefined") ? entryData : modelData
+        isSelected: entriesListRoot.currentIndex === index
+        onHovered: (yPos, itemH) => {
+            entriesListRoot.currentIndex = index;
+            entriesListRoot.hoverItem(index, yPos, itemH);
+        }
+        onUnhovered: entriesListRoot.unhoverItem(index)
+        onItemClicked: entriesListRoot.entryClicked(entryText)
+        onPinRequested: entriesListRoot.pinClicked(entryText)
+        onDeleteRequested: entriesListRoot.removeEntryOptimistically(index, entryText)
     }
 
     Keys.onDownPressed: {

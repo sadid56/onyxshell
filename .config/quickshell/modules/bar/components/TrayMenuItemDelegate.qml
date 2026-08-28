@@ -61,18 +61,28 @@ Item {
         z: 1
     }
 
+    readonly property bool hasIcon: {
+        if (isSeparator) return false;
+        if (hasToggle) return true;
+        if (!itemModel) return false;
+        var ic = itemModel.icon;
+        if (!ic || ic === "") return false;
+        if (typeof ic === "string" && ic.trim() === "") return false;
+        return true;
+    }
+
     RowLayout {
         visible: !entryDelegate.isSeparator
         anchors.fill: parent
-        anchors.leftMargin: 10
-        anchors.rightMargin: 10
-        spacing: 8
+        anchors.leftMargin: 4
+        anchors.rightMargin: 4
+        spacing: 4
         z: 2
 
         Item {
-            width: 16
-            height: 16
-            visible: !entryDelegate.isSeparator && (entryDelegate.hasToggle || (entryDelegate.itemModel && entryDelegate.itemModel.icon && entryDelegate.itemModel.icon !== ""))
+            Layout.preferredWidth: 16
+            Layout.preferredHeight: 16
+            visible: entryDelegate.hasToggle || (entryDelegate.itemModel && entryDelegate.itemModel.icon && String(entryDelegate.itemModel.icon).trim() !== "")
 
             IconImage {
                 anchors.centerIn: parent
@@ -116,6 +126,7 @@ Item {
             text: (entryDelegate.itemModel && entryDelegate.itemModel.text) ? entryDelegate.itemModel.text.replace(/&/g, "") : ""
             variant: "labelMedium"
             colorRole: "onSurface"
+            horizontalAlignment: Text.AlignLeft
             elide: Text.ElideRight
             Layout.alignment: Qt.AlignVCenter
         }
@@ -146,11 +157,32 @@ Item {
                 entryDelegate.popupWindow.closeTimer.stop();
             }
             entryDelegate.hovered(entryDelegate.y, entryDelegate.height);
+            if (entryDelegate.itemModel && entryDelegate.itemModel.hasChildren) {
+                if (typeof entryDelegate.itemModel.sendOpened === "function") entryDelegate.itemModel.sendOpened();
+                if (typeof entryDelegate.itemModel.updateLayout === "function") entryDelegate.itemModel.updateLayout();
+                if (entryDelegate.popupWindow && typeof entryDelegate.popupWindow.openSubMenu === "function") {
+                    var globalPos = entryDelegate.mapToItem(null, 0, 0);
+                    entryDelegate.popupWindow.openSubMenu(entryDelegate.itemModel, globalPos.y - 6);
+                }
+            } else {
+                if (entryDelegate.popupWindow && typeof entryDelegate.popupWindow.closeSubMenu === "function" && entryDelegate.menuOpener === entryDelegate.popupWindow.menuOpener) {
+                    entryDelegate.popupWindow.closeSubMenu();
+                }
+            }
         }
         onExited: {
             entryDelegate.unhovered();
         }
         onClicked: {
+            if (entryDelegate.itemModel && entryDelegate.itemModel.hasChildren) {
+                if (typeof entryDelegate.itemModel.sendOpened === "function") entryDelegate.itemModel.sendOpened();
+                if (typeof entryDelegate.itemModel.updateLayout === "function") entryDelegate.itemModel.updateLayout();
+                if (entryDelegate.popupWindow && typeof entryDelegate.popupWindow.openSubMenu === "function") {
+                    var globalPos = entryDelegate.mapToItem(null, 0, 0);
+                    entryDelegate.popupWindow.openSubMenu(entryDelegate.itemModel, globalPos.y - 6);
+                }
+                return;
+            }
             if (entryDelegate.itemModel && typeof entryDelegate.itemModel.triggered === "function") {
                 entryDelegate.itemModel.triggered();
             }
