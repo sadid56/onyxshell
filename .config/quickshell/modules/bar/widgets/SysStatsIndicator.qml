@@ -17,6 +17,13 @@ Item {
     implicitHeight: 32
     implicitWidth: rowLayout.implicitWidth
 
+    function pressureColor(value) {
+        if (value >= 90) return sysStatsRoot.theme ? sysStatsRoot.theme.getColor("error") : "#ff5555";
+        if (value >= 70) return sysStatsRoot.theme ? sysStatsRoot.theme.getColor("tertiary") : "#ffb74d";
+        if (value >= 50) return sysStatsRoot.theme ? sysStatsRoot.theme.getColor("primary") : "#D0BCFF";
+        return sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF";
+    }
+
     function getResourcesX() {
         var pos = sysStatsRoot.mapToItem(null, 0, 0);
         return pos.x + sysStatsRoot.width / 2;
@@ -57,20 +64,23 @@ Item {
             UI.Icon {
                 size: 15
                 icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getCpuIcon()
-                color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
+                color: sysStatsRoot.pressureColor(sysStatsRoot.sysStats.cpuUsage)
                 Layout.alignment: Qt.AlignVCenter
+                Behavior on color { ColorAnimation { duration: 400 } }
             }
             UI.Typography {
                 theme: sysStatsRoot.theme
                 text: Math.round(sysStatsRoot.sysStats.cpuUsage) + "%"
                 variant: "labelMedium"
                 font.weight: Font.Bold
+                font.letterSpacing: 0.5
                 Layout.preferredWidth: 28
                 Layout.minimumWidth: 28
                 Layout.maximumWidth: 28
                 horizontalAlignment: Text.AlignLeft
-                colorRole: "onSurface"
+                color: sysStatsRoot.pressureColor(sysStatsRoot.sysStats.cpuUsage)
                 Layout.alignment: Qt.AlignVCenter
+                Behavior on color { ColorAnimation { duration: 400 } }
             }
         }
 
@@ -80,20 +90,23 @@ Item {
             UI.Icon {
                 size: 15
                 icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getSwapIcon()
-                color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
+                color: sysStatsRoot.pressureColor(sysStatsRoot.sysStats.swapUsage || 0)
                 Layout.alignment: Qt.AlignVCenter
+                Behavior on color { ColorAnimation { duration: 400 } }
             }
             UI.Typography {
                 theme: sysStatsRoot.theme
                 text: Math.round(sysStatsRoot.sysStats.swapUsage || 0) + "%"
                 variant: "labelMedium"
                 font.weight: Font.Bold
+                font.letterSpacing: 0.5
                 Layout.preferredWidth: 28
                 Layout.minimumWidth: 28
                 Layout.maximumWidth: 28
                 horizontalAlignment: Text.AlignLeft
-                colorRole: "onSurface"
+                color: sysStatsRoot.pressureColor(sysStatsRoot.sysStats.swapUsage || 0)
                 Layout.alignment: Qt.AlignVCenter
+                Behavior on color { ColorAnimation { duration: 400 } }
             }
         }
 
@@ -103,20 +116,23 @@ Item {
             UI.Icon {
                 size: 15
                 icon: ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : root.shellConfig).getMemoryIcon()
-                color: sysStatsRoot.theme ? sysStatsRoot.theme.getColor("onSurface") : "#FFFFFF"
+                color: sysStatsRoot.pressureColor(sysStatsRoot.sysStats.memUsage)
                 Layout.alignment: Qt.AlignVCenter
+                Behavior on color { ColorAnimation { duration: 400 } }
             }
             UI.Typography {
                 theme: sysStatsRoot.theme
                 text: Math.round(sysStatsRoot.sysStats.memUsage) + "%"
                 variant: "labelMedium"
                 font.weight: Font.Bold
+                font.letterSpacing: 0.5
                 Layout.preferredWidth: 28
                 Layout.minimumWidth: 28
                 Layout.maximumWidth: 28
                 horizontalAlignment: Text.AlignLeft
-                colorRole: "onSurface"
+                color: sysStatsRoot.pressureColor(sysStatsRoot.sysStats.memUsage)
                 Layout.alignment: Qt.AlignVCenter
+                Behavior on color { ColorAnimation { duration: 400 } }
             }
         }
 
