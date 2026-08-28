@@ -99,7 +99,7 @@ Popup {
             displayedMonth = today.getMonth();
             displayedYear = today.getFullYear();
             daysList = generateDaysFor(displayedYear, displayedMonth);
-            gridContainer.x = 0;
+            gridTranslate.x = 0;
             gridContainer.opacity = 1.0;
             gridContainer.scale = 1.0;
         }
@@ -179,19 +179,19 @@ Popup {
         ParallelAnimation {
             id: monthSlideAnim
             NumberAnimation {
-                target: gridContainer
+                target: gridTranslate
                 property: "x"
-                from: calWindow.slideDir * 60
+                from: calWindow.slideDir * 70
                 to: 0
-                duration: 220
+                duration: 260
                 easing.type: Easing.OutCubic
             }
             NumberAnimation {
                 target: gridContainer
                 property: "opacity"
-                from: 0.2
+                from: 0.15
                 to: 1.0
-                duration: 180
+                duration: 220
                 easing.type: Easing.OutQuad
             }
         }
@@ -203,6 +203,7 @@ Popup {
             calWindow: calWindow
             daysList: calWindow.daysList
             dayNames: calWindow.dayNames
+            transform: Translate { id: gridTranslate; x: 0 }
         }
     }
 }

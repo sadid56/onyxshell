@@ -42,12 +42,12 @@ Scope {
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    spacing: 24
+                    spacing: 32
 
                     Item {
                         Layout.alignment: Qt.AlignHCenter
-                        width: 72
-                        height: 72
+                        width: 128
+                        height: 128
 
                         IconImage {
                             id: splashLogo
@@ -66,71 +66,53 @@ Scope {
                             NumberAnimation {
                                 target: splashLogo
                                 property: "scale"
-                                from: 0.95
-                                to: 1.05
+                                from: 0.97
+                                to: 1.03
                                 duration: 900
                                 easing.type: Easing.InOutSine
                             }
                             NumberAnimation {
                                 target: splashLogo
                                 property: "scale"
-                                from: 1.05
-                                to: 0.95
+                                from: 1.03
+                                to: 0.97
                                 duration: 900
                                 easing.type: Easing.InOutSine
                             }
                         }
                     }
 
-                    ColumnLayout {
+                    Item {
                         Layout.alignment: Qt.AlignHCenter
-                        spacing: 6
+                        width: 28
+                        height: 28
 
-                        UI.Typography {
-                            theme: splashScope.theme
-                            text: "Welcome"
-                            variant: "titleLarge"
-                            font.pixelSize: 20
-                            colorRole: "onSurface"
-                            Layout.alignment: Qt.AlignHCenter
-                        }
+                        Canvas {
+                            id: spinnerCanvas
+                            anchors.fill: parent
+                            antialiasing: true
+                            renderTarget: Canvas.FramebufferObject
 
-                        UI.Typography {
-                            theme: splashScope.theme
-                            text: "Starting desktop session..."
-                            variant: "labelMedium"
-                            colorRole: "outline"
-                            Layout.alignment: Qt.AlignHCenter
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.alignment: Qt.AlignHCenter
-                        width: 180
-                        height: 4
-                        radius: 2
-                        color: splashScope.theme ? splashScope.theme.getColor("surfaceVariant") : "#2B2831"
-                        clip: true
-
-                        Rectangle {
-                            id: progressPill
-                            width: 60
-                            height: parent.height
-                            radius: 2
-                            color: splashScope.theme ? splashScope.theme.getColor("primary") : "#D0BCFF"
-
-                            SequentialAnimation {
-                                running: !splashScope.isFinished
-                                loops: Animation.Infinite
-                                NumberAnimation {
-                                    target: progressPill
-                                    property: "x"
-                                    from: -60
-                                    to: 180
-                                    duration: 1000
-                                    easing.type: Easing.InOutCubic
-                                }
+                            onPaint: {
+                                var ctx = getContext("2d");
+                                ctx.reset();
+                                ctx.clearRect(0, 0, width, height);
+                                ctx.lineWidth = 2.5;
+                                ctx.lineCap = "round";
+                                ctx.strokeStyle = splashScope.theme ? splashScope.theme.getColor("primary") : "#c5c5d8";
+                                ctx.beginPath();
+                                ctx.arc(width / 2, height / 2, width / 2 - 2, 0, Math.PI * 1.35);
+                                ctx.stroke();
                             }
+                        }
+
+                        RotationAnimator {
+                            target: spinnerCanvas
+                            from: 0
+                            to: 360
+                            duration: 750
+                            loops: Animation.Infinite
+                            running: !splashScope.isFinished
                         }
                     }
                 }

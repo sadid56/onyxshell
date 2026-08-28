@@ -13,10 +13,11 @@ Rectangle {
     property int customRadius: -1
     property alias size: btnRoot.buttonSize
     property alias radius: btnRoot.customRadius
+    radius: (customRadius >= 0) ? customRadius : (buttonSize / 2)
     property color iconColor: theme ? theme.getColor("onSurface") : "#ffffff"
     property color hoverIconColor: theme ? theme.getColor("primary") : iconColor
     property color normalBgColor: "transparent"
-    property color hoverBgColor: theme ? theme.getColor("surfaceVariant") : "#322f37"
+    property color hoverBgColor: "transparent"
     property bool active: false
 
     signal clicked()
@@ -27,7 +28,6 @@ Rectangle {
     height: buttonSize
 
     color: (mouseArea.containsMouse || active) ? hoverBgColor : normalBgColor
-    Behavior on color { ColorAnimation { duration: 120 } }
 
     MouseArea {
         id: mouseArea
@@ -58,6 +58,8 @@ Rectangle {
         height: btnRoot.iconSize
         source: btnRoot.resolvedSource
         asynchronous: true
+        scale: mouseArea.containsMouse ? 1.25 : 1.0
+        Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
         layer.enabled: true
         layer.effect: MultiEffect {
             colorization: 1.0
