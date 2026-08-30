@@ -73,30 +73,30 @@ Item {
             delegate: Rectangle {
                 id: itemRect
                 width: catList.width
-                height: 38
-                radius: 10
+                height: 42
+                radius: 21
 
                 readonly property bool isSelected: sidebarRoot.selectedIndex === index
                 readonly property bool isHovered: itemMouse.containsMouse
 
-                color: (isSelected || isHovered)
-                    ? (sidebarRoot.theme.getColor("surfaceVariant") + "44")
-                    : "transparent"
+                color: isSelected
+                    ? (sidebarRoot.theme ? sidebarRoot.theme.getColor("secondaryContainer") : "#3d3a48")
+                    : (isHovered ? (sidebarRoot.theme ? Qt.alpha(sidebarRoot.theme.getColor("surfaceVariant"), 0.50) : "#20ffffff") : "transparent")
 
                 Behavior on color { ColorAnimation { duration: 140 } }
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    spacing: 10
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 14
+                    spacing: 12
 
                     UI.Icon {
-                        size: 16
+                        size: 18
                         icon: modelData.icon
                         color: isSelected
-                            ? sidebarRoot.theme.getColor("primary")
-                            : (isHovered ? sidebarRoot.theme.getColor("onSurface") : sidebarRoot.theme.getColor("onSurfaceVariant"))
+                            ? (sidebarRoot.theme ? sidebarRoot.theme.getColor("onSecondaryContainer") : "#ffffff")
+                            : (isHovered ? (sidebarRoot.theme ? sidebarRoot.theme.getColor("onSurface") : "#ffffff") : (sidebarRoot.theme ? sidebarRoot.theme.getColor("onSurfaceVariant") : "#aaaaaa"))
                         Layout.alignment: Qt.AlignVCenter
                     }
 
@@ -104,13 +104,11 @@ Item {
                         Layout.fillWidth: true
                         theme: sidebarRoot.theme
                         text: modelData.title
-                        variant: "bodyMedium"
-                        font.weight: isSelected ? Font.DemiBold : Font.Normal
-                        color: isSelected
-                            ? sidebarRoot.theme.getColor("primary")
-                            : (isHovered ? sidebarRoot.theme.getColor("onSurface") : sidebarRoot.theme.getColor("onSurfaceVariant"))
+                        variant: "labelLarge"
+                        font.bold: isSelected
+                        colorRole: isSelected ? "onSecondaryContainer" : (isHovered ? "onSurface" : "onSurfaceVariant")
+                        Layout.alignment: Qt.AlignVCenter
                         elide: Text.ElideRight
-                        verticalAlignment: Text.AlignVCenter
                     }
                 }
 

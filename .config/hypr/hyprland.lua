@@ -12,7 +12,7 @@ hl.monitor({
 ---- MY PROGRAMS ----
 ---------------------
 terminal = os.getenv("TERMINAL") or "kitty"
-fileManager = terminal .. " -e yazi"
+fileManager = terminal .. " --class yazi -e yazi"
 browser = os.getenv("BROWSER") or "brave-origin"
 hl.env("TERMINAL", terminal)
 
@@ -28,6 +28,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("systemctl --user start hyprpolkitagent")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'")
+	hl.exec_cmd("gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface font-name 'Inter 10'")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface font-antialiasing 'rgba'")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface font-hinting 'slight'")

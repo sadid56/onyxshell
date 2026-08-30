@@ -5,11 +5,10 @@ import "../../../components/ui" as UISliders
 ColumnLayout {
     id: quickSlidersRoot
     Layout.fillWidth: true
-    spacing: 10
+    spacing: 8
 
     property var theme
     property int volumeValue: 50
-    property int micValue: 50
     property int brightnessValue: 50
     property var volumeSetter
     property var brightnessSetter

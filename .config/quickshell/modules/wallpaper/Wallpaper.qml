@@ -7,7 +7,13 @@ Scope {
     id: wallpaperRoot
 
     property string currentWallpaperPath: ""
-    property bool isSplashActive: (typeof root !== "undefined" && root.splashScreen && !root.splashScreen.isFadingOut && !root.splashScreen.isFinished)
+
+    function formatSource(p) {
+        if (!p || p === "") return "";
+        if (p.startsWith("file://")) return p;
+        if (p.startsWith("/")) return "file://" + p;
+        return p;
+    }
 
     function setWallpaper(filePath) {
         if (filePath && filePath !== "") {
@@ -23,8 +29,6 @@ Scope {
             var fileText = (typeof currentWallpaperFile.text === "function") ? currentWallpaperFile.text() : currentWallpaperFile.text;
             if (fileText && fileText.trim().length > 0) {
                 wallpaperRoot.currentWallpaperPath = fileText.trim();
-            } else if (!wallpaperRoot.currentWallpaperPath && typeof shellConfig !== "undefined" && shellConfig) {
-                wallpaperRoot.currentWallpaperPath = shellConfig.defaultWallpaper;
             }
         }
     }
@@ -54,20 +58,12 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             exclusiveZone: 0
             color: "#1b1111"
-
-            visible: !wallpaperRoot.isSplashActive
+            visible: true
 
             property bool isInitialLoad: true
 
-            function formatSource(p) {
-                if (!p || p === "") return "";
-                if (p.startsWith("file://")) return p;
-                if (p.startsWith("/")) return "file://" + p;
-                return p;
-            }
-
             function applyWallpaper(newPath) {
-                var src = formatSource(newPath);
+                var src = wallpaperRoot.formatSource(newPath);
                 if (!src || src === "") return;
 
                 if (isInitialLoad || currentImg.source.toString() === "") {
@@ -140,7 +136,7 @@ Scope {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 320
+                duration: 280
                 easing.type: Easing.OutCubic
                 onFinished: {
                     currentImg.source = nextImg.source;

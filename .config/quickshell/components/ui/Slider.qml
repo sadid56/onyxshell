@@ -23,7 +23,7 @@ Item {
         id: track
         anchors.fill: parent
         radius: 14
-        color: sliderRoot.theme.getColor("surfaceVariant")
+        color: sliderRoot.theme ? sliderRoot.theme.getColor("surfaceVariant") : "#3a3030"
         clip: true
 
         Rectangle {
@@ -89,7 +89,7 @@ Item {
                 text: sliderRoot.icon
                 mono: true
                 font.pixelSize: 19
-                color: fillBar.width > 36 ? sliderRoot.theme.getColor("onPrimary") : sliderRoot.theme.getColor("primary")
+                color: fillBar.width > 36 ? (sliderRoot.theme ? sliderRoot.theme.getColor("onPrimary") : "#000000") : (sliderRoot.theme ? sliderRoot.theme.getColor("primary") : "#FFFFFF")
                 visible: sliderRoot.icon !== "" && sliderRoot.icon.length <= 2
                 Layout.alignment: Qt.AlignVCenter
             }
@@ -99,7 +99,7 @@ Item {
                 text: sliderRoot.title
                 variant: "bodyMedium"
                 font.bold: true
-                color: fillBar.width > 120 ? sliderRoot.theme.getColor("onPrimary") : sliderRoot.theme.getColor("onSurface")
+                color: fillBar.width > 120 ? (sliderRoot.theme ? sliderRoot.theme.getColor("onPrimary") : "#000000") : (sliderRoot.theme ? sliderRoot.theme.getColor("onSurface") : "#ffffff")
                 visible: sliderRoot.title !== ""
                 Layout.alignment: Qt.AlignVCenter
             }
@@ -151,7 +151,6 @@ Item {
                 sliderRoot.value = newVal;
                 sliderRoot.released(newVal);
             }
-
         }
     }
 }

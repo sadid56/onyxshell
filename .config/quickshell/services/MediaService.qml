@@ -13,7 +13,16 @@ Item {
     property int mediaLength: 0
 
     readonly property bool isPlaying: mediaStatus === "Playing"
-    readonly property bool hasMedia: mediaStatus !== "Stopped" && mediaTitle !== "" && mediaTitle !== "No media playing"
+    readonly property bool hasMedia: (mediaStatus === "Playing" || mediaStatus === "Paused") && mediaTitle !== "" && mediaTitle !== "No media playing"
+
+    function resetMedia() {
+        mediaStatus = "Stopped";
+        mediaTitle = "No media playing";
+        mediaArtist = "";
+        mediaArtUrl = "";
+        mediaPosition = 0;
+        mediaLength = 0;
+    }
 
     Timer {
         id: progressTicker
@@ -27,21 +36,54 @@ Item {
         }
     }
 
+    Timer {
+        id: sanityCheckTimer
+        interval: 2000
+        repeat: true
+        running: mediaService.hasMedia
+        onTriggered: {
+            statusChecker.running = false;
+            statusChecker.running = true;
+        }
+    }
+
+    Process {
+        id: statusChecker
+        command: ["playerctl", "status"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var txt = this.text ? this.text.trim().toLowerCase() : "";
+                if (txt === "" || txt === "stopped" || txt.indexOf("no players") !== -1) {
+                    mediaService.resetMedia();
+                }
+            }
+        }
+    }
+
     Process {
         id: mediaFollower
         command: ["playerctl", "metadata", "--follow", "--format", "{{status}}::{{title}}::{{artist}}::{{position}}::{{mpris:length}}::{{mpris:artUrl}}"]
         running: true
 
         onExited: (exitCode, exitStatus) => {
+            mediaService.resetMedia();
             restartTimer.restart();
         }
 
         stdout: SplitParser {
             onRead: data => {
                 var text = data ? data.trim() : "";
-                if (text === "") return;
+                if (text === "") {
+                    mediaService.resetMedia();
+                    return;
+                }
                 var parts = text.split("::");
-                mediaService.mediaStatus = parts[0] || "Stopped";
+                var st = parts[0] || "Stopped";
+                if (st === "Stopped") {
+                    mediaService.resetMedia();
+                    return;
+                }
+                mediaService.mediaStatus = st;
                 mediaService.mediaTitle = parts[1] || "No media playing";
                 mediaService.mediaArtist = parts[2] || "";
                 var posUs = parseInt(parts[3]) || 0;
@@ -79,9 +121,17 @@ Item {
         stdout: StdioCollector {
             onStreamFinished: {
                 var text = this.text ? this.text.trim() : "";
-                if (text === "") return;
+                if (text === "") {
+                    mediaService.resetMedia();
+                    return;
+                }
                 var parts = text.split("::");
-                mediaService.mediaStatus = parts[0] || "Stopped";
+                var st = parts[0] || "Stopped";
+                if (st === "Stopped") {
+                    mediaService.resetMedia();
+                    return;
+                }
+                mediaService.mediaStatus = st;
                 mediaService.mediaTitle = parts[1] || "No media playing";
                 mediaService.mediaArtist = parts[2] || "";
                 var posUs = parseInt(parts[3]) || 0;

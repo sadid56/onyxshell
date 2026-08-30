@@ -153,10 +153,10 @@ Popup {
                     var col = currentIndex % columns;
                     var row = Math.floor(currentIndex / columns);
                     emojiUnhoverTimer.stop();
-                    emojiHoverPill.targetX = col * cellWidth + 3;
-                    emojiHoverPill.targetY = row * cellHeight + 3;
-                    emojiHoverPill.targetWidth = cellWidth - 6;
-                    emojiHoverPill.targetHeight = cellHeight - 6;
+                    emojiHoverPill.targetX = col * cellWidth + 2;
+                    emojiHoverPill.targetY = row * cellHeight + 2;
+                    emojiHoverPill.targetWidth = cellWidth - 4;
+                    emojiHoverPill.targetHeight = cellHeight - 4;
                     emojiHoverPill.isHovered = true;
                 } else {
                     emojiHoverPill.isHovered = false;
@@ -209,7 +209,7 @@ Popup {
                 id: emojiHoverPill
                 parent: emojiGrid.contentItem
                 z: 0
-                radius: 10
+                radius: 16
                 color: emojiWindow.theme ? emojiWindow.theme.getColor("secondaryContainer") : "#3d3a48"
 
                 property real targetX: 0
@@ -240,10 +240,10 @@ Popup {
                     emojiUnhoverTimer.stop();
                     emojiGrid.currentIndex = index;
                     var pos = mapToItem(emojiGrid.contentItem, 0, 0);
-                    emojiHoverPill.targetX = pos.x + 3;
-                    emojiHoverPill.targetY = pos.y + 3;
-                    emojiHoverPill.targetWidth = width - 6;
-                    emojiHoverPill.targetHeight = height - 6;
+                    emojiHoverPill.targetX = pos.x + 2;
+                    emojiHoverPill.targetY = pos.y + 2;
+                    emojiHoverPill.targetWidth = width - 4;
+                    emojiHoverPill.targetHeight = height - 4;
                     emojiHoverPill.isHovered = true;
                 }
                 onUnhovered: {

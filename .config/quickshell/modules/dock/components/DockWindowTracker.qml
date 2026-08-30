@@ -52,20 +52,35 @@ Item {
             var a = appsList[i];
             if (!a || !a.icon) continue;
             var icon = a.icon;
-            if (a.name) map[a.name.toLowerCase().trim()] = icon;
+            if (a.name) {
+                var nameKey = a.name.toLowerCase().trim();
+                map[nameKey] = icon;
+                var cleanName = nameKey.replace(/\s*\([^)]*\)/g, "").trim();
+                if (cleanName) map[cleanName] = icon;
+            }
             if (a.desktopId) {
                 var dId = a.desktopId.toLowerCase().trim();
                 map[dId] = icon;
                 var dBase = dId.split(".").pop().toLowerCase().trim();
                 map[dBase] = icon;
+                var cleanId = dBase.replace(/-(launcher|bin|desktop|gtk|qt)$/i, "").trim();
+                if (cleanId) map[cleanId] = icon;
+            }
+            if (a.wmClass) {
+                map[a.wmClass.toLowerCase().trim()] = icon;
             }
             if (a.rawIcon) {
-                map[a.rawIcon.toLowerCase().trim()] = icon;
+                var raw = a.rawIcon.toLowerCase().trim();
+                map[raw] = icon;
+                var cleanRaw = raw.replace(/-(launcher|bin|desktop|gtk|qt)$/i, "").trim();
+                if (cleanRaw) map[cleanRaw] = icon;
             }
             if (a.exec) {
                 var execBase = a.exec.split(/\s/)[0].split("/").pop().toLowerCase().trim();
                 map[execBase] = icon;
                 map[a.exec.toLowerCase().trim()] = icon;
+                var cleanExec = execBase.replace(/-(launcher|bin|desktop|gtk|qt)$/i, "").trim();
+                if (cleanExec) map[cleanExec] = icon;
             }
         }
         trackerRoot.systemAppsMap = map;
@@ -77,6 +92,7 @@ Item {
         function onAppsReloaded() {
             if (trackerRoot.appService && trackerRoot.appService.apps) {
                 trackerRoot.buildSystemAppsMap(trackerRoot.appService.apps);
+                trackerRoot.rebuildDisplayApps();
             }
         }
     }
@@ -98,16 +114,16 @@ Item {
         if (init && systemAppsMap[init]) return systemAppsMap[init];
         if (t && systemAppsMap[t]) return systemAppsMap[t];
 
-        var cBase = c.split(".").pop().replace(/_app$/, "").replace(/-origin$/, "");
+        var cBase = c.split(".").pop().replace(/_app$/, "").replace(/-origin$/, "").replace(/-(launcher|bin|desktop)$/i, "");
         if (cBase && systemAppsMap[cBase]) return systemAppsMap[cBase];
-        var initBase = init.split(".").pop().replace(/_app$/, "").replace(/-origin$/, "");
+        var initBase = init.split(".").pop().replace(/_app$/, "").replace(/-origin$/, "").replace(/-(launcher|bin|desktop)$/i, "");
         if (initBase && systemAppsMap[initBase]) return systemAppsMap[initBase];
 
         var cClean = c.replace(/[-_.]/g, "");
         for (var k in systemAppsMap) {
             if (!k || k.length < 3) continue;
             var kClean = k.replace(/[-_.]/g, "");
-            if (cClean === kClean || (cClean.indexOf(kClean) !== -1 && kClean.length >= 4)) {
+            if (cClean === kClean || (cClean.indexOf(kClean) !== -1 && kClean.length >= 4) || (kClean.indexOf(cClean) !== -1 && cClean.length >= 4)) {
                 return systemAppsMap[k];
             }
         }
@@ -251,6 +267,29 @@ Item {
                     runningApp = cand;
                     matchedRunning[cand.className.toLowerCase()] = true;
                     break;
+                }
+            }
+
+            if (!runningApp) {
+                var isInstalled = false;
+                if (trackerRoot.appService && trackerRoot.appService.isLoaded) {
+                    var found = trackerRoot.appService.findApp(pin.desktopId || pin.name || pin.exec);
+                    if (found) {
+                        isInstalled = true;
+                    } else {
+                        var pName = (pin.name || "").toLowerCase().trim();
+                        var pExec = (pin.exec || "").toLowerCase().trim();
+                        var pExecBase = pExec.split(/\s/)[0].split("/").pop().toLowerCase().trim();
+                        if (trackerRoot.systemAppsMap && (trackerRoot.systemAppsMap[pName] || (pExecBase && trackerRoot.systemAppsMap[pExecBase]))) {
+                            isInstalled = true;
+                        }
+                    }
+                } else {
+                    isInstalled = true;
+                }
+
+                if (!isInstalled) {
+                    continue;
                 }
             }
 

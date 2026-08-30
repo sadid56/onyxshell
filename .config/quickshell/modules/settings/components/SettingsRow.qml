@@ -23,16 +23,16 @@ Item {
         spacing: 12
 
         Rectangle {
-            width: 28
-            height: 28
-            radius: 8
-            color: rowRoot.theme.getColor("surfaceVariant") + "60"
+            width: 32
+            height: 32
+            radius: 16
+            color: rowRoot.theme ? Qt.alpha(rowRoot.theme.getColor("surfaceVariant"), 0.70) : "#302f38"
             visible: rowRoot.icon !== ""
             Layout.alignment: Qt.AlignVCenter
 
             UI.Icon {
                 anchors.centerIn: parent
-                size: 15
+                size: 16
                 icon: rowRoot.icon
                 color: rowRoot.theme.getColor("primary")
             }
@@ -42,12 +42,13 @@ Item {
             id: textColumn
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
-            spacing: 1
+            spacing: 2
 
             UI.Typography {
                 theme: rowRoot.theme
                 text: rowRoot.title
                 variant: "bodyMedium"
+                font.bold: true
                 colorRole: "onSurface"
                 elide: Text.ElideRight
                 Layout.fillWidth: true
@@ -56,8 +57,8 @@ Item {
             UI.Typography {
                 theme: rowRoot.theme
                 text: rowRoot.subtitle
-                variant: "caption"
-                colorRole: "outline"
+                variant: "labelSmall"
+                colorRole: "onSurfaceVariant"
                 visible: rowRoot.subtitle !== ""
                 elide: Text.ElideRight
                 Layout.fillWidth: true

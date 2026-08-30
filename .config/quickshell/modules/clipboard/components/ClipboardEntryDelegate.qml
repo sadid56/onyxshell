@@ -13,13 +13,23 @@ Item {
     property bool isSelected: false
 
     width: parent ? parent.width : 480
-    height: 48
+    height: 52
     z: 1
 
     readonly property string entryText: (rawEntryData !== undefined && rawEntryData !== null) ? String(rawEntryData) : ""
-    property bool isImage: clipService ? clipService.isImageEntry(entryText) : false
+    property bool isImage: (clipService && clipService.isImageEntry(entryText)) || entryText.indexOf("[[ binary data") !== -1
     property string imageSource: (isImage && clipService) ? clipService.getImagePreview(entryText) : ""
-    property string cleanDisplay: entryText.indexOf("\t") !== -1 ? entryText.substring(entryText.indexOf("\t") + 1).replace(/\r?\n|\r/g, " ") : entryText.replace(/\r?\n|\r/g, " ")
+    property string cleanDisplay: {
+        var t = entryText.indexOf("\t") !== -1 ? entryText.substring(entryText.indexOf("\t") + 1) : entryText;
+        t = t.replace(/\r?\n|\r/g, " ").trim();
+        if (t.indexOf("[[ binary data") !== -1) {
+            var match = t.match(/\[\[ binary data (?:[\d.]+\s*\w+)?\s*(\w+)?\s*([\dx]+)? \]\]/);
+            var res = match && match[2] ? match[2] : "";
+            var fmt = match && match[1] ? match[1].toUpperCase() : "PNG";
+            return res ? ("Image • " + fmt + " (" + res + ")") : ("Image • " + fmt);
+        }
+        return t;
+    }
     property bool isPinned: clipService ? clipService.isPinned(entryText) : false
 
     signal itemClicked()
@@ -46,15 +56,18 @@ Item {
         spacing: 12
         z: 2
 
-        Rectangle {
-            width: 32
-            height: 32
-            radius: 10
-            color: delegateWrapper.theme ? delegateWrapper.theme.getColor("surfaceVariant") : "#282836"
+        ClippingRectangle {
+            id: imgContainer
+            width: 38
+            height: 38
+            radius: 7
+            color: delegateWrapper.isSelected
+                ? (delegateWrapper.theme ? Qt.alpha(delegateWrapper.theme.getColor("onSecondaryContainer") || "#ffffff", 0.15) : "#35ffffff")
+                : (delegateWrapper.theme ? Qt.alpha(delegateWrapper.theme.getColor("surfaceVariant"), 0.70) : "#282836")
             Layout.alignment: Qt.AlignVCenter
-            clip: true
 
             Image {
+                id: clipImg
                 anchors.fill: parent
                 source: delegateWrapper.imageSource
                 visible: delegateWrapper.isImage && delegateWrapper.imageSource !== ""
@@ -65,14 +78,16 @@ Item {
 
             IconImage {
                 anchors.centerIn: parent
-                width: 16
-                height: 16
+                width: 18
+                height: 18
                 source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon(delegateWrapper.isImage ? "actions/image.svg" : "actions/image-copy.svg")
                 visible: !delegateWrapper.isImage || delegateWrapper.imageSource === ""
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     colorization: 1.0
-                    colorizationColor: delegateWrapper.theme ? delegateWrapper.theme.getColor("onSurfaceVariant") : "#aaaaaa"
+                    colorizationColor: delegateWrapper.isSelected
+                        ? (delegateWrapper.theme ? delegateWrapper.theme.getColor("onSecondaryContainer") : "#ffffff")
+                        : (delegateWrapper.theme ? delegateWrapper.theme.getColor("onSurfaceVariant") : "#aaaaaa")
                 }
             }
         }
@@ -83,7 +98,6 @@ Item {
             text: delegateWrapper.cleanDisplay
             variant: "bodyMedium"
             colorRole: delegateWrapper.isSelected ? "onSecondaryContainer" : "onSurface"
-            font.weight: delegateWrapper.isSelected ? Font.Medium : Font.Normal
             elide: Text.ElideRight
             maximumLineCount: 1
             Layout.alignment: Qt.AlignVCenter

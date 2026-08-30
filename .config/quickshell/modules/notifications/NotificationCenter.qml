@@ -9,7 +9,7 @@ import "./components"
 Popup {
     id: notifWindow
     popupWidth: 540
-    popupHeight: 560
+    popupHeight: 630
     showCorners: true
     flatBottom: false
     contentRectX: Math.round((safeWidth - popupWidth) / 2)
@@ -48,14 +48,6 @@ Popup {
         }
     }
     Process { id: setProfileProc }
-    Process {
-        id: hyprpickerProc
-        command: ["hyprpicker", "-a"]
-    }
-    Process {
-        id: screenshotProc
-        command: ["hyprshot", "-m", "region", "-o", shellConfig.homeDir + "/Pictures/Screenshots"]
-    }
     NotifStatsFetcher {
         id: statsService
         notifWindow: notifWindow
@@ -98,18 +90,20 @@ Popup {
             Qt.callLater(() => running = true);
         }
     }
+
+    // 1. Top Uptime & Quick Tools Header
     PanelHeader {
         theme: notifWindow.theme
         uptimeStr: notifWindow.uptimeStr
         currentProfile: notifWindow.currentProfile
         powerProfileExpanded: notifWindow.powerProfileExpanded
-        hyprpickerProc: hyprpickerProc
-        screenshotProc: screenshotProc
         onTogglePowerProfile: {
             notifWindow.powerProfileExpanded = !notifWindow.powerProfileExpanded;
         }
         onCloseRequested: notifWindow.active = false
     }
+
+    // 2. Power Profile Collapsible Selector
     PowerProfileMenu {
         theme: notifWindow.theme
         expanded: notifWindow.powerProfileExpanded
@@ -117,50 +111,8 @@ Popup {
         setProfileProc: setProfileProc
         onProfileSelected: profileId => notifWindow.currentProfile = profileId
     }
-    QuickSliders {
-        theme: notifWindow.theme
-        volumeValue: notifWindow.volumeValue
-        brightnessValue: notifWindow.brightnessValue
-        volumeSetter: volumeSetter
-        brightnessSetter: brightnessSetter
-        onVolumeMoved: val => notifWindow.volumeValue = val
-        onBrightnessMoved: val => notifWindow.brightnessValue = val
-    }
-    UI.Divider {
-        theme: notifWindow.theme
-        horizontal: true
-        Layout.fillWidth: true
-        Layout.topMargin: 2
-        Layout.bottomMargin: 2
-    }
-    NotifSection {
-        theme: notifWindow.theme
-    }
-    UI.Divider {
-        theme: notifWindow.theme
-        horizontal: true
-        Layout.fillWidth: true
-        Layout.topMargin: notifWindow.micExpanded ? 0 : 2
-        Layout.bottomMargin: notifWindow.micExpanded ? 4 : 2
-    }
-    UI.Slider {
-        id: bottomMicSlider
-        Layout.fillWidth: true
-        Layout.preferredHeight: notifWindow.micExpanded ? 32 : 0
-        implicitHeight: notifWindow.micExpanded ? 32 : 0
-        visible: notifWindow.micExpanded || opacity > 0.0
-        opacity: notifWindow.micExpanded ? 1.0 : 0.0
-        clip: true
-        theme: notifWindow.theme
-        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getMicIcon(notifWindow.micValue === 0)
-        value: notifWindow.micValue
-        onMoved: val => {
-            notifWindow.micValue = val;
-            if (micSetter) micSetter.setMic(val);
-        }
-        Behavior on Layout.preferredHeight { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-        Behavior on opacity { NumberAnimation { duration: 180 } }
-    }
+
+    // 3. macOS Style 2x2 Quick Actions Control Grid
     QuickActions {
         theme: notifWindow.theme
         wifiEnabled: notifWindow.wifiEnabled
@@ -172,5 +124,50 @@ Popup {
         onWifiEnabledChanged: notifWindow.wifiEnabled = wifiEnabled
         onIsMutedChanged: notifWindow.isMuted = isMuted
         onToggleMicExpanded: notifWindow.micExpanded = !notifWindow.micExpanded
+    }
+
+    // 4. Collapsible Mic Slider
+    UI.Slider {
+        id: bottomMicSlider
+        Layout.fillWidth: true
+        Layout.preferredHeight: notifWindow.micExpanded ? 32 : 0
+        implicitHeight: notifWindow.micExpanded ? 32 : 0
+        visible: notifWindow.micExpanded || opacity > 0.0
+        opacity: notifWindow.micExpanded ? 1.0 : 0.0
+        clip: !notifWindow.micExpanded || opacity < 0.99
+        theme: notifWindow.theme
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getMicIcon(notifWindow.micValue === 0)
+        value: notifWindow.micValue
+        onMoved: val => {
+            notifWindow.micValue = val;
+            if (micSetter) micSetter.setMic(val);
+        }
+        Behavior on Layout.preferredHeight { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: 180 } }
+    }
+
+    // 5. macOS Style Display & Sound Sliders
+    QuickSliders {
+        theme: notifWindow.theme
+        volumeValue: notifWindow.volumeValue
+        brightnessValue: notifWindow.brightnessValue
+        volumeSetter: volumeSetter
+        brightnessSetter: brightnessSetter
+        onVolumeMoved: val => notifWindow.volumeValue = val
+        onBrightnessMoved: val => notifWindow.brightnessValue = val
+    }
+
+    // 6. Subtle Divider
+    UI.Divider {
+        theme: notifWindow.theme
+        horizontal: true
+        Layout.fillWidth: true
+        Layout.topMargin: 4
+        Layout.bottomMargin: 2
+    }
+
+    // 7. macOS Style Notifications Section
+    NotifSection {
+        theme: notifWindow.theme
     }
 }

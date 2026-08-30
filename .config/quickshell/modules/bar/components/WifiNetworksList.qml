@@ -59,7 +59,7 @@ ColumnLayout {
         visible: wifiWindow && wifiWindow.wifiList.length > 0
         clip: true
         pillColor: listRoot.theme ? listRoot.theme.getColor("surfaceVariant") : "#2b2a27"
-        pillRadius: 10
+        pillRadius: 14
         pillMargin: 4
         spacing: 4
         model: wifiWindow ? wifiWindow.wifiList : []

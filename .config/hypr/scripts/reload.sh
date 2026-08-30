@@ -14,4 +14,5 @@ if [ -f ~/.config/hypr/scripts/power_auto.sh ]; then
     ~/.config/hypr/scripts/power_auto.sh &
 fi
 
-notify-send -u low "Desktop Reloaded" "Quickshell, Hypridle, and Hyprland configuration reloaded."
+sleep 0.5
+notify-send -u low "Desktop Reloaded" "Configuration reloaded successfully"

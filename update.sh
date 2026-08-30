@@ -26,6 +26,8 @@ CONFIG_DIRS=(
 CONFIG_FILES=(
   "starship.toml"
   "kdeglobals"
+  "chrome-flags.conf"
+  "chromium-flags.conf"
 )
 
 echo "🚀 Starting dotfiles update from ~/.config..."

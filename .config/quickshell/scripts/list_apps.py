@@ -8,8 +8,19 @@ MAX_CACHE_AGE = 3600
 
 app_dirs = [
     "/usr/share/applications",
-    os.path.expanduser("~/.local/share/applications")
+    "/usr/local/share/applications",
+    os.path.expanduser("~/.local/share/applications"),
+    "/var/lib/flatpak/exports/share/applications",
+    os.path.expanduser("~/.local/share/flatpak/exports/share/applications"),
+    "/var/lib/snapd/desktop/applications"
 ]
+
+xdg_data_dirs = os.getenv("XDG_DATA_DIRS", "").split(":")
+for xd in xdg_data_dirs:
+    if xd.strip():
+        app_d = os.path.join(xd.strip(), "applications")
+        if app_d not in app_dirs:
+            app_dirs.append(app_d)
 
 icon_theme_dirs = [
     os.path.expanduser("~/.local/share/icons"),
@@ -36,12 +47,11 @@ def is_cache_valid():
             for f in os.listdir(d):
                 if f.endswith(".desktop"):
                     fp = os.path.join(d, f)
-                    if os.path.getmtime(fp) > cache_mtime:
+                    try:
+                        if os.path.getmtime(fp) > cache_mtime:
+                            return False
+                    except OSError:
                         return False
-
-        for d in icon_theme_dirs:
-            if os.path.exists(d) and os.path.getmtime(d) > cache_mtime:
-                return False
 
         return True
     except Exception:
@@ -177,6 +187,7 @@ for d in app_dirs:
                 cat_match = re.search(r"^Categories=(.+)$", content, re.MULTILINE)
                 nodisplay_match = re.search(r"^NoDisplay=(true|1)$", content, re.MULTILINE | re.IGNORECASE)
                 terminal_match = re.search(r"^Terminal=(true|1)$", content, re.MULTILINE | re.IGNORECASE)
+                wmclass_match = re.search(r"^StartupWMClass=(.+)$", content, re.MULTILINE)
 
                 if name_match and exec_match and not nodisplay_match:
                     name = name_match.group(1).strip()
@@ -199,6 +210,7 @@ for d in app_dirs:
 
                     comment = comment_match.group(1).strip() if comment_match else ""
                     categories = parse_categories(cat_match.group(1).strip() if cat_match else "")
+                    wmclass = wmclass_match.group(1).strip() if wmclass_match else ""
 
                     desktop_id = f[:-8] if f.endswith(".desktop") else f
                     apps.append({
@@ -208,7 +220,8 @@ for d in app_dirs:
                         "icon": icon_path,
                         "rawIcon": icon_name,
                         "comment": comment,
-                        "categories": categories
+                        "categories": categories,
+                        "wmClass": wmclass
                     })
         except Exception:
             pass

@@ -43,7 +43,7 @@ PanelWindow {
 
     Timer {
         id: closeTimer
-        interval: 15
+        interval: 180
         running: false
         repeat: false
         onTriggered: {
@@ -53,7 +53,7 @@ PanelWindow {
 
     Timer {
         id: openGuard
-        interval: 80
+        interval: 150
         running: false
         repeat: false
     }

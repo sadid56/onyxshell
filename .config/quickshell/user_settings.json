@@ -1,5 +1,5 @@
 {
-  "accentColor": "#cba6f7",
+  "accentColor": "auto",
   "cornerRadius": 20,
   "borderWidth": 0,
   "gapsIn": 6,
@@ -27,7 +27,7 @@
   "dockEnabled": true,
   "dockLivePreview": true,
   "dockAutoShowEmpty": true,
-  "dockIconSize": 26,
+  "dockIconSize": 30,
   "dockSpacing": 6,
   "dockPinnedApps": [
     {
@@ -55,16 +55,16 @@
       "comment": "File Manager"
     },
     {
-      "name": "Discord",
-      "icon": "discord",
-      "exec": "discord",
-      "comment": "Chat & Voice"
-    },
-    {
       "name": "Neovim",
       "icon": "/usr/share/icons/hicolor/128x128/apps/nvim.png",
       "exec": "nvim",
       "comment": "Edit text files"
+    },
+    {
+      "name": "LocalSend",
+      "icon": "/usr/share/icons/hicolor/128x128/apps/localsend.png",
+      "exec": "localsend",
+      "comment": ""
     }
   ]
 }

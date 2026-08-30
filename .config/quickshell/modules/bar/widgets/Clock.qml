@@ -45,7 +45,7 @@ Item {
             }
             onClicked: {
                 if (clockRoot.hasNotif) return;
-                root.toggleLoaderActive(calendarLoader, statusBar.getClockX());
+                root.stopLoaderTimerAndActivate(calendarLoader, statusBar.getClockX());
             }
 
             UI.Typography {
@@ -85,7 +85,7 @@ Item {
             }
             onClicked: {
                 if (clockRoot.hasNotif) return;
-                root.toggleLoaderActive(notifsLoader, clockRoot.getNotifX());
+                root.stopLoaderTimerAndActivate(notifsLoader, clockRoot.getNotifX());
             }
 
             UI.Icon {

@@ -2,18 +2,12 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
-import "../../../components/ui" as UI
-import "../../../utils"
 
 Row {
     id: workspacesRoot
     spacing: 6
 
     property var theme
-
-    AppIconUtils {
-        id: iconUtils
-    }
 
     property int highestUsedWs: {
         var focusedId = (Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id > 0) ? Hyprland.focusedWorkspace.id : 1;
@@ -50,41 +44,11 @@ Row {
             }
 
             property bool isActive: (Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === wsId)
-
-            property var windowIcons: {
-                if (!wsData || !wsData.toplevels || !wsData.toplevels.values) return [];
-                var list = wsData.toplevels.values;
-                var icons = [];
-                for (var j = 0; j < list.length; j++) {
-                    var top = list[j];
-                    if (!top) continue;
-
-                    var cls = "";
-                    if (top.lastIpcObject && top.lastIpcObject.class) {
-                        cls = top.lastIpcObject.class;
-                    } else if (top.wayland && top.wayland.appId) {
-                        cls = top.wayland.appId;
-                    } else if (top.appId) {
-                        cls = top.appId;
-                    }
-
-                    var title = top.title || (top.wayland ? top.wayland.title : "") || (top.lastIpcObject ? top.lastIpcObject.title : "") || "";
-                    var icon = iconUtils.mapClassToIcon(cls, title);
-
-                    if (icon && icons.indexOf(icon) === -1) {
-                        icons.push(icon);
-                    }
-                }
-                return icons;
-            }
+            property bool hasWindows: (wsData && wsData.toplevels && wsData.toplevels.values && wsData.toplevels.values.length > 0)
 
             height: 24
-
-            width: isActive
-                   ? Math.max(48, iconsRow.implicitWidth + 24)
-                   : (windowIcons.length > 0 ? Math.max(28, iconsRow.implicitWidth + 18) : 24)
-
-            radius: height / 2
+            width: isActive ? 44 : 24
+            radius: 12
 
             color: isActive
                    ? (workspacesRoot.theme ? workspacesRoot.theme.getColor("primary") : "#D0BCFF")
@@ -106,38 +70,16 @@ Row {
 
             Rectangle {
                 anchors.centerIn: parent
-                visible: dot.windowIcons.length === 0
                 width: dot.isActive ? 8 : 6
                 height: dot.isActive ? 8 : 6
                 radius: width / 2
                 color: dot.isActive
                     ? (workspacesRoot.theme ? workspacesRoot.theme.getColor("onPrimary") : "#381E72")
                     : (workspacesRoot.theme ? workspacesRoot.theme.getColor("onSurface") : "#E6E1E5")
-                opacity: dot.isActive ? 1.0 : 0.4
-            }
+                opacity: dot.isActive ? 1.0 : (dot.hasWindows ? 0.9 : 0.4)
 
-            RowLayout {
-                id: iconsRow
-                anchors.centerIn: parent
-                spacing: 6
-                visible: dot.windowIcons.length > 0
-
-                Repeater {
-                    model: dot.windowIcons
-                    UI.Typography {
-                        theme: workspacesRoot.theme
-                        text: modelData
-                        font.pixelSize: 13
-                        Layout.alignment: Qt.AlignVCenter
-                        color: dot.isActive
-                            ? (workspacesRoot.theme ? workspacesRoot.theme.getColor("onPrimary") : "#381E72")
-                            : (workspacesRoot.theme ? workspacesRoot.theme.getColor("onSurface") : "#E6E1E5")
-
-                        Behavior on color {
-                            ColorAnimation { duration: 250 }
-                        }
-                    }
-                }
+                Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
             }
 
             MouseArea {

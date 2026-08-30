@@ -11,6 +11,7 @@ import "../modules/power_menu"
 import "../modules/bar/components"
 import "../services"
 import "../modules/settings"
+import "../modules/overview"
 
 QtObject {
     id: popupManager
@@ -23,6 +24,7 @@ QtObject {
     property var appService: null
     property var activeNotifs: []
 
+    property alias overviewLoader: overviewLoader
     property alias dashboardLoader: dashboardLoader
     property alias mediaLoader: mediaLoader
     property alias notifsLoader: notifsLoader
@@ -72,7 +74,7 @@ QtObject {
     }
 
     function closeAllPopupsExcept(excludeLoader) {
-        var loaders = [dashboardLoader, notifsLoader, calendarLoader, wifiLoader, resourcesLoader, emojiLoader, clipboardLoader, wallpaperSelectorLoader, settingsLoader, powerMenuLoader, altTabLoader, mediaLoader];
+        var loaders = [overviewLoader, dashboardLoader, notifsLoader, calendarLoader, wifiLoader, resourcesLoader, emojiLoader, clipboardLoader, wallpaperSelectorLoader, settingsLoader, powerMenuLoader, altTabLoader, mediaLoader];
         for (var i = 0; i < loaders.length; i++) {
             var l = loaders[i];
             if (l !== excludeLoader && l.loaded && l.item) l.item.active = false;
@@ -165,6 +167,15 @@ QtObject {
     }
 
     property list<QtObject> elements: [
+        AutoUnloadLoader {
+            id: overviewLoader
+            loaded: true
+            autoUnloadEnabled: false
+            sourceComponent: Overview {
+                theme: popupManager.theme
+                appService: popupManager.appService
+            }
+        },
         AutoUnloadLoader {
             id: mediaLoader
             onItemInitialized: item => { item.mediaService = popupManager.mediaService; }

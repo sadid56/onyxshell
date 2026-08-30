@@ -7,8 +7,19 @@ import re
 
 app_dirs = [
     "/usr/share/applications",
-    os.path.expanduser("~/.local/share/applications")
+    "/usr/local/share/applications",
+    os.path.expanduser("~/.local/share/applications"),
+    "/var/lib/flatpak/exports/share/applications",
+    os.path.expanduser("~/.local/share/flatpak/exports/share/applications"),
+    "/var/lib/snapd/desktop/applications"
 ]
+
+xdg_data_dirs = os.getenv("XDG_DATA_DIRS", "").split(":")
+for xd in xdg_data_dirs:
+    if xd.strip():
+        app_d = os.path.join(xd.strip(), "applications")
+        if app_d not in app_dirs:
+            app_dirs.append(app_d)
 
 icon_dirs = [
     os.path.expanduser("~/.local/share/icons"),

@@ -26,19 +26,19 @@ ColumnLayout {
 
     Rectangle {
         Layout.fillWidth: true
-        implicitHeight: cardContentCol.implicitHeight + 20
-        radius: 12
-        color: cardRoot.theme ? cardRoot.theme.getColor("surfaceVariant") + "35" : "#24232a"
+        implicitHeight: cardContentCol.implicitHeight + 28
+        radius: 16
+        color: cardRoot.theme ? Qt.alpha(cardRoot.theme.getColor("surfaceVariant"), 0.35) : "#24232a"
         border.width: 1
-        border.color: cardRoot.theme ? cardRoot.theme.getColor("outlineVariant") + "25" : "#38373e"
+        border.color: cardRoot.theme ? Qt.alpha(cardRoot.theme.getColor("outlineVariant"), 0.25) : "#38373e"
 
         Column {
             id: cardContentCol
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: 10
-            spacing: 8
+            anchors.margins: 14
+            spacing: 10
 
             Column {
                 id: cardContainer

@@ -6,7 +6,7 @@ Item {
     id: rowRoot
 
     width: ListView.view ? ListView.view.width : (parent ? parent.width : 280)
-    height: 28
+    height: 32
 
     property var theme
     property var appData: ({})
@@ -16,9 +16,13 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: 6
-        color: rowMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.04) : "transparent"
-        Behavior on color { ColorAnimation { duration: 100 } }
+        anchors.leftMargin: 2
+        anchors.rightMargin: 2
+        radius: 10
+        color: rowMouse.containsMouse
+            ? (rowRoot.theme ? Qt.alpha(rowRoot.theme.getColor("surfaceVariant"), 0.65) : "#20ffffff")
+            : "transparent"
+        Behavior on color { ColorAnimation { duration: 120 } }
     }
 
     MouseArea {
@@ -37,15 +41,15 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 6
-        spacing: 0
+        anchors.leftMargin: 10
+        anchors.rightMargin: 10
+        spacing: 6
 
         UI.Typography {
             theme: rowRoot.theme
             text: String(rowRoot.rank)
-            variant: "caption"
-            font.pixelSize: 10
+            variant: "labelSmall"
+            font.pixelSize: 11
             colorRole: "outline"
             Layout.preferredWidth: 16
             Layout.alignment: Qt.AlignVCenter
@@ -55,6 +59,7 @@ Item {
             theme: rowRoot.theme
             text: rowRoot.appData.name || "—"
             variant: "bodySmall"
+            font.bold: true
             colorRole: "onSurface"
             Layout.fillWidth: true
             elide: Text.ElideRight
@@ -66,25 +71,33 @@ Item {
             theme: rowRoot.theme
             visible: (rowRoot.appData.count || 1) > 1
             text: "×" + (rowRoot.appData.count || 1)
-            variant: "caption"
-            font.pixelSize: 9
+            variant: "labelSmall"
+            font.pixelSize: 10
             colorRole: "outline"
-            Layout.preferredWidth: 22
+            Layout.preferredWidth: 20
             Layout.alignment: Qt.AlignVCenter
         }
 
-        UI.Typography {
-            theme: rowRoot.theme
-            text: (rowRoot.appData.cpu || 0).toFixed(1) + "%"
-            variant: "caption"
-            font.pixelSize: 10
-            font.bold: (rowRoot.appData.cpu || 0) > 10
+        // CPU Badge Pill
+        Rectangle {
+            Layout.preferredWidth: 44
+            Layout.preferredHeight: 18
+            radius: 9
             color: (rowRoot.appData.cpu || 0) > 15
-                ? (rowRoot.theme ? rowRoot.theme.getColor("primary") : "#adc6ff")
-                : (rowRoot.theme ? rowRoot.theme.getColor("outline") : "#8c909f")
-            Layout.preferredWidth: 40
-            horizontalAlignment: Text.AlignRight
+                ? (rowRoot.theme ? Qt.alpha(rowRoot.theme.getColor("primary"), 0.18) : "#30ffb3b4")
+                : "transparent"
             Layout.alignment: Qt.AlignVCenter
+
+            UI.Typography {
+                anchors.centerIn: parent
+                theme: rowRoot.theme
+                text: (rowRoot.appData.cpu || 0).toFixed(1) + "%"
+                variant: "labelSmall"
+                font.bold: (rowRoot.appData.cpu || 0) > 10
+                color: (rowRoot.appData.cpu || 0) > 15
+                    ? (rowRoot.theme ? rowRoot.theme.getColor("primary") : "#adc6ff")
+                    : (rowRoot.theme ? rowRoot.theme.getColor("onSurfaceVariant") : "#c5c5d8")
+            }
         }
 
         UI.Typography {
@@ -93,13 +106,12 @@ Item {
                 var mb = rowRoot.appData.rss_mb || 0;
                 return mb >= 1024 ? (mb / 1024).toFixed(1) + " GB" : mb.toFixed(0) + " MB";
             }
-            variant: "caption"
-            font.pixelSize: 10
+            variant: "labelSmall"
             font.bold: (rowRoot.appData.rss_mb || 0) > 1000
             color: (rowRoot.appData.rss_mb || 0) > 1000
                 ? (rowRoot.theme ? rowRoot.theme.getColor("primary") : "#adc6ff")
                 : (rowRoot.theme ? rowRoot.theme.getColor("outline") : "#8c909f")
-            Layout.preferredWidth: 52
+            Layout.preferredWidth: 54
             horizontalAlignment: Text.AlignRight
             Layout.alignment: Qt.AlignVCenter
         }

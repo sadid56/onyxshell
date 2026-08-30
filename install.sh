@@ -58,17 +58,16 @@ if confirm "Update system packages with pacman?"; then
 fi
 
 BASE_PKGS=(
-    base-devel git curl wget rsync jq socat
-    hyprland hypridle hyprlock hyprpolkitagent
+    hyprland hypridle hyprlock hyprpicker hyprshot hyprpolkitagent
     xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
-    quickshell
+    quickshell matugen jq socat
     python python-psutil
     kitty fish starship fastfetch cava yazi htop
     wl-clipboard cliphist playerctl brightnessctl
     wireplumber pipewire pipewire-pulse
     gnome-keyring libsecret
     grim slurp satty
-    ttf-inter noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-jetbrains-mono-nerd
+    noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-jetbrains-mono-nerd
     papirus-icon-theme qt5ct qt6ct
 )
 

@@ -7,7 +7,7 @@ import "../../../components/ui" as UI
 Item {
     id: delegateWrapper
     width: parentListView ? parentListView.width : 280
-    height: 42
+    height: 46
     z: 1
 
     property var parentListView
@@ -20,7 +20,7 @@ Item {
     Rectangle {
         id: highlightBg
         anchors.fill: parent
-        radius: 10
+        radius: 14
         color: delegateWrapper.theme ? delegateWrapper.theme.getColor("surfaceVariant") : "#2b2a27"
         opacity: (delegateWrapper.isHighlighted || mouseArea.containsMouse) ? 1.0 : 0.0
         z: 0
@@ -52,20 +52,32 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 12
+        anchors.leftMargin: 10
         anchors.rightMargin: 12
         spacing: 10
         z: 2
 
-        IconImage {
-            width: 14
-            height: 14
-            source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getWifiIcon(delegateWrapper.netInfo.signal, true, true)
+        Rectangle {
+            width: 28
+            height: 28
+            radius: 14
+            color: delegateWrapper.netInfo.active
+                ? (delegateWrapper.theme ? Qt.alpha(delegateWrapper.theme.getColor("primary"), 0.20) : "#40adc6ff")
+                : (delegateWrapper.theme ? Qt.alpha(delegateWrapper.theme.getColor("surfaceVariant"), 0.60) : "#20ffffff")
             Layout.alignment: Qt.AlignVCenter
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                colorization: 1.0
-                colorizationColor: delegateWrapper.netInfo.active ? delegateWrapper.theme.getColor("primary") : (delegateWrapper.isHighlighted ? delegateWrapper.theme.getColor("primary") : delegateWrapper.theme.getColor("onSurface"))
+
+            IconImage {
+                anchors.centerIn: parent
+                width: 14
+                height: 14
+                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getWifiIcon(delegateWrapper.netInfo.signal, true, true)
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: delegateWrapper.netInfo.active
+                        ? (delegateWrapper.theme ? delegateWrapper.theme.getColor("primary") : "#adc6ff")
+                        : (delegateWrapper.theme ? delegateWrapper.theme.getColor("onSurface") : "#ffffff")
+                }
             }
         }
 
@@ -74,7 +86,9 @@ Item {
             text: delegateWrapper.netInfo.ssid
             variant: "bodyMedium"
             font.bold: delegateWrapper.netInfo.active || delegateWrapper.netInfo.saved
-            color: delegateWrapper.netInfo.active ? delegateWrapper.theme.getColor("primary") : (delegateWrapper.isHighlighted ? delegateWrapper.theme.getColor("primary") : delegateWrapper.theme.getColor("onSurface"))
+            color: delegateWrapper.netInfo.active
+                ? (delegateWrapper.theme ? delegateWrapper.theme.getColor("primary") : "#adc6ff")
+                : (delegateWrapper.theme ? delegateWrapper.theme.getColor("onSurface") : "#ffffff")
             Layout.fillWidth: true
             elide: Text.ElideRight
             Layout.alignment: Qt.AlignVCenter

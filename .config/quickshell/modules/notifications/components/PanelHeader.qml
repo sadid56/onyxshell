@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
-import Quickshell.Widgets
+import Quickshell
 import "../../../components/ui" as UI
 
 RowLayout {
     id: headerRoot
     Layout.fillWidth: true
+    Layout.preferredHeight: 38
     spacing: 10
 
     property var theme
@@ -14,35 +15,28 @@ RowLayout {
     property string currentProfile: "performance"
     property bool powerProfileExpanded: false
 
-    property var hyprpickerProc
-    property var screenshotProc
-
     signal togglePowerProfile()
     signal closeRequested()
 
+    // macOS Style Uptime Badge
     Rectangle {
-        height: 34
-        implicitWidth: uptimeRow.implicitWidth + 20
-        radius: 10
-        color: headerRoot.theme ? headerRoot.theme.getColor("surfaceVariant") + "40" : "#282932"
+        Layout.preferredHeight: 34
+        implicitWidth: uptimeRow.implicitWidth + 24
+        radius: 17
+        color: headerRoot.theme ? Qt.alpha(headerRoot.theme.getColor("surfaceVariant"), 0.55) : "#302626"
         border.width: 1
-        border.color: headerRoot.theme ? headerRoot.theme.getColor("outlineVariant") + "20" : "#ffffff15"
+        border.color: headerRoot.theme ? Qt.alpha(headerRoot.theme.getColor("outlineVariant"), 0.3) : "#453838"
 
-        RowLayout {
+        Row {
             id: uptimeRow
             anchors.centerIn: parent
-            spacing: 6
+            spacing: 7
 
-            IconImage {
-                width: 15
-                height: 15
-                source: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/clock.svg")
-                Layout.alignment: Qt.AlignVCenter
-                layer.enabled: true
-                layer.effect: MultiEffect {
-                    colorization: 1.0
-                    colorizationColor: headerRoot.theme ? headerRoot.theme.getColor("primary") : "#ffb3b4"
-                }
+            UI.Icon {
+                size: 14
+                icon: "system/power.svg"
+                color: headerRoot.theme ? headerRoot.theme.getColor("primary") : "#ffb3b4"
+                anchors.verticalCenter: parent.verticalCenter
             }
 
             UI.Typography {
@@ -51,33 +45,34 @@ RowLayout {
                 variant: "labelMedium"
                 font.bold: true
                 colorRole: "onSurface"
-                Layout.alignment: Qt.AlignVCenter
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
     }
 
     Item { Layout.fillWidth: true }
 
+    // macOS Style Segmented Tools Capsule
     Rectangle {
-        id: pillToolbar
-        height: 34
-        implicitWidth: toolbarRow.implicitWidth + 8
-        radius: 10
-        color: headerRoot.theme ? headerRoot.theme.getColor("surfaceVariant") + "40" : "#282932"
+        Layout.preferredHeight: 34
+        implicitWidth: toolsRow.width + 12
+        radius: 17
+        color: headerRoot.theme ? Qt.alpha(headerRoot.theme.getColor("surfaceVariant"), 0.55) : "#302626"
         border.width: 1
-        border.color: headerRoot.theme ? headerRoot.theme.getColor("outlineVariant") + "25" : "#ffffff15"
+        border.color: headerRoot.theme ? Qt.alpha(headerRoot.theme.getColor("outlineVariant"), 0.3) : "#453838"
 
-        RowLayout {
-            id: toolbarRow
+        Row {
+            id: toolsRow
             anchors.centerIn: parent
-            spacing: 2
+            spacing: 4
 
+            // 1. Eyedropper Color Picker
             Rectangle {
-                width: 32
+                width: 28
                 height: 28
-                radius: 7
+                radius: 14
                 color: eyedropperMouse.containsMouse
-                    ? (headerRoot.theme ? headerRoot.theme.getColor("surfaceVariant") : "#3a3944")
+                    ? (headerRoot.theme ? Qt.alpha(headerRoot.theme.getColor("primary"), 0.18) : "#453838")
                     : "transparent"
 
                 Behavior on color { ColorAnimation { duration: 120 } }
@@ -97,27 +92,19 @@ RowLayout {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        if (headerRoot.hyprpickerProc) {
-                            headerRoot.hyprpickerProc.running = false;
-                            headerRoot.hyprpickerProc.running = true;
-                        }
+                        headerRoot.closeRequested();
+                        Quickshell.execDetached(["hyprpicker", "-a"]);
                     }
                 }
             }
 
+            // 2. Screenshot Region Crop
             Rectangle {
-                width: 1
-                height: 14
-                color: headerRoot.theme ? headerRoot.theme.getColor("outlineVariant") + "30" : "#ffffff20"
-                Layout.alignment: Qt.AlignVCenter
-            }
-
-            Rectangle {
-                width: 32
+                width: 28
                 height: 28
-                radius: 7
+                radius: 14
                 color: cropMouse.containsMouse
-                    ? (headerRoot.theme ? headerRoot.theme.getColor("surfaceVariant") : "#3a3944")
+                    ? (headerRoot.theme ? Qt.alpha(headerRoot.theme.getColor("primary"), 0.18) : "#453838")
                     : "transparent"
 
                 Behavior on color { ColorAnimation { duration: 120 } }
@@ -138,29 +125,20 @@ RowLayout {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         headerRoot.closeRequested();
-                        if (headerRoot.screenshotProc) {
-                            headerRoot.screenshotProc.running = false;
-                            headerRoot.screenshotProc.running = true;
-                        }
+                        Quickshell.execDetached(["hyprshot", "-m", "region", "-o", (Quickshell.env("HOME") || "") + "/Pictures/Screenshots"]);
                     }
                 }
             }
 
+            // 3. Power Profile Toggle
             Rectangle {
-                width: 1
-                height: 14
-                color: headerRoot.theme ? headerRoot.theme.getColor("outlineVariant") + "30" : "#ffffff20"
-                Layout.alignment: Qt.AlignVCenter
-            }
-
-            Rectangle {
-                width: 32
+                width: 28
                 height: 28
-                radius: 7
+                radius: 14
                 color: headerRoot.powerProfileExpanded
-                    ? (headerRoot.theme ? headerRoot.theme.getColor("primaryContainer") : "#4f3737")
-                    : (powerMouse.containsMouse
-                        ? (headerRoot.theme ? headerRoot.theme.getColor("surfaceVariant") : "#3a3944")
+                    ? (headerRoot.theme ? headerRoot.theme.getColor("primary") : "#ffb3b4")
+                    : (perfMouse.containsMouse
+                        ? (headerRoot.theme ? Qt.alpha(headerRoot.theme.getColor("primary"), 0.18) : "#453838")
                         : "transparent")
 
                 Behavior on color { ColorAnimation { duration: 120 } }
@@ -170,18 +148,18 @@ RowLayout {
                     size: 15
                     icon: {
                         if (headerRoot.currentProfile === "performance") return "system/zap.svg";
-                        if (headerRoot.currentProfile === "power-saver") return "system/leaf-two.svg";
-                        return "system/memory.svg";
+                        if (headerRoot.currentProfile === "balanced") return "system/memory.svg";
+                        return "system/leaf-two.svg";
                     }
                     color: headerRoot.powerProfileExpanded
-                        ? (headerRoot.theme ? headerRoot.theme.getColor("onPrimaryContainer") : "#ffb3b4")
-                        : (powerMouse.containsMouse
+                        ? (headerRoot.theme ? headerRoot.theme.getColor("onPrimary") : "#000000")
+                        : (perfMouse.containsMouse
                             ? (headerRoot.theme ? headerRoot.theme.getColor("primary") : "#ffb3b4")
                             : (headerRoot.theme ? headerRoot.theme.getColor("onSurfaceVariant") : "#c5c5d8"))
                 }
 
                 MouseArea {
-                    id: powerMouse
+                    id: perfMouse
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
@@ -189,19 +167,13 @@ RowLayout {
                 }
             }
 
+            // 4. Settings Shortcut
             Rectangle {
-                width: 1
-                height: 14
-                color: headerRoot.theme ? headerRoot.theme.getColor("outlineVariant") + "30" : "#ffffff20"
-                Layout.alignment: Qt.AlignVCenter
-            }
-
-            Rectangle {
-                width: 32
+                width: 28
                 height: 28
-                radius: 7
+                radius: 14
                 color: settingsMouse.containsMouse
-                    ? (headerRoot.theme ? headerRoot.theme.getColor("surfaceVariant") : "#3a3944")
+                    ? (headerRoot.theme ? Qt.alpha(headerRoot.theme.getColor("primary"), 0.18) : "#453838")
                     : "transparent"
 
                 Behavior on color { ColorAnimation { duration: 120 } }
@@ -222,11 +194,7 @@ RowLayout {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         headerRoot.closeRequested();
-                        if (typeof root !== "undefined" && root.popupManager) {
-                            root.popupManager.toggleLoaderActive(root.popupManager.settingsLoader);
-                        } else if (typeof popupManager !== "undefined") {
-                            popupManager.toggleLoaderActive(popupManager.settingsLoader);
-                        }
+                        Quickshell.execDetached(["qs", "ipc", "call", "shell", "toggleSettings"]);
                     }
                 }
             }

@@ -21,7 +21,7 @@ Popup {
     popupHeight: (allApps.length === 0)
         ? (chromeHeight + 5 * itemRowHeight)
         : (dynamicAppsModel.count === 0
-            ? 240
+            ? 310
             : (chromeHeight + Math.min(maxVisibleItems, dynamicAppsModel.count) * itemRowHeight))
 
     closeOnHoverOutside: false
@@ -115,6 +115,13 @@ Popup {
     onSearchQueryChanged: searchDebounceTimer.restart()
     onAllAppsChanged: updateAppsModel()
 
+    Connections {
+        target: appService
+        function onAppsReloaded() {
+            launcherWindow.updateAppsModel();
+        }
+    }
+
     function launchApp(app) {
         if (!app) return;
         launcherWindow.active = false;
@@ -134,6 +141,9 @@ Popup {
         if (active) {
             searchQuery = "";
             searchInput.text = "";
+            if (appService && typeof appService.refresh === "function") {
+                appService.refresh();
+            }
             updateAppsModel();
             Qt.callLater(() => searchInput.forceFocus());
         }
@@ -225,8 +235,8 @@ Popup {
                 theme: launcherWindow.theme
                 model: dynamicAppsModel
                 spacing: 4
-                pillMargin: 0
-                pillRadius: 12
+                pillMargin: 4
+                pillRadius: 16
                 pillColor: launcherWindow.theme ? launcherWindow.theme.getColor("secondaryContainer") : "#3d3a48"
 
                 delegate: Components.AppListItem {

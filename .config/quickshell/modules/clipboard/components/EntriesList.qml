@@ -7,8 +7,8 @@ import "../../../components/ui" as UI
 UI.AnimatedListView {
     id: entriesListRoot
     spacing: 4
-    pillMargin: 0
-    pillRadius: 12
+    pillMargin: 4
+    pillRadius: 16
     pillColor: entriesListRoot.theme ? entriesListRoot.theme.getColor("secondaryContainer") : "#3d3a48"
 
     property var clipService

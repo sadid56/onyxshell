@@ -10,12 +10,12 @@ Rectangle {
     property int currentIndex: 0
     property var currentValue: null
 
-    implicitHeight: 34
+    implicitHeight: 38
     implicitWidth: segRow.implicitWidth + 8
-    radius: 10
-    color: segRoot.theme ? segRoot.theme.getColor("surfaceVariant") + "30" : "#1a1b20"
+    radius: 19
+    color: segRoot.theme ? Qt.alpha(segRoot.theme.getColor("surfaceVariant"), 0.35) : "#1a1b20"
     border.width: 1
-    border.color: segRoot.theme ? segRoot.theme.getColor("outlineVariant") + "33" : "#ffffff15"
+    border.color: segRoot.theme ? Qt.alpha(segRoot.theme.getColor("outlineVariant"), 0.35) : "#ffffff15"
 
     signal selected(int index, var value, string text)
 
@@ -66,8 +66,8 @@ Rectangle {
             Rectangle {
                 id: segItem
                 Layout.fillHeight: true
-                Layout.preferredWidth: Math.max(54, label.implicitWidth + 16)
-                radius: 8
+                Layout.preferredWidth: Math.max(54, label.implicitWidth + 18)
+                radius: 15
 
                 readonly property bool isSelected: index === segRoot.currentIndex
                 readonly property bool isHovered: itemMouse.containsMouse

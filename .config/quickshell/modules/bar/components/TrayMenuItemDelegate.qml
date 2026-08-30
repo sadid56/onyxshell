@@ -46,14 +46,14 @@ Item {
     }
 
     width: parent ? parent.width : 200
-    height: isSeparator ? 9 : 34
+    height: isSeparator ? 9 : 38
 
     opacity: (!isItemEnabled && !isSeparator) ? 0.45 : 1.0
 
     Rectangle {
         id: highlightBg
         anchors.fill: parent
-        radius: 9
+        radius: 12
         color: entryDelegate.theme ? entryDelegate.theme.getColor("surfaceVariant") : "#302f38"
         opacity: (!entryDelegate.isSeparator && itemMouse.containsMouse) ? 1.0 : 0.0
         z: 0

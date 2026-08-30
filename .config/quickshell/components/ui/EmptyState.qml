@@ -7,9 +7,9 @@ ColumnLayout {
     id: emptyStateRoot
     Layout.fillWidth: true
     Layout.fillHeight: true
-    spacing: 10
-    Layout.topMargin: 16
-    Layout.bottomMargin: 16
+    spacing: 12
+    Layout.topMargin: 20
+    Layout.bottomMargin: 24
 
     property var theme
     property string icon: ""

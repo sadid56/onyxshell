@@ -239,8 +239,8 @@ PanelWindow {
                     height: contentHeight
                     implicitHeight: contentHeight
                     spacing: 3
-                    pillMargin: 0
-                    pillRadius: 9
+                    pillMargin: 2
+                    pillRadius: 12
                     showBottomFade: false
                     pillColor: trayMenuWindow.theme ? trayMenuWindow.theme.getColor("surfaceVariant") : "#302f38"
                     model: menuOpener.children
@@ -347,8 +347,8 @@ PanelWindow {
                 anchors.rightMargin: 8
                 height: contentHeight
                 spacing: 3
-                pillMargin: 0
-                pillRadius: 9
+                pillMargin: 2
+                pillRadius: 12
                 showBottomFade: false
                 pillColor: trayMenuWindow.theme ? trayMenuWindow.theme.getColor("surfaceVariant") : "#302f38"
                 model: subMenuOpener.children

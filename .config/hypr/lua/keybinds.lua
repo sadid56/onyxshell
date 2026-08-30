@@ -11,6 +11,22 @@ hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("~/.config/hypr/scripts/dropdown.sh"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(
+	mainMod .. " + SUPER_L",
+	hl.dsp.exec_cmd("qs ipc call shell toggleOverview"),
+	{ release = true }
+)
+hl.bind(
+	mainMod .. " + SUPER_R",
+	hl.dsp.exec_cmd("qs ipc call shell toggleOverview"),
+	{ release = true }
+)
+
+hl.bind(
+	mainMod .. " + A",
+	hl.dsp.exec_cmd("qs ipc call shell toggleOverviewAll")
+)
+
+hl.bind(
 	secondMod .. " + SPACE",
 	hl.dsp.exec_cmd("qs ipc call shell toggleDashboard")
 )

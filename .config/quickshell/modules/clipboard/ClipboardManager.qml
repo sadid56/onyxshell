@@ -24,7 +24,7 @@ Popup {
     }
 
     popupHeight: (filteredEntriesList.length === 0)
-        ? 240
+        ? 310
         : (chromeHeight + Math.min(maxVisibleItems, filteredEntriesList.length) * itemRowHeight)
 
     closeOnHoverOutside: false

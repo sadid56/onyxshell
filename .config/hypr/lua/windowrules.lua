@@ -51,11 +51,6 @@ hl.window_rule({
     opacity   = 1.0,
 })
 
-hl.window_rule({
-    name  = "jetbrains-dialogs",
-    match = { class = "^(jetbrains-.*)$", title = "^(splash|win.*|Preferences|Project Structure|Rename)$" },
-    float = true,
-})
 
 hl.window_rule({
     name  = "pip-video",
@@ -70,4 +65,48 @@ hl.window_rule({
     match  = { class = "^(pavucontrol|blueman-manager|nm-connection-editor|org.pulseaudio.pavucontrol|zenity)$" },
     float  = true,
     center = true,
+})
+
+hl.window_rule({
+    name   = "nautilus-float",
+    match  = { class = "^(org.gnome.Nautilus|nautilus)$" },
+    float  = true,
+    center = true,
+    size   = { 1200, 750 },
+})
+
+hl.window_rule({
+    name   = "yazi-float",
+    match  = { class = "^(yazi)$" },
+    float  = true,
+    center = true,
+    size   = { 1200, 750 },
+})
+
+hl.window_rule({
+    name   = "yazi-title-float",
+    match  = { title = "^(yazi|Yazi:.*)$" },
+    float  = true,
+    center = true,
+    size   = { 1200, 750 },
+})
+
+hl.window_rule({
+    name   = "timeshift-float",
+    match  = { class = "^(Timeshift-gtk|timeshift-gtk|timeshift)$" },
+    float  = true,
+    center = true,
+    size   = { 1100, 700 },
+})
+
+hl.window_rule({
+    name      = "spotify-special",
+    match     = { class = "^(Spotify|spotify)$" },
+    workspace = "special:magic",
+})
+
+hl.window_rule({
+    name      = "discord-special",
+    match     = { class = "^(discord|vesktop|Discord)$" },
+    workspace = "special:magic",
 })

@@ -15,7 +15,7 @@ PanelWindow {
     color: "transparent"
 
     readonly property bool isFullscreen: (Hyprland.focusedWorkspace && Boolean(Hyprland.focusedWorkspace.hasfullscreen || Hyprland.focusedWorkspace.hasFullscreen))
-    visible: (typeof root === "undefined" || !root.splashScreen || root.splashScreen.isFadingOut || root.splashScreen.isFinished) && !barWindow.isFullscreen
+    visible: !barWindow.isFullscreen
 
     margins { top: 0; left: 0; right: 0 }
     exclusiveZone: isFullscreen ? 0 : 40

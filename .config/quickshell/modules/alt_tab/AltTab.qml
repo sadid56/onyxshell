@@ -88,12 +88,10 @@ PanelWindow {
         altTabWindow.active = false;
         if (target && target.address) {
             var addr = target.address;
-            Quickshell.execDetached([
-                "hyprctl", "eval",
-                "hl.dispatch(hl.dsp.focus({ window = 'address:" + addr + "' }))\n" +
-                "hl.dispatch(hl.dsp.window.bring_to_top({ window = 'address:" + addr + "' }))\n" +
-                "hl.dispatch(hl.dsp.window.alter_zorder({ action = 'top', window = 'address:" + addr + "' }))"
-            ]);
+            var script = "hl.dispatch(hl.dsp.focus({ window = 'address:" + addr + "' }))\n" +
+                         "hl.dispatch(hl.dsp.window.bring_to_top({ window = 'address:" + addr + "' }))\n" +
+                         "hl.dispatch(hl.dsp.window.alter_zorder({ mode = 'top', window = 'address:" + addr + "' }))";
+            Quickshell.execDetached(["hyprctl", "eval", script]);
         }
     }
 

@@ -16,6 +16,54 @@ QtObject {
             toggleDashboard();
         }
 
+        function toggleOverview(): void {
+            if (ipcServiceRoot.popupManager) {
+                var loader = ipcServiceRoot.popupManager.overviewLoader;
+                if (!loader.loaded) {
+                    ipcServiceRoot.popupManager.closeAllPopupsExcept(loader);
+                    loader.loaded = true;
+                    Qt.callLater(() => {
+                        if (loader.item) {
+                            loader.item.showAllWorkspaces = false;
+                            loader.item.active = true;
+                        }
+                    });
+                } else if (loader.item) {
+                    if (loader.item.active && !loader.item.showAllWorkspaces) {
+                        loader.item.active = false;
+                    } else {
+                        ipcServiceRoot.popupManager.closeAllPopupsExcept(loader);
+                        loader.item.showAllWorkspaces = false;
+                        loader.item.active = true;
+                    }
+                }
+            }
+        }
+
+        function toggleOverviewAll(): void {
+            if (ipcServiceRoot.popupManager) {
+                var loader = ipcServiceRoot.popupManager.overviewLoader;
+                if (!loader.loaded) {
+                    ipcServiceRoot.popupManager.closeAllPopupsExcept(loader);
+                    loader.loaded = true;
+                    Qt.callLater(() => {
+                        if (loader.item) {
+                            loader.item.showAllWorkspaces = true;
+                            loader.item.active = true;
+                        }
+                    });
+                } else if (loader.item) {
+                    if (loader.item.active && loader.item.showAllWorkspaces) {
+                        loader.item.active = false;
+                    } else {
+                        ipcServiceRoot.popupManager.closeAllPopupsExcept(loader);
+                        loader.item.showAllWorkspaces = true;
+                        loader.item.active = true;
+                    }
+                }
+            }
+        }
+
         function toggleDashboard(): void {
             if (ipcServiceRoot.popupManager) {
                 ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.dashboardLoader);

@@ -120,32 +120,24 @@ Popup {
                 theme: calWindow.theme
                 text: calWindow.dayFullNames[calWindow.selectedDate.getDay()] + ", " + calWindow.selectedDate.getDate() + " " + calWindow.monthNames[calWindow.selectedDate.getMonth()] + " " + calWindow.selectedDate.getFullYear()
                 variant: "titleMedium"
-                font.pixelSize: 17
+                font.bold: true
+                font.pixelSize: 16
                 colorRole: "onSurface"
             }
 
             UI.Typography {
                 theme: calWindow.theme
-                text: calWindow.monthNames[calWindow.displayedMonth] + " " + calWindow.displayedYear
+                text: (calWindow.displayedMonth !== calWindow.selectedDate.getMonth() || calWindow.displayedYear !== calWindow.selectedDate.getFullYear())
+                    ? ("Viewing: " + calWindow.monthNames[calWindow.displayedMonth] + " " + calWindow.displayedYear)
+                    : (calWindow.isTodaySelected ? "Today" : "Selected Date")
                 variant: "bodySmall"
-                colorRole: "outline"
+                font.bold: true
+                colorRole: "primary"
+                visible: text !== ""
             }
         }
 
         Item { Layout.fillWidth: true }
-
-        UI.Button {
-            theme: calWindow.theme
-            text: calWindow.isTodaySelected ? "Today" : "Jump to Today"
-            active: calWindow.isTodaySelected
-            onClicked: {
-                calWindow.today = new Date();
-                calWindow.selectedDate = new Date();
-                calWindow.displayedMonth = calWindow.today.getMonth();
-                calWindow.displayedYear = calWindow.today.getFullYear();
-                calWindow.daysList = calWindow.generateDaysFor(calWindow.displayedYear, calWindow.displayedMonth);
-            }
-        }
 
         RowLayout {
             spacing: 6

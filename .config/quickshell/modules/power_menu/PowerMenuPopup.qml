@@ -5,7 +5,6 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Wayland
 import "../../components/ui" as UI
-import "../bar/widgets"
 
 PanelWindow {
     id: powerWindow
@@ -15,40 +14,26 @@ PanelWindow {
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.keyboardFocus: active ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: active ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     exclusiveZone: 0
 
     property bool active: false
-    visible: active || morphContainer.height > 40.5
+    visible: active || modalBackdrop.opacity > 0.01
 
     property var theme: (typeof root !== "undefined" && root && root.theme) ? root.theme : null
     property real targetX: -1
     property var statusBar: null
-    property alias closeTimer: closeTimer
-    property int hoveredIndex: -1
-
-    readonly property int safeWidth: powerWindow.width > 0 ? powerWindow.width : 1920
-    readonly property int expandedWidth: 220
-    readonly property int collapsedWidth: (statusBar && statusBar.rightIslandBaseWidth > 0) ? statusBar.rightIslandBaseWidth : 230
-    readonly property int expandedHeight: 220
-
-    Timer {
-        id: closeTimer
-        interval: 80
-        repeat: false
-        onTriggered: powerWindow.active = false
-    }
+    property int selectedIndex: 0
 
     readonly property var powerActions: [
-        { action: "lock", label: "Lock", icon: "system/lock-closed.svg", key: "L", isDanger: false, colorRole: "primary" },
-        { action: "logout", label: "Log Out", icon: "system/logout.svg", key: "E", isDanger: false, colorRole: "tertiary" },
-        { action: "reboot", label: "Restart", icon: "system/arrow-clockwise-filled.svg", key: "R", isDanger: false, colorRole: "primary" },
-        { action: "shutdown", label: "Power Off", icon: "system/power.svg", key: "P", isDanger: true, colorRole: "error" }
+        { action: "lock", label: "Lock", subLabel: "Secure session", icon: "system/lock-closed.svg", key: "L", role: "primary" },
+        { action: "logout", label: "Log Out", subLabel: "End current session", icon: "system/logout.svg", key: "E", role: "secondary" },
+        { action: "reboot", label: "Restart", subLabel: "Reboot device", icon: "system/arrow-clockwise-filled.svg", key: "R", role: "tertiary" },
+        { action: "shutdown", label: "Power Off", subLabel: "Shut down PC", icon: "system/power.svg", key: "P", role: "error" }
     ]
 
     function executePowerAction(action) {
         powerWindow.active = false;
-        closeTimer.stop();
         if (typeof root !== "undefined" && typeof root.closeAllPopups === "function") {
             root.closeAllPopups();
         }
@@ -66,22 +51,18 @@ PanelWindow {
         }
     }
 
-    property int selectedIndex: 0
-    property bool mouseWasInside: false
-
     onActiveChanged: {
         if (active) {
-            closeTimer.stop();
-            mouseWasInside = false;
             selectedIndex = 0;
-            hoveredIndex = -1;
             keyFocusItem.forceActiveFocus();
         }
     }
 
     Item {
         id: keyFocusItem
+        anchors.fill: parent
         focus: powerWindow.active
+
         Keys.onEscapePressed: powerWindow.active = false
         Keys.onReturnPressed: {
             if (selectedIndex >= 0 && selectedIndex < powerActions.length) {
@@ -93,32 +74,10 @@ PanelWindow {
                 executePowerAction(powerActions[selectedIndex].action);
             }
         }
-        Keys.onRightPressed: {
-            if (selectedIndex === 0) selectedIndex = 1;
-            else if (selectedIndex === 2) selectedIndex = 3;
-            else selectedIndex = 0;
-        }
-        Keys.onLeftPressed: {
-            if (selectedIndex === 1) selectedIndex = 0;
-            else if (selectedIndex === 3) selectedIndex = 2;
-            else selectedIndex = 1;
-        }
-        Keys.onDownPressed: {
-            if (selectedIndex === 0) selectedIndex = 2;
-            else if (selectedIndex === 1) selectedIndex = 3;
-            else selectedIndex = 0;
-        }
-        Keys.onUpPressed: {
-            if (selectedIndex === 2) selectedIndex = 0;
-            else if (selectedIndex === 3) selectedIndex = 1;
-            else selectedIndex = 2;
-        }
-        Keys.onTabPressed: {
-            selectedIndex = (selectedIndex + 1) % 4;
-        }
-        Keys.onBacktabPressed: {
-            selectedIndex = (selectedIndex + 3) % 4;
-        }
+        Keys.onRightPressed: selectedIndex = (selectedIndex + 1) % 4
+        Keys.onLeftPressed: selectedIndex = (selectedIndex + 3) % 4
+        Keys.onTabPressed: selectedIndex = (selectedIndex + 1) % 4
+        Keys.onBacktabPressed: selectedIndex = (selectedIndex + 3) % 4
     }
 
     Shortcut { sequence: "Escape"; enabled: powerWindow.active; onActivated: powerWindow.active = false }
@@ -127,114 +86,70 @@ PanelWindow {
     Shortcut { sequence: "r"; enabled: powerWindow.active; onActivated: executePowerAction("reboot") }
     Shortcut { sequence: "p"; enabled: powerWindow.active; onActivated: executePowerAction("shutdown") }
 
-    MouseArea {
-        anchors.fill: parent
-        enabled: powerWindow.active
-        hoverEnabled: true
-        onClicked: powerWindow.active = false
-        onEntered: {
-            if (powerWindow.active && powerWindow.mouseWasInside) {
-                closeTimer.restart();
-            }
-        }
-        onPositionChanged: {
-            if (powerWindow.active && powerWindow.mouseWasInside) {
-                closeTimer.restart();
-            }
-        }
-    }
-
-    Corner {
-        id: powerLeftCorner
-        anchors.top: parent.top
-        anchors.right: morphContainer.left
-        alignRight: true
-        alignBottom: false
-        color: powerWindow.theme ? powerWindow.theme.getColor("surface") : "#1e1e2e"
-        cornerRadius: (typeof root !== "undefined" && root && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : 16
-        opacity: morphContainer.opacity
-        visible: morphContainer.opacity > 0.05
-    }
-
-    Corner {
-        id: powerBottomRightCorner
-        anchors.top: morphContainer.bottom
-        anchors.right: parent.right
-        alignRight: true
-        alignBottom: false
-        color: powerWindow.theme ? powerWindow.theme.getColor("surface") : "#1e1e2e"
-        cornerRadius: (typeof root !== "undefined" && root && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : 16
-        opacity: morphContainer.opacity
-        visible: morphContainer.opacity > 0.05
-    }
-
+    // Ambient Fullscreen Dim Backdrop
     Rectangle {
-        id: morphContainer
-        anchors.top: parent.top
-        anchors.right: parent.right
-        width: powerWindow.active ? powerWindow.expandedWidth : powerWindow.collapsedWidth
-        height: powerWindow.active ? powerWindow.expandedHeight : 40
-        radius: (typeof root !== "undefined" && root && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : 16
-        color: powerWindow.theme ? powerWindow.theme.getColor("surface") : "#1e1e2e"
-        clip: true
-        opacity: powerWindow.active ? 1.0 : 0.0
+        id: modalBackdrop
+        anchors.fill: parent
+        color: "#000000"
+        opacity: powerWindow.active ? 0.72 : 0.0
 
-        Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutQuint } }
-        Behavior on height { NumberAnimation { duration: 220; easing.type: Easing.OutQuint } }
-        Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutQuad } }
-
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: powerWindow.active
-            shadowColor: "#60000000"
-            shadowBlur: 1.0
-            shadowVerticalOffset: 8
-        }
+        Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
         MouseArea {
             anchors.fill: parent
-            hoverEnabled: true
-            onEntered: {
-                powerWindow.mouseWasInside = true;
-                closeTimer.stop();
+            onClicked: powerWindow.active = false
+        }
+    }
+
+    // Centered Cinematic Container
+    ColumnLayout {
+        id: centerGroup
+        anchors.centerIn: parent
+        spacing: 32
+
+        scale: powerWindow.active ? 1.0 : 0.95
+        opacity: powerWindow.active ? 1.0 : 0.0
+
+        Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+
+        // Top Cinematic Time & Date
+        ColumnLayout {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 4
+
+            UI.Typography {
+                Layout.alignment: Qt.AlignHCenter
+                theme: powerWindow.theme
+                text: Qt.formatDateTime(new Date(), "hh:mm AP")
+                variant: "headlineLarge"
+                font.bold: true
+                font.pixelSize: 42
+                colorRole: "onSurface"
             }
-            onPositionChanged: {
-                powerWindow.mouseWasInside = true;
-                closeTimer.stop();
+
+            UI.Typography {
+                Layout.alignment: Qt.AlignHCenter
+                theme: powerWindow.theme
+                text: Qt.formatDateTime(new Date(), "dddd, dd MMMM yyyy")
+                variant: "titleMedium"
+                font.pixelSize: 15
+                colorRole: "outline"
             }
         }
 
-        Rectangle {
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: parent.radius
-            color: parent.color
-        }
-        Rectangle {
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            width: parent.radius
-            color: parent.color
-        }
-
-        GridLayout {
-            anchors.fill: parent
-            anchors.margins: 14
-            columns: 2
-            rows: 2
-            rowSpacing: 10
-            columnSpacing: 10
-            opacity: powerWindow.active ? 1.0 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }
+        // 4 Large Luxury Material 3 Floating Cards
+        RowLayout {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredHeight: 185
+            Layout.minimumHeight: 185
+            Layout.maximumHeight: 185
+            spacing: 16
 
             Repeater {
                 model: powerWindow.powerActions
                 PowerMenuTile {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    theme: (powerWindow && powerWindow.theme) ? powerWindow.theme : null
+                    theme: powerWindow.theme
                     itemData: modelData
                     isSelected: (powerWindow.selectedIndex === index)
                     onTileClicked: powerWindow.executePowerAction(modelData.action)

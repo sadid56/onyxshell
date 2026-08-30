@@ -9,13 +9,20 @@ import "modules/bar"
 import "modules/bar/components"
 import "components/ui"
 import "modules/wallpaper"
-import "modules/splash"
 import "modules/dock"
 
 QtObject {
     id: root
 
     property bool dndEnabled: false
+    property bool isReady: false
+    property var startupGraceTimer: Timer {
+        id: startupGraceTimer
+        interval: 350
+        running: true
+        repeat: false
+        onTriggered: root.isReady = true
+    }
     property var activeNotifs: []
     property var clipboardService: clipService
     property MediaService mediaService: MediaService { id: mediaService }
@@ -25,8 +32,8 @@ QtObject {
     property Theme rootTheme: rootTheme
     property alias theme: rootTheme
 
-    property alias splashScreen: splashScreen
     property alias wallpaperBackground: wallpaperBackground
+    property alias overviewLoader: popupManager.overviewLoader
     property alias dashboardLoader: popupManager.dashboardLoader
     property alias mediaLoader: popupManager.mediaLoader
     property alias notifsLoader: popupManager.notifsLoader
@@ -147,11 +154,6 @@ QtObject {
             id: rootTheme
         },
 
-        SplashScreen {
-            id: splashScreen
-            theme: rootTheme
-        },
-
         Wallpaper {
             id: wallpaperBackground
         },
@@ -226,6 +228,10 @@ QtObject {
             actionsSupported: true
             imageSupported: true
             onNotification: notification => {
+                if (!root.isReady) {
+                    if (typeof notification.dismiss === "function") notification.dismiss();
+                    return;
+                }
 
                 if (settingsService && (settingsService.isAppMuted(notification) || settingsService.isAppMuted(notification.appName) || settingsService.isAppMuted(notification.applicationName) || settingsService.isAppMuted(notification.desktopEntry) || settingsService.isAppMuted(notification.appIcon))) {
                     if (typeof notification.dismiss === "function") notification.dismiss();

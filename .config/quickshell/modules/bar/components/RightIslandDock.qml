@@ -11,14 +11,13 @@ Item {
     property var powerMenuButton: powerButtonItem
 
     readonly property bool hasResourcesActive: (typeof resourcesLoader !== "undefined" && resourcesLoader.loaded && resourcesLoader.item && resourcesLoader.item.active)
-    readonly property bool hasPowerActive: (typeof powerMenuLoader !== "undefined" && powerMenuLoader.loaded && powerMenuLoader.item && powerMenuLoader.item.active)
-    readonly property bool hasRightPopupActive: hasResourcesActive || hasPowerActive
+    readonly property bool hasRightPopupActive: hasResourcesActive
     readonly property real rightIslandBaseWidth: (typeof rightContentRow !== "undefined" && rightContentRow) ? (rightContentRow.implicitWidth + 36) : 230
 
     anchors.top: parent.top
     anchors.right: parent.right
     height: barWindow ? barWindow.barHeight : 40
-    width: hasResourcesActive ? 380 : (hasPowerActive ? 220 : (barWindow ? barWindow.rightIslandBaseWidth : rightIslandBaseWidth))
+    width: hasResourcesActive ? 380 : (barWindow ? barWindow.rightIslandBaseWidth : rightIslandBaseWidth)
     Behavior on width { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
 
     Corner {
@@ -87,21 +86,9 @@ Item {
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
 
-            onEntered: {
-                if (typeof root !== "undefined" && root.stopLoaderTimerAndActivate && typeof powerMenuLoader !== "undefined" && typeof statusBar !== "undefined") {
-                    root.stopLoaderTimerAndActivate(powerMenuLoader, statusBar.getPowerX());
-                    if (typeof resourcesLoader !== "undefined") root.setLoaderInactive(resourcesLoader);
-                    if (typeof wifiLoader !== "undefined") root.setLoaderInactive(wifiLoader);
-                }
-            }
-            onExited: {
-                if (typeof root !== "undefined" && root.restartLoaderTimer && typeof powerMenuLoader !== "undefined") {
-                    root.restartLoaderTimer(powerMenuLoader);
-                }
-            }
             onClicked: {
-                if (typeof root !== "undefined" && root.toggleLoaderActive && typeof powerMenuLoader !== "undefined" && typeof statusBar !== "undefined") {
-                    root.toggleLoaderActive(powerMenuLoader, statusBar.getPowerX());
+                if (typeof root !== "undefined" && root.toggleLoaderActive && typeof powerMenuLoader !== "undefined") {
+                    root.toggleLoaderActive(powerMenuLoader);
                 }
             }
 

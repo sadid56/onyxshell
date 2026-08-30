@@ -21,17 +21,33 @@ QtObject {
                 if (this.text && this.text.trim().length > 0) {
                     try {
                         var parsed = JSON.parse(this.text.trim());
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            appService.apps = parsed;
-                            appService.buildAppsMap(parsed);
-                            appService.isLoaded = true;
-                            appService.appsReloaded();
+                        if (Array.isArray(parsed)) {
+                            var currentLen = appService.apps ? appService.apps.length : 0;
+                            var changed = !appService.isLoaded || (currentLen !== parsed.length);
+                            if (!changed && appService.apps) {
+                                for (var i = 0; i < parsed.length; i++) {
+                                    if (appService.apps[i].desktopId !== parsed[i].desktopId ||
+                                        appService.apps[i].name !== parsed[i].name ||
+                                        appService.apps[i].icon !== parsed[i].icon ||
+                                        appService.apps[i].exec !== parsed[i].exec) {
+                                        changed = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (changed) {
+                                appService.apps = parsed;
+                                appService.buildAppsMap(parsed);
+                                appService.isLoaded = true;
+                                appService.appsReloaded();
+                            }
                         }
                     } catch(e) {}
                 }
             }
         }
     }
+
 
     function buildAppsMap(list) {
         var map = {};

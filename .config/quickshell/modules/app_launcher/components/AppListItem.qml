@@ -6,7 +6,7 @@ import "../../../components/ui" as UI
 Item {
     id: appItemRoot
     width: parent ? parent.width : 540
-    height: 48
+    height: 52
     opacity: 1.0
 
     property var appItem: model
@@ -28,19 +28,6 @@ Item {
         onClicked: appItemRoot.clicked()
     }
 
-    Rectangle {
-        id: highlightBg
-        anchors.fill: parent
-        radius: 12
-        color: appItemRoot.theme ? appItemRoot.theme.getColor("secondaryContainer") : "#3d3a48"
-        opacity: (appItemRoot.isSelected || mouseArea.containsMouse) ? 1.0 : 0.0
-        z: 0
-
-        Behavior on opacity {
-            NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
-        }
-    }
-
     function getCategoriesText(cats) {
         if (!cats) return "";
         if (Array.isArray(cats)) return cats.join(" • ");
@@ -58,23 +45,28 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 12
-        anchors.rightMargin: 12
-        spacing: 12
+        anchors.leftMargin: 14
+        anchors.rightMargin: 14
+        spacing: 14
         z: 2
 
         Rectangle {
-            width: 34
-            height: 34
-            radius: 9
-            color: appItemRoot.theme ? appItemRoot.theme.getColor("surfaceVariant") : "#2b2b35"
+            width: 38
+            height: 38
+            radius: 19
+            color: appItemRoot.isSelected
+                ? (appItemRoot.theme ? Qt.alpha(appItemRoot.theme.getColor("onSecondaryContainer") || "#ffffff", 0.15) : "#35ffffff")
+                : (appItemRoot.theme ? Qt.alpha(appItemRoot.theme.getColor("surfaceVariant"), 0.70) : "#2b2b35")
             clip: true
             Layout.alignment: Qt.AlignVCenter
             opacity: 1.0
 
+            Behavior on color { ColorAnimation { duration: 140 } }
+
             IconImage {
-                anchors.fill: parent
-                anchors.margins: 4
+                anchors.centerIn: parent
+                width: 24
+                height: 24
                 opacity: 1.0
                 source: (appItem && appItem.icon && appItem.icon !== "")
                     ? (appItem.icon.indexOf("/") === 0 ? ("file://" + appItem.icon) : appItem.icon)
@@ -87,7 +79,7 @@ Item {
 
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 1
+            spacing: 2
             Layout.alignment: Qt.AlignVCenter
 
             UI.Typography {
@@ -95,21 +87,20 @@ Item {
                 text: (appItem && appItem.name) ? appItem.name : ""
                 variant: "bodyMedium"
                 font.bold: true
-                colorRole: "onSurface"
+                colorRole: appItemRoot.isSelected ? "onSecondaryContainer" : "onSurface"
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
 
             UI.Typography {
                 theme: appItemRoot.theme
-                text: (appItem && appItem.comment && appItem.comment !== "")
-                    ? appItem.comment
-                    : appItemRoot.getCategoriesText(appItem ? appItem.categories : null)
-                variant: "bodySmall"
-                colorRole: "onSurfaceVariant"
+                text: (appItem && appItem.description) ? appItem.description : getCategoriesText(appItem ? appItem.categories : null)
+                variant: "labelSmall"
+                colorRole: appItemRoot.isSelected ? "onSecondaryContainer" : "onSurfaceVariant"
                 elide: Text.ElideRight
                 Layout.fillWidth: true
                 visible: text !== ""
+                opacity: appItemRoot.isSelected ? 0.85 : 0.65
             }
         }
     }
