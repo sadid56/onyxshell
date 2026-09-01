@@ -107,12 +107,6 @@ QtObject {
             }
         }
 
-        function toggleSettings(): void {
-            if (ipcServiceRoot.popupManager) {
-                ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.settingsLoader);
-            }
-        }
-
         function togglePowerMenu(): void {
             if (ipcServiceRoot.popupManager) {
                 ipcServiceRoot.popupManager.toggleLoaderActive(ipcServiceRoot.popupManager.powerMenuLoader);
@@ -125,9 +119,21 @@ QtObject {
             }
         }
 
+        function toggleAltTabPrev(): void {
+            if (ipcServiceRoot.popupManager) {
+                ipcServiceRoot.popupManager.toggleAltTabPrev();
+            }
+        }
+
+        function quickSwitchAltTab(): void {
+            if (ipcServiceRoot.popupManager) {
+                ipcServiceRoot.popupManager.quickSwitchAltTab();
+            }
+        }
+
         function closeAltTab(): void {
-            if (ipcServiceRoot.popupManager && ipcServiceRoot.popupManager.altTabLoader && ipcServiceRoot.popupManager.altTabLoader.item) {
-                ipcServiceRoot.popupManager.altTabLoader.item.selectAndClose();
+            if (ipcServiceRoot.popupManager && ipcServiceRoot.popupManager.altTab) {
+                ipcServiceRoot.popupManager.altTab.selectAndClose();
             }
         }
 

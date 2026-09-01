@@ -13,15 +13,46 @@ Item {
     property int mediaLength: 0
 
     readonly property bool isPlaying: mediaStatus === "Playing"
-    readonly property bool hasMedia: (mediaStatus === "Playing" || mediaStatus === "Paused") && mediaTitle !== "" && mediaTitle !== "No media playing"
+    readonly property bool rawHasMedia: (mediaStatus === "Playing" || mediaStatus === "Paused") && mediaTitle !== "" && mediaTitle !== "No media playing"
+
+    property bool hasMedia: false
+
+    onRawHasMediaChanged: {
+        if (rawHasMedia) {
+            gracePeriodTimer.stop();
+            hasMedia = true;
+        } else if (hasMedia) {
+            gracePeriodTimer.restart();
+        }
+    }
+
+    Timer {
+        id: gracePeriodTimer
+        interval: 2800
+        repeat: false
+        onTriggered: {
+            if (!mediaService.rawHasMedia) {
+                mediaService.hasMedia = false;
+                mediaService.mediaTitle = "No media playing";
+                mediaService.mediaArtist = "";
+                mediaService.mediaArtUrl = "";
+                mediaService.mediaPosition = 0;
+                mediaService.mediaLength = 0;
+            }
+        }
+    }
 
     function resetMedia() {
         mediaStatus = "Stopped";
-        mediaTitle = "No media playing";
-        mediaArtist = "";
-        mediaArtUrl = "";
-        mediaPosition = 0;
-        mediaLength = 0;
+        if (hasMedia) {
+            gracePeriodTimer.restart();
+        } else {
+            mediaTitle = "No media playing";
+            mediaArtist = "";
+            mediaArtUrl = "";
+            mediaPosition = 0;
+            mediaLength = 0;
+        }
     }
 
     Timer {
@@ -38,9 +69,9 @@ Item {
 
     Timer {
         id: sanityCheckTimer
-        interval: 2000
+        interval: 3000
         repeat: true
-        running: mediaService.hasMedia
+        running: mediaService.hasMedia && !mediaService.isPlaying
         onTriggered: {
             statusChecker.running = false;
             statusChecker.running = true;
@@ -83,9 +114,17 @@ Item {
                     mediaService.resetMedia();
                     return;
                 }
+                var title = (parts[1] || "").trim();
+                var artist = (parts[2] || "").trim();
+                if (title === "" && st === "Playing") {
+                    title = "Media";
+                }
+
                 mediaService.mediaStatus = st;
-                mediaService.mediaTitle = parts[1] || "No media playing";
-                mediaService.mediaArtist = parts[2] || "";
+                if (title !== "") {
+                    mediaService.mediaTitle = title;
+                }
+                mediaService.mediaArtist = artist;
                 var posUs = parseInt(parts[3]) || 0;
                 var lenUs = parseInt(parts[4]) || 0;
                 mediaService.mediaPosition = Math.round(posUs / 1000000);
@@ -131,9 +170,17 @@ Item {
                     mediaService.resetMedia();
                     return;
                 }
+                var title = (parts[1] || "").trim();
+                var artist = (parts[2] || "").trim();
+                if (title === "" && st === "Playing") {
+                    title = "Media";
+                }
+
                 mediaService.mediaStatus = st;
-                mediaService.mediaTitle = parts[1] || "No media playing";
-                mediaService.mediaArtist = parts[2] || "";
+                if (title !== "") {
+                    mediaService.mediaTitle = title;
+                }
+                mediaService.mediaArtist = artist;
                 var posUs = parseInt(parts[3]) || 0;
                 var lenUs = parseInt(parts[4]) || 0;
                 mediaService.mediaPosition = Math.round(posUs / 1000000);

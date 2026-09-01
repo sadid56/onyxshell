@@ -17,7 +17,7 @@ ColumnLayout {
         iconSource: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/cpu.svg")
         progress: (gaugesRoot.telemetryData && gaugesRoot.telemetryData.cpu) ? gaugesRoot.telemetryData.cpu.usage : 0
         valueText: Math.round(progress) + "%"
-        subText: (gaugesRoot.telemetryData && gaugesRoot.telemetryData.cpu) ? (gaugesRoot.telemetryData.cpu.freq + " MHz") : ""
+        subText: (gaugesRoot.telemetryData && gaugesRoot.telemetryData.cpu) ? (gaugesRoot.telemetryData.cpu.freq + " GHz") : ""
         barColor: gaugesRoot.theme ? gaugesRoot.theme.getColor("primary") : "#adc6ff"
     }
 

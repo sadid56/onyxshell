@@ -152,6 +152,7 @@ PanelWindow {
                     theme: powerWindow.theme
                     itemData: modelData
                     isSelected: (powerWindow.selectedIndex === index)
+                    onHoverEntered: powerWindow.selectedIndex = index
                     onTileClicked: powerWindow.executePowerAction(modelData.action)
                 }
             }

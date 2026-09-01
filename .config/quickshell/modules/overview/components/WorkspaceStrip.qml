@@ -48,15 +48,15 @@ Item {
         return list;
     }
 
-    readonly property real cardW: Math.min(190, Math.max(124, Math.floor((1780 - (activeWsList.length * 12)) / Math.max(1, activeWsList.length))))
-    readonly property real cardH: Math.floor(cardW * 0.58)
+    readonly property real cardW: Math.min(205, Math.max(140, Math.floor((1780 - (activeWsList.length * 12)) / Math.max(1, activeWsList.length))))
+    readonly property real cardH: Math.floor(cardW * 0.57)
 
     function findWorkspaceAt(gx, gy) {
         for (var i = 0; i < wsRepeater.count; i++) {
             var item = wsRepeater.itemAt(i);
             if (item) {
                 var p = item.mapFromItem(null, gx, gy);
-                if (p.x >= -20 && p.x <= item.width + 20 && p.y >= -20 && p.y <= item.height + 20) {
+                if (p.x >= -30 && p.x <= item.width + 30 && p.y >= -30 && p.y <= item.height + 40) {
                     return item.targetWs;
                 }
             }
@@ -79,7 +79,7 @@ Item {
     Row {
         id: wsRow
         anchors.centerIn: parent
-        spacing: 12
+        spacing: 10
 
         Repeater {
             id: wsRepeater
@@ -94,13 +94,13 @@ Item {
 
                 width: stripRoot.cardW
                 height: stripRoot.cardH
-                radius: 16
+                radius: 14
                 scale: isDragTarget ? 1.04 : (isHovered ? 1.02 : 1.0)
 
                 color: isHighlighted
                        ? (stripRoot.theme ? Qt.alpha(stripRoot.theme.getColor("primaryContainer"), 0.90) : "#453850")
                        : (isHovered
-                          ? (stripRoot.theme ? Qt.alpha(stripRoot.theme.getColor("surfaceVariant"), 0.9) : "#352c2c")
+                          ? (stripRoot.theme ? Qt.alpha(stripRoot.theme.getColor("surfaceVariant"), 0.90) : "#352c2c")
                           : (stripRoot.theme ? Qt.alpha(stripRoot.theme.getColor("surface"), 0.70) : "#201818"))
 
                 border.width: isHighlighted ? 2 : 1
@@ -110,38 +110,13 @@ Item {
                                  ? (stripRoot.theme ? stripRoot.theme.getColor("outline") : "#887575")
                                  : (stripRoot.theme ? Qt.alpha(stripRoot.theme.getColor("outlineVariant"), 0.35) : "#403535"))
 
-                Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-                Behavior on color { ColorAnimation { duration: 120 } }
-                Behavior on border.color { ColorAnimation { duration: 120 } }
-
                 Item {
                     anchors.fill: parent
                     anchors.margins: 8
 
-                    Rectangle {
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        width: 24
-                        height: 24
-                        radius: 12
-                        color: isHighlighted
-                               ? (stripRoot.theme ? stripRoot.theme.getColor("primary") : "#cba6f7")
-                               : (stripRoot.theme ? Qt.alpha(stripRoot.theme.getColor("onSurface"), 0.2) : "#40ffffff")
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: String(targetWs)
-                            font.bold: true
-                            font.pixelSize: 12
-                            color: isHighlighted
-                                   ? (stripRoot.theme ? stripRoot.theme.getColor("onPrimary") : "#000000")
-                                   : (stripRoot.theme ? stripRoot.theme.getColor("onSurface") : "#ffffff")
-                        }
-                    }
-
                     Row {
                         anchors.centerIn: parent
-                        spacing: 6
+                        spacing: 8
                         Repeater {
                             model: {
                                 var wins = [];
@@ -151,19 +126,19 @@ Item {
                                         wins.push(cl);
                                     }
                                 }
-                                return wins.slice(0, 3);
+                                return wins.slice(0, 2);
                             }
                             delegate: Rectangle {
-                                width: Math.min(30, stripRoot.cardH * 0.34)
+                                width: Math.min(36, stripRoot.cardH * 0.38)
                                 height: width
-                                radius: 6
+                                radius: 8
                                 color: stripRoot.theme ? Qt.alpha(stripRoot.theme.getColor("background"), 0.85) : "#151518"
                                 border.width: 1
                                 border.color: stripRoot.theme ? Qt.alpha(stripRoot.theme.getColor("outlineVariant"), 0.35) : "#353030"
 
                                 IconImage {
                                     anchors.fill: parent
-                                    anchors.margins: 4
+                                    anchors.margins: 5
                                     source: {
                                         var ic = modelData.icon || "";
                                         if (ic && ic.indexOf("/") === 0) return "file://" + ic;

@@ -28,13 +28,14 @@ UI.AnimatedListView {
     onEntriesModelChanged: {
         syncListModel(dynamicClipModel, normalizeEntries(entriesModel), "entryData", 25);
         if (dynamicClipModel.count > 0) {
+            currentIndex = -1;
             currentIndex = 0;
-            hoverItem(0, 0, 48);
+            hoverItem(0, 0, 52);
             positionViewAtBeginning();
             Qt.callLater(() => {
                 if (entriesListRoot && entriesListRoot.count > 0) {
-                    entriesListRoot.currentIndex = 0;
-                    entriesListRoot.hoverItem(0, 0, 48);
+                    if (entriesListRoot.currentIndex < 0) entriesListRoot.currentIndex = 0;
+                    entriesListRoot.updateSelectionPill();
                 }
             });
         } else {

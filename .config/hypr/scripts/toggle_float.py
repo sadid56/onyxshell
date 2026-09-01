@@ -90,8 +90,13 @@ def toggle_single():
         cmd = f'hl.dispatch(hl.dsp.window.float({{ window = "address:{addr}", action = "off" }}))'
         run_eval(cmd)
     else:
+        lua_cmds = []
+        grouped = win.get("grouped", [])
+        if grouped and len(grouped) > 1:
+            lua_cmds.append(f'hl.dispatch(hl.dsp.group.toggle())')
+
         saved = cache.get(addr) or cache.get(w_class) or cache.get(f"{w_class}:{w_title}")
-        lua_cmds = [f'hl.dispatch(hl.dsp.window.float({{ window = "address:{addr}", action = "on" }}))']
+        lua_cmds.append(f'hl.dispatch(hl.dsp.window.float({{ window = "address:{addr}", action = "on" }}))')
 
         if saved and "size" in saved and "at" in saved:
             w, h = saved["size"]
@@ -109,8 +114,6 @@ def toggle_single():
             lua_cmds.append(f'hl.dispatch(hl.dsp.window.center({{ window = "address:{addr}" }}))')
 
         lua_cmds.append(f'hl.dispatch(hl.dsp.focus({{ window = "address:{addr}" }}))')
-        lua_cmds.append(f'hl.dispatch(hl.dsp.window.alterzorder({{ action = "top", window = "address:{addr}" }}))')
-
         run_eval("\n".join(lua_cmds))
 
 def toggle_all():
@@ -128,21 +131,35 @@ def toggle_all():
     lua_commands = []
 
     if any_tiled:
-        # Enable workspace-wide floating rule for new windows
-        lua_commands.append(f'hl.window_rule({{ name = "ws-float-{cur_ws}", match = {{ workspace = "{cur_ws}" }}, float = true }})')
+        # Ungroup any grouped windows first so they become independent floating windows
+        seen_groups = set()
+        for c in ws_clients:
+            grouped = c.get("grouped", [])
+            if grouped and len(grouped) > 1:
+                group_key = tuple(sorted(grouped))
+                if group_key not in seen_groups:
+                    seen_groups.add(group_key)
+                    addr = c.get("address")
+                    lua_commands.append(f'hl.dispatch(hl.dsp.focus({{ window = "address:{addr}" }}))')
+                    lua_commands.append(f'hl.dispatch(hl.dsp.group.toggle())')
 
         if str(cur_ws) not in floating_workspaces:
             floating_workspaces.append(str(cur_ws))
         cache["floating_workspaces"] = floating_workspaces
 
-        default_w = max(750, min(1250, int(mon_w * 0.65)))
-        default_h = max(500, min(800, int(mon_h * 0.65)))
+        total_wins = len(ws_clients)
+        default_w = max(780, min(1300, int(mon_w * (0.70 if total_wins == 1 else 0.62))))
+        default_h = max(520, min(820, int(mon_h * (0.70 if total_wins == 1 else 0.64))))
 
-        base_center_x = mon_x + max(40, int((mon_w - default_w) / 2))
-        base_center_y = mon_y + max(60, int((mon_h - default_h) / 2))
-
-        step_x = 55
-        step_y = 48
+        anchors = [
+            (mon_x + 35, mon_y + 55),                                           # Top-Left
+            (mon_x + mon_w - default_w - 35, mon_y + mon_h - default_h - 30),  # Bottom-Right
+            (mon_x + mon_w - default_w - 35, mon_y + 55),                       # Top-Right
+            (mon_x + 35, mon_y + mon_h - default_h - 30),                       # Bottom-Left
+            (mon_x + int((mon_w - default_w) / 2), mon_y + 55),                 # Top-Center
+            (mon_x + int((mon_w - default_w) / 2), mon_y + mon_h - default_h - 30), # Bottom-Center
+            (mon_x + int((mon_w - default_w) / 2), mon_y + int((mon_h - default_h) / 2)) # Center
+        ]
 
         for idx, c in enumerate(ws_clients):
             addr = c.get("address")
@@ -162,27 +179,29 @@ def toggle_all():
                 h = max(350, min(h, mon_h - 70))
                 x = max(mon_x + 20, min(x, mon_x + mon_w - w - 20))
                 y = max(mon_y + 45, min(y, mon_y + mon_h - h - 20))
-                lua_commands.append(f'hl.dispatch(hl.dsp.window.resize({{ window = "address:{addr}", x = {int(w)}, y = {int(h)}, relative = false }}))')
-                lua_commands.append(f'hl.dispatch(hl.dsp.window.move({{ window = "address:{addr}", x = {int(x)}, y = {int(y)}, relative = false }}))')
             else:
-                cascade_x = base_center_x + (idx * step_x) - (len(ws_clients) * 20)
-                cascade_y = base_center_y + (idx * step_y) - (len(ws_clients) * 16)
-                x = max(mon_x + 30, min(cascade_x, mon_x + mon_w - default_w - 30))
-                y = max(mon_y + 55, min(cascade_y, mon_y + mon_h - default_h - 30))
-                lua_commands.append(f'hl.dispatch(hl.dsp.window.resize({{ window = "address:{addr}", x = {default_w}, y = {default_h}, relative = false }}))')
-                lua_commands.append(f'hl.dispatch(hl.dsp.window.move({{ window = "address:{addr}", x = {int(x)}, y = {int(y)}, relative = false }}))')
+                w = default_w
+                h = default_h
+                if total_wins == 1:
+                    x = mon_x + int((mon_w - default_w) / 2)
+                    y = mon_y + int((mon_h - default_h) / 2)
+                else:
+                    anchor_idx = idx % len(anchors)
+                    ax, ay = anchors[anchor_idx]
+                    cycle = idx // len(anchors)
+                    x = max(mon_x + 20, min(ax + (cycle * 45), mon_x + mon_w - default_w - 20))
+                    y = max(mon_y + 45, min(ay + (cycle * 35), mon_y + mon_h - default_h - 20))
+
+            lua_commands.append(f'hl.dispatch(hl.dsp.window.resize({{ window = "address:{addr}", x = {int(w)}, y = {int(h)}, relative = false }}))')
+            lua_commands.append(f'hl.dispatch(hl.dsp.window.move({{ window = "address:{addr}", x = {int(x)}, y = {int(y)}, relative = false }}))')
 
         if ws_clients:
-            top_addr = ws_clients[0].get("address")
+            top_addr = ws_clients[-1].get("address")
             lua_commands.append(f'hl.dispatch(hl.dsp.focus({{ window = "address:{top_addr}" }}))')
-            lua_commands.append(f'hl.dispatch(hl.dsp.window.alterzorder({{ action = "top", window = "address:{top_addr}" }}))')
 
         save_cache(cache)
 
     else:
-        # Revert workspace-wide floating rule so new windows open tiled
-        lua_commands.append(f'hl.window_rule({{ name = "ws-float-{cur_ws}", match = {{ workspace = "{cur_ws}" }}, float = false }})')
-
         if str(cur_ws) in floating_workspaces:
             floating_workspaces.remove(str(cur_ws))
         cache["floating_workspaces"] = floating_workspaces

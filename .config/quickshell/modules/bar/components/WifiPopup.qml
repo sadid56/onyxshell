@@ -61,6 +61,31 @@ PanelWindow {
         onTriggered: wifiWindow.refreshWifi()
     }
 
+    property string connectingSsid: (wifiConnector && wifiConnector.running) ? wifiConnector.targetSsid : ""
+    property string failedSsid: ""
+    property string failedErrorMessage: ""
+
+    Timer {
+        id: failedResetTimer
+        interval: 4500
+        repeat: false
+        onTriggered: {
+            wifiWindow.failedSsid = "";
+            wifiWindow.failedErrorMessage = "";
+        }
+    }
+
+    Timer {
+        id: closeSuccessTimer
+        interval: 1200
+        repeat: false
+        onTriggered: {
+            if (wifiWindow.active) {
+                wifiWindow.active = false;
+            }
+        }
+    }
+
     function parseWifiList(text) {
         var lines = text.split("\n"), list = [], ssidsSeen = {}, savedMap = {}, mode = "";
         for (var i = 0; i < lines.length; i++) {
@@ -103,6 +128,10 @@ PanelWindow {
             targetSsid = ssid;
             fallbackSsid = wifiWindow.activeConnectedSsid;
             errorOutput = "";
+            wifiWindow.failedSsid = "";
+            wifiWindow.failedErrorMessage = "";
+            failedResetTimer.stop();
+            closeSuccessTimer.stop();
             command = (password && password !== "") ? ["nmcli", "device", "wifi", "connect", ssid, "password", password] : ["nmcli", "device", "wifi", "connect", ssid];
             running = false;
             running = true;
@@ -120,17 +149,28 @@ PanelWindow {
         onExited: (exitCode, exitStatus) => {
             if (exitCode === 0 && (!errorOutput || errorOutput.indexOf("Error") === -1)) {
                 wifiWindow.showPasswordPrompt = false;
-                wifiWindow.active = false;
+                wifiWindow.failedSsid = "";
+                wifiWindow.failedErrorMessage = "";
+                Quickshell.execDetached(["notify-send", "-u", "low", "Wi-Fi Connected", "Successfully connected to " + targetSsid]);
                 wifiWindow.refreshWifi();
+                closeSuccessTimer.restart();
             } else {
                 if (targetSsid && targetSsid !== "") Quickshell.execDetached(["nmcli", "connection", "delete", "id", targetSsid]);
                 if (fallbackSsid && fallbackSsid !== "" && fallbackSsid !== targetSsid) Quickshell.execDetached(["nmcli", "connection", "up", "id", fallbackSsid]);
 
+                var msg = "Connection failed. Please check network.";
+                if (errorOutput.indexOf("timeout") !== -1) msg = "Connection timed out.";
+                else if (errorOutput.indexOf("password") !== -1 || errorOutput.indexOf("secret") !== -1 || errorOutput.indexOf("Secrets") !== -1) msg = "Incorrect password or credentials required.";
+
+                wifiWindow.failedSsid = targetSsid;
+                wifiWindow.failedErrorMessage = msg;
+                failedResetTimer.restart();
+
                 if (wifiWindow.showPasswordPrompt) {
-                    var msg = "Incorrect password. Please try again.";
-                    if (errorOutput.indexOf("timeout") !== -1) msg = "Connection timed out. Please try again.";
                     pwdPrompt.showError(msg);
-                } else wifiWindow.active = false;
+                } else {
+                    Quickshell.execDetached(["notify-send", "-u", "normal", "Wi-Fi Connection Failed", "Could not connect to " + targetSsid + " (" + msg + ")"]);
+                }
             }
         }
     }
@@ -140,6 +180,8 @@ PanelWindow {
             showPasswordPrompt = false;
             selectedSsid = "";
             selectedSecurity = "";
+            failedSsid = "";
+            failedErrorMessage = "";
             closeTimer.stop();
             refreshWifi();
         }

@@ -2,12 +2,17 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import "../../../utils"
 
 Row {
     id: workspacesRoot
     spacing: 6
 
     property var theme
+
+    AppIconUtils {
+        id: iconUtils
+    }
 
     property int highestUsedWs: {
         var focusedId = (Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id > 0) ? Hyprland.focusedWorkspace.id : 1;
@@ -44,11 +49,42 @@ Row {
             }
 
             property bool isActive: (Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === wsId)
-            property bool hasWindows: (wsData && wsData.toplevels && wsData.toplevels.values && wsData.toplevels.values.length > 0)
+
+            property var windowIcons: {
+                if (!wsData || !wsData.toplevels || !wsData.toplevels.values) return [];
+                var list = wsData.toplevels.values;
+                var icons = [];
+                for (var j = 0; j < list.length; j++) {
+                    var top = list[j];
+                    if (!top) continue;
+
+                    var cls = "";
+                    if (top.lastIpcObject && top.lastIpcObject.class) {
+                        cls = top.lastIpcObject.class;
+                    } else if (top.wayland && top.wayland.appId) {
+                        cls = top.wayland.appId;
+                    } else if (top.appId) {
+                        cls = top.appId;
+                    }
+
+                    var title = top.title || (top.wayland ? top.wayland.title : "") || (top.lastIpcObject ? top.lastIpcObject.title : "") || "";
+                    var icon = iconUtils.mapClassToIcon(cls, title);
+
+                    if (icon && icons.indexOf(icon) === -1) {
+                        icons.push(icon);
+                        if (icons.length >= 2) break;
+                    }
+                }
+                return icons.slice(0, 2);
+            }
 
             height: 24
-            width: isActive ? 44 : 24
-            radius: 12
+
+            width: isActive
+                   ? Math.max(48, iconsRow.implicitWidth + 24)
+                   : (windowIcons.length > 0 ? Math.max(28, iconsRow.implicitWidth + 18) : 24)
+
+            radius: height / 2
 
             color: isActive
                    ? (workspacesRoot.theme ? workspacesRoot.theme.getColor("primary") : "#D0BCFF")
@@ -56,8 +92,9 @@ Row {
 
             Behavior on width {
                 NumberAnimation {
-                    duration: 220
-                    easing.type: Easing.OutCubic
+                    duration: 350
+                    easing.type: Easing.OutBack
+                    easing.overshoot: 1.5
                 }
             }
 
@@ -70,16 +107,38 @@ Row {
 
             Rectangle {
                 anchors.centerIn: parent
+                visible: dot.windowIcons.length === 0
                 width: dot.isActive ? 8 : 6
                 height: dot.isActive ? 8 : 6
                 radius: width / 2
                 color: dot.isActive
                     ? (workspacesRoot.theme ? workspacesRoot.theme.getColor("onPrimary") : "#381E72")
                     : (workspacesRoot.theme ? workspacesRoot.theme.getColor("onSurface") : "#E6E1E5")
-                opacity: dot.isActive ? 1.0 : (dot.hasWindows ? 0.9 : 0.4)
+                opacity: dot.isActive ? 1.0 : 0.4
+            }
 
-                Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-                Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+            RowLayout {
+                id: iconsRow
+                anchors.centerIn: parent
+                spacing: 6
+                visible: dot.windowIcons.length > 0
+
+                Repeater {
+                    model: dot.windowIcons
+                    Text {
+                        text: modelData
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 13
+                        Layout.alignment: Qt.AlignVCenter
+                        color: dot.isActive
+                            ? (workspacesRoot.theme ? workspacesRoot.theme.getColor("onPrimary") : "#381E72")
+                            : (workspacesRoot.theme ? workspacesRoot.theme.getColor("onSurface") : "#E6E1E5")
+
+                        Behavior on color {
+                            ColorAnimation { duration: 250 }
+                        }
+                    }
+                }
             }
 
             MouseArea {

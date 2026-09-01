@@ -9,7 +9,6 @@ import "modules/bar"
 import "modules/bar/components"
 import "components/ui"
 import "modules/wallpaper"
-import "modules/dock"
 
 QtObject {
     id: root
@@ -43,9 +42,8 @@ QtObject {
     property alias emojiLoader: popupManager.emojiLoader
     property alias clipboardLoader: popupManager.clipboardLoader
     property alias wallpaperSelectorLoader: popupManager.wallpaperSelectorLoader
-    property alias settingsLoader: popupManager.settingsLoader
     property alias powerMenuLoader: popupManager.powerMenuLoader
-    property alias altTabLoader: popupManager.altTabLoader
+    property alias altTab: popupManager.altTab
 
     property alias errorPopup: popupManager.errorPopup
     property alias trayMenuPopup: popupManager.trayMenuPopup
@@ -213,12 +211,6 @@ QtObject {
             showTop: false
             radius: (settingsService && settingsService.cornerRadius !== undefined) ? settingsService.cornerRadius : shellConfig.cornerRadius
             color: rootTheme.getColor("surface")
-        },
-
-        Loader {
-            id: dockLoader
-            active: (settingsService && settingsService.dockEnabled !== undefined) ? settingsService.dockEnabled : true
-            source: "modules/dock/Dock.qml"
         },
 
         NotificationServer {

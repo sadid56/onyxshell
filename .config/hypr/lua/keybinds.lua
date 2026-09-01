@@ -40,11 +40,7 @@ hl.bind(
 	hl.dsp.exec_cmd("qs ipc call shell toggleBar")
 )
 
--- Settings Popup
-hl.bind(
-	secondMod .. " + SHIFT + S",
-	hl.dsp.exec_cmd("qs ipc call shell toggleSettings")
-)
+
 
 -- Power Menu
 hl.bind(
@@ -82,10 +78,28 @@ hl.bind(mainMod .. " + backslash", hl.dsp.layout("togglesplit"))
 -- Cycle & Move Focus
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
 local altTabTimer = nil
+local altHoldTimer = nil
+local altTabCount = 0
+local altPopupActive = false
+
+local function showAltTabPopup()
+	if hl.is_key_down("Alt_L") or hl.is_key_down(64) or hl.is_key_down("Alt_R") or hl.is_key_down(108) then
+		altPopupActive = true
+		hl.exec_cmd("qs ipc call shell toggleAltTab")
+	end
+	altHoldTimer = nil
+end
 
 local function checkAltReleased()
 	if not hl.is_key_down("Alt_L") and not hl.is_key_down(64) and not hl.is_key_down("Alt_R") and not hl.is_key_down(108) then
-		hl.exec_cmd("qs ipc call shell closeAltTab")
+		if altHoldTimer then
+			altHoldTimer = nil
+			hl.exec_cmd("qs ipc call shell quickSwitchAltTab")
+		elseif altPopupActive then
+			hl.exec_cmd("qs ipc call shell closeAltTab")
+		end
+		altPopupActive = false
+		altTabCount = 0
 		altTabTimer = nil
 	else
 		altTabTimer = hl.timer(checkAltReleased, { type = "oneshot", timeout = 25 })
@@ -95,18 +109,42 @@ end
 hl.bind(
 	secondMod .. " + Tab",
 	function()
-		hl.exec_cmd("qs ipc call shell toggleAltTab")
-		if not altTabTimer then
-			altTabTimer = hl.timer(checkAltReleased, { type = "oneshot", timeout = 25 })
+		altTabCount = altTabCount + 1
+		if altTabCount == 1 then
+			altPopupActive = false
+			altHoldTimer = hl.timer(showAltTabPopup, { type = "oneshot", timeout = 200 })
+			if not altTabTimer then
+				altTabTimer = hl.timer(checkAltReleased, { type = "oneshot", timeout = 25 })
+			end
+		else
+			if altHoldTimer then
+				altHoldTimer = nil
+				altPopupActive = true
+				hl.exec_cmd("qs ipc call shell toggleAltTab")
+			end
+			hl.exec_cmd("qs ipc call shell toggleAltTab")
 		end
 	end
 )
+
 hl.bind(
 	secondMod .. " + SHIFT + Tab",
 	function()
-		hl.exec_cmd("qs ipc call shell toggleAltTab")
-		if not altTabTimer then
-			altTabTimer = hl.timer(checkAltReleased, { type = "oneshot", timeout = 25 })
+		altTabCount = altTabCount + 1
+		if altTabCount == 1 then
+			altPopupActive = false
+			altHoldTimer = hl.timer(showAltTabPopup, { type = "oneshot", timeout = 200 })
+			if not altTabTimer then
+				altTabTimer = hl.timer(checkAltReleased, { type = "oneshot", timeout = 25 })
+			end
+		else
+			if altHoldTimer then
+				altHoldTimer = nil
+				altPopupActive = true
+				hl.exec_cmd("qs ipc call shell toggleAltTabPrev")
+			else
+				hl.exec_cmd("qs ipc call shell toggleAltTabPrev")
+			end
 		end
 	end
 )

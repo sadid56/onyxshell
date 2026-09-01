@@ -15,8 +15,8 @@ Popup {
 
     popupWidth: 580
 
-    readonly property int chromeHeight: 150
-    readonly property int itemRowHeight: 50
+    readonly property int chromeHeight: 140
+    readonly property int itemRowHeight: 52
     readonly property int maxVisibleItems: 8
     popupHeight: (allApps.length === 0)
         ? (chromeHeight + 5 * itemRowHeight)
@@ -90,12 +90,13 @@ Popup {
         modelUtils.syncListModel(dynamicAppsModel, filtered, "name", 0);
         if (appsListView) {
             if (dynamicAppsModel.count > 0) {
+                appsListView.currentIndex = -1;
                 appsListView.currentIndex = 0;
-                appsListView.hoverItem(0, 0, 48);
+                appsListView.hoverItem(0, 0, 52);
                 Qt.callLater(() => {
                     if (appsListView && appsListView.count > 0) {
-                        appsListView.currentIndex = 0;
-                        appsListView.hoverItem(0, 0, 48);
+                        if (appsListView.currentIndex < 0) appsListView.currentIndex = 0;
+                        appsListView.updateSelectionPill();
                     }
                 });
             } else {

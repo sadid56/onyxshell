@@ -11,7 +11,7 @@ Popup {
 
     popupWidth: 480
 
-    readonly property int chromeHeight: 146
+    readonly property int chromeHeight: 140
     readonly property int itemRowHeight: 52
     readonly property int maxVisibleItems: 7
 

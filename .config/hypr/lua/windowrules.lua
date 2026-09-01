@@ -25,10 +25,17 @@ hl.window_rule({
 
 hl.layer_rule({
 	name         = "quickshell-style",
-	match        = { namespace = "quickshell" },
+	match        = { namespace = "^(quickshell)$" },
 	blur         = true,
 	ignore_alpha = 0.3,
-	animation    = "fade",
+	animation    = "none",
+})
+
+hl.layer_rule({
+	name         = "quickshell-overview-style",
+	match        = { namespace = "^(quickshell-overview)$" },
+	blur         = false,
+	animation    = "none",
 })
 
 hl.window_rule({
@@ -100,9 +107,27 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name      = "spotify-special",
-    match     = { class = "^(Spotify|spotify)$" },
-    workspace = "special:magic",
+    name   = "localsend-float",
+    match  = { class = "^(localsend|LocalSend|org.localsend.localsend_app|localsend_app)$" },
+    float  = true,
+    center = true,
+    size   = { 900, 650 },
+})
+
+hl.window_rule({
+    name   = "calculator-float",
+    match  = { class = "^(org.gnome.Calculator|gnome-calculator|Calculator)$" },
+    float  = true,
+    center = true,
+    size   = { 400, 600 },
+})
+
+hl.window_rule({
+    name   = "calendar-float",
+    match  = { class = "^(org.gnome.Calendar|gnome-calendar|Calendar)$" },
+    float  = true,
+    center = true,
+    size   = { 900, 650 },
 })
 
 hl.window_rule({

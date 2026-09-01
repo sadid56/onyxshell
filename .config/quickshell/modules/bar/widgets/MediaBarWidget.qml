@@ -118,7 +118,9 @@ Item {
                 if (!mediaBarRoot.mediaService) return "";
                 var t = mediaBarRoot.mediaService.mediaTitle || "";
                 var a = mediaBarRoot.mediaService.mediaArtist || "";
-                if (t === "No media playing" || t === "") return "";
+                if (t === "No media playing" || t === "") {
+                    return mediaBarRoot.mediaService.isPlaying ? "Playing Media" : "";
+                }
                 return a ? (t + " • " + a) : t;
             }
             variant: "bodyMedium"

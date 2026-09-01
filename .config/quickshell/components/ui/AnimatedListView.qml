@@ -11,6 +11,7 @@ ListView {
         : ((typeof root !== "undefined" && root.theme) ? root.theme.getColor("surfaceVariant") : "#2b2a27")
     property real pillRadius: 12
     property real pillMargin: 6
+    property real defaultItemHeight: 52
     property int hoveredIndex: -1
     property int activeTargetIndex: currentIndex >= 0 ? currentIndex : hoveredIndex
     property bool showBottomFade: true
@@ -32,19 +33,22 @@ ListView {
         repeat: false
         onTriggered: {
             hoveredIndex = -1;
-            if (currentIndex >= 0 && currentItem) {
-                selectionPill.targetY = currentItem.y;
-                selectionPill.targetHeight = currentItem.height;
-            }
+            updateSelectionPill();
         }
     }
 
     function hoverItem(idx, targetY, targetHeight) {
         unhoverTimer.stop();
         hoveredIndex = idx;
-        if (targetY !== undefined && targetHeight !== undefined) {
+        if (targetY !== undefined) {
             selectionPill.targetY = targetY;
+        }
+        if (targetHeight !== undefined && targetHeight > 0) {
             selectionPill.targetHeight = targetHeight;
+        } else if (currentItem && currentItem.height > 0) {
+            selectionPill.targetHeight = currentItem.height;
+        } else {
+            selectionPill.targetHeight = defaultItemHeight;
         }
     }
 
@@ -64,8 +68,8 @@ ListView {
                 selectionPill.targetY = currentItem.y;
                 selectionPill.targetHeight = currentItem.height;
             } else {
-                selectionPill.targetY = currentIndex * (48 + spacing);
-                selectionPill.targetHeight = 48;
+                selectionPill.targetY = currentIndex * (defaultItemHeight + spacing);
+                selectionPill.targetHeight = defaultItemHeight;
             }
         }
     }
@@ -74,9 +78,14 @@ ListView {
         if (hoveredIndex >= count) {
             hoveredIndex = -1;
         }
-        if (currentIndex >= count) {
-            currentIndex = count > 0 ? 0 : -1;
+        if (count > 0) {
+            if (currentIndex < 0 || currentIndex >= count) {
+                currentIndex = 0;
+            }
+        } else {
+            currentIndex = -1;
         }
+        updateSelectionPill();
         Qt.callLater(() => updateSelectionPill());
     }
 
@@ -95,7 +104,7 @@ ListView {
         color: listViewRoot.pillColor
 
         property real targetY: 0
-        property real targetHeight: 48
+        property real targetHeight: defaultItemHeight
 
         y: targetY
         height: targetHeight

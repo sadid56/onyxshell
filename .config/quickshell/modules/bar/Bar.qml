@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Wayland
 import Quickshell.Widgets
 import Quickshell.Hyprland
 import "./widgets"
@@ -13,6 +14,7 @@ PanelWindow {
     anchors { top: true; left: true; right: true }
     implicitHeight: 56
     color: "transparent"
+    WlrLayershell.layer: WlrLayer.Overlay
 
     readonly property bool isFullscreen: (Hyprland.focusedWorkspace && Boolean(Hyprland.focusedWorkspace.hasfullscreen || Hyprland.focusedWorkspace.hasFullscreen))
     visible: !barWindow.isFullscreen

@@ -18,19 +18,22 @@ Rectangle {
     signal selectWindow()
     signal closeWindow()
     signal draggingAt(real gx, real gy)
-    signal droppedAt(real gx, real gy)
+    signal droppedAt(var client, real gx, real gy)
 
     radius: 20
     color: isHovered || isSelected || dragMouse.drag.active
-           ? (theme ? Qt.alpha(theme.getColor("surfaceVariant"), 0.85) : "#282020")
-           : (theme ? Qt.alpha(theme.getColor("surface"), 0.75) : "#1a1414")
+           ? (theme ? theme.getColor("surfaceVariant") : "#282020")
+           : (theme ? theme.getColor("surface") : "#1a1414")
 
     border.width: dragMouse.drag.active ? 2 : 1
     border.color: dragMouse.drag.active
                   ? (theme ? theme.getColor("primary") : "#cba6f7")
                   : (isHovered || isSelected
                      ? (theme ? theme.getColor("outline") : "#605050")
-                     : (theme ? Qt.alpha(theme.getColor("outlineVariant"), 0.35) : "#382c2c"))
+                     : (theme ? theme.getColor("outlineVariant") : "#382c2c"))
+
+    property bool overviewActive: true
+    readonly property bool isTopActive: Boolean(clientData && (clientData.focusHistoryID === 0 || cardRoot.isSelected))
 
     property real dragProgress: {
         if (!dragMouse.drag.active) return 0.0;
@@ -42,9 +45,13 @@ Rectangle {
 
     readonly property real targetMinScale: Math.max(0.18, Math.min(0.40, 145.0 / Math.max(100, cardRoot.width)))
 
-    scale: dragMouse.drag.active ? (1.0 - (dragProgress * (1.0 - targetMinScale))) : 1.0
-    z: dragMouse.drag.active ? 999 : (isSelected ? 2 : 1)
-    opacity: dragMouse.drag.active ? 0.88 : 1.0
+    scale: {
+        if (dragMouse.drag.active) return 1.0 - (dragProgress * (1.0 - targetMinScale));
+        if (!cardRoot.overviewActive) return (isTopActive ? 1.45 : 1.15);
+        return 1.0;
+    }
+    z: dragMouse.drag.active ? 999 : (isTopActive ? 10 : (isSelected ? 2 : 1))
+    opacity: 1.0
 
     layer.enabled: dragMouse.drag.active
     layer.effect: MultiEffect {
@@ -55,11 +62,13 @@ Rectangle {
     }
 
     Behavior on scale {
-        enabled: dragMouse.drag.active
-        NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
+        enabled: true
+        NumberAnimation {
+            duration: dragMouse.drag.active ? 100 : 180
+            easing.type: dragMouse.drag.active ? Easing.OutQuad : Easing.OutQuint
+        }
     }
-    Behavior on color { ColorAnimation { duration: 120 } }
-    Behavior on border.color { ColorAnimation { duration: 120 } }
+
 
     ColumnLayout {
         anchors.fill: parent
@@ -99,25 +108,41 @@ Rectangle {
 
             Rectangle {
                 id: closeBtn
-                Layout.preferredWidth: 24
-                Layout.preferredHeight: 24
+                Layout.preferredWidth: 30
+                Layout.preferredHeight: 30
                 Layout.alignment: Qt.AlignVCenter
-                radius: 12
+                radius: 15
                 z: 20
+
                 color: closeBtnMouse.containsMouse
-                       ? (cardRoot.theme ? cardRoot.theme.getColor("errorContainer") : "#ff5555")
+                       ? (cardRoot.theme ? Qt.alpha(cardRoot.theme.getColor("onSurface"), 0.12) : "#20ffffff")
                        : "transparent"
 
-                Behavior on color { ColorAnimation { duration: 100 } }
+                border.width: closeBtnMouse.containsMouse ? 1 : 0
+                border.color: cardRoot.theme ? Qt.alpha(cardRoot.theme.getColor("outlineVariant"), 0.40) : "#35ffffff"
 
-                Text {
+                scale: closeBtnMouse.pressed ? 0.90 : (closeBtnMouse.containsMouse ? 1.06 : 1.0)
+                Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutQuad } }
+                Behavior on color { ColorAnimation { duration: 120 } }
+                Behavior on border.color { ColorAnimation { duration: 120 } }
+
+                IconImage {
                     anchors.centerIn: parent
-                    text: "✕"
-                    font.pixelSize: 11
-                    font.bold: true
-                    color: closeBtnMouse.containsMouse
-                           ? (cardRoot.theme ? cardRoot.theme.getColor("onErrorContainer") : "#ffffff")
-                           : (cardRoot.theme ? cardRoot.theme.getColor("onSurfaceVariant") : "#aaaaaa")
+                    width: 14
+                    height: 14
+                    source: {
+                        var cfg = (typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : ((typeof root !== "undefined" && root.shellConfig) ? root.shellConfig : null);
+                        if (cfg && typeof cfg.getIcon === "function") return cfg.getIcon("actions/dismiss.svg");
+                        return "";
+                    }
+                    asynchronous: true
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        colorization: 1.0
+                        colorizationColor: closeBtnMouse.containsMouse
+                                           ? (cardRoot.theme ? cardRoot.theme.getColor("onSurface") : "#ffffff")
+                                           : (cardRoot.theme ? cardRoot.theme.getColor("onSurfaceVariant") : "#a6adc8")
+                    }
                 }
 
                 MouseArea {
@@ -183,7 +208,7 @@ Rectangle {
                 cardRoot.selectWindow();
             } else {
                 var globalPt = dragMouse.mapToItem(null, mouse.x, mouse.y);
-                cardRoot.droppedAt(globalPt.x, globalPt.y);
+                cardRoot.droppedAt(cardRoot.clientData, globalPt.x, globalPt.y);
             }
             cardRoot.x = startX;
             cardRoot.y = startY;

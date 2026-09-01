@@ -7,7 +7,7 @@ Item {
 
     Process {
         id: statsFetcher
-        command: ["sh", "-c", "echo \"VOL: $(wpctl get-volume @DEFAULT_AUDIO_SINK@)\"; echo \"MIC: $(wpctl get-volume @DEFAULT_AUDIO_SOURCE@)\"; echo \"BRI: $(brightnessctl -m)\"; echo \"WIFI: $(nmcli radio wifi 2>/dev/null)\"; echo \"PPD: $(powerprofilesctl get 2>/dev/null)\"; echo \"UP: $(uptime -p 2>/dev/null)\""]
+        command: ["sh", "-c", "echo \"VOL: $(wpctl get-volume @DEFAULT_AUDIO_SINK@)\"; echo \"MIC: $(wpctl get-volume @DEFAULT_AUDIO_SOURCE@)\"; echo \"BRI: $(brightnessctl -m)\"; echo \"WIFI: $(nmcli radio wifi 2>/dev/null)\"; echo \"NIGHT: $([ -f \"${XDG_RUNTIME_DIR:-/tmp}/hyprsunset_${USER}.state\" ] && pgrep -x hyprsunset >/dev/null && echo on || echo off)\"; echo \"PPD: $(powerprofilesctl get 2>/dev/null)\"; echo \"UP: $(uptime -p 2>/dev/null)\""]
         stdout: StdioCollector {
             onStreamFinished: {
                 var lines = this.text.split('\n');
@@ -32,6 +32,9 @@ Item {
                         var matchM = mStr.match(/Volume:\s+([0-9.]+)/);
                         if (matchM) notifWindow.micValue = Math.round(parseFloat(matchM[1]) * 100);
                         notifWindow.isMicMuted = mStr.indexOf("[MUTED]") !== -1;
+                    } else if (line.indexOf("NIGHT:") === 0) {
+                        var nStr = line.substring(6).trim();
+                        notifWindow.nightLightEnabled = (nStr === "on" || nStr === "active");
                     } else if (line.indexOf("BRI:") === 0) {
                         var bStr = line.substring(4).trim();
                         var parts = bStr.split(',');

@@ -1,14 +1,11 @@
 Typography 1.0 Typography.qml
 Button 1.0 Button.qml
-Dropdown 1.0 Dropdown.qml
-DropdownPopup 1.0 DropdownPopup.qml
 EmptyState 1.0 EmptyState.qml
 Icon 1.0 Icon.qml
 IconButton 1.0 IconButton.qml
 Input 1.0 Input.qml
 ScreenCorners 1.0 ScreenCorners.qml
 Slider 1.0 Slider.qml
-Switch 1.0 Switch.qml
 Divider 1.0 Divider.qml
 AnimatedListView 1.0 AnimatedListView.qml
 WindowPreview 1.0 WindowPreview.qml

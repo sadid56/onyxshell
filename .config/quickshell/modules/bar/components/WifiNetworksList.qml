@@ -65,9 +65,10 @@ ColumnLayout {
         model: wifiWindow ? wifiWindow.wifiList : []
         delegate: WifiItemDelegate {
             parentListView: wifiListView
+            wifiWindow: listRoot.wifiWindow
             theme: listRoot.theme
             onItemClicked: info => {
-                if (info.active || !wifiWindow) return;
+                if (info.active || !wifiWindow || wifiWindow.connectingSsid !== "") return;
                 wifiWindow.selectedSsid = info.ssid;
                 wifiWindow.selectedSecurity = info.security;
                 if (info.saved || info.security === "") wifiWindow.wifiConnector.connectTo(wifiWindow.selectedSsid, "");

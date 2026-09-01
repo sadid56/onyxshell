@@ -18,15 +18,18 @@ Popup {
     property int volumeValue: 50
     property int micValue: 50
     property int brightnessValue: 50
+    property int nightLightValue: 50
     property bool powerProfileExpanded: false
     property bool micExpanded: false
+    property bool nightLightExpanded: false
+    property bool nightLightEnabled: false
     property string currentProfile: "performance"
     property string uptimeStr: "Up 0m"
-    property bool wifiEnabled: true
     property bool isMuted: false
     property int lastUnmutedVolume: 50
     property bool isMicMuted: false
-    Process { id: wifiToggleProc }
+    property bool wifiEnabled: true
+
     Process {
         id: muteToggleProc
         function toggleMute() {
@@ -47,6 +50,52 @@ Popup {
             Qt.callLater(() => running = true);
         }
     }
+
+    Process {
+        id: micMuteToggleProc
+        function toggleMute() {
+            notifWindow.isMicMuted = !notifWindow.isMicMuted;
+            command = ["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", notifWindow.isMicMuted ? "1" : "0"];
+            running = false;
+            Qt.callLater(() => running = true);
+        }
+    }
+
+    function getNightLightScript() {
+        if (typeof shellConfig !== "undefined" && shellConfig && typeof shellConfig.getScript === "function") {
+            return shellConfig.getScript("nightlight.sh");
+        }
+        if (typeof root !== "undefined" && root.shellConfig && typeof root.shellConfig.getScript === "function") {
+            return root.shellConfig.getScript("nightlight.sh");
+        }
+        return Quickshell.env("HOME") + "/.config/quickshell/scripts/nightlight.sh";
+    }
+
+    Process {
+        id: nightLightToggleProc
+        function toggleNightLight() {
+            notifWindow.nightLightEnabled = !notifWindow.nightLightEnabled;
+            var script = notifWindow.getNightLightScript();
+            if (notifWindow.nightLightEnabled) {
+                command = [script, "on", notifWindow.nightLightValue.toString()];
+            } else {
+                command = [script, "off"];
+            }
+            running = false;
+            Qt.callLater(() => running = true);
+        }
+    }
+
+    Process {
+        id: nightLightSetter
+        function setNightLight(val) {
+            var script = notifWindow.getNightLightScript();
+            command = [script, "set", val.toString()];
+            running = false;
+            Qt.callLater(() => running = true);
+        }
+    }
+
     Process { id: setProfileProc }
     NotifStatsFetcher {
         id: statsService
@@ -115,18 +164,46 @@ Popup {
     // 3. macOS Style 2x2 Quick Actions Control Grid
     QuickActions {
         theme: notifWindow.theme
-        wifiEnabled: notifWindow.wifiEnabled
         isMuted: notifWindow.isMuted
         isMicMuted: notifWindow.isMicMuted
         micExpanded: notifWindow.micExpanded
-        wifiToggleProc: wifiToggleProc
+        nightLightEnabled: notifWindow.nightLightEnabled
+        nightLightValue: notifWindow.nightLightValue
+        nightLightExpanded: notifWindow.nightLightExpanded
         muteToggleProc: muteToggleProc
-        onWifiEnabledChanged: notifWindow.wifiEnabled = wifiEnabled
+        micMuteToggleProc: micMuteToggleProc
+        nightLightToggleProc: nightLightToggleProc
         onIsMutedChanged: notifWindow.isMuted = isMuted
+        onIsMicMutedChanged: notifWindow.isMicMuted = isMicMuted
+        onNightLightEnabledChanged: notifWindow.nightLightEnabled = nightLightEnabled
         onToggleMicExpanded: notifWindow.micExpanded = !notifWindow.micExpanded
+        onToggleNightLightExpanded: notifWindow.nightLightExpanded = !notifWindow.nightLightExpanded
     }
 
-    // 4. Collapsible Mic Slider
+    // 4. Collapsible Night Light Slider
+    UI.Slider {
+        id: bottomNightLightSlider
+        Layout.fillWidth: true
+        Layout.preferredHeight: notifWindow.nightLightExpanded ? 32 : 0
+        implicitHeight: notifWindow.nightLightExpanded ? 32 : 0
+        visible: notifWindow.nightLightExpanded || opacity > 0.0
+        opacity: notifWindow.nightLightExpanded ? 1.0 : 0.0
+        clip: !notifWindow.nightLightExpanded || opacity < 0.99
+        theme: notifWindow.theme
+        icon: (typeof shellConfig !== "undefined" ? shellConfig : root.shellConfig).getIcon("system/moon.svg")
+        value: notifWindow.nightLightValue
+        onMoved: val => {
+            notifWindow.nightLightValue = val;
+            if (!notifWindow.nightLightEnabled) {
+                notifWindow.nightLightEnabled = true;
+            }
+            if (nightLightSetter) nightLightSetter.setNightLight(val);
+        }
+        Behavior on Layout.preferredHeight { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: 180 } }
+    }
+
+    // 5. Collapsible Mic Slider
     UI.Slider {
         id: bottomMicSlider
         Layout.fillWidth: true
@@ -146,7 +223,7 @@ Popup {
         Behavior on opacity { NumberAnimation { duration: 180 } }
     }
 
-    // 5. macOS Style Display & Sound Sliders
+    // 6. macOS Style Display & Sound Sliders
     QuickSliders {
         theme: notifWindow.theme
         volumeValue: notifWindow.volumeValue
@@ -157,7 +234,7 @@ Popup {
         onBrightnessMoved: val => notifWindow.brightnessValue = val
     }
 
-    // 6. Subtle Divider
+    // 7. Subtle Divider
     UI.Divider {
         theme: notifWindow.theme
         horizontal: true
@@ -166,7 +243,7 @@ Popup {
         Layout.bottomMargin: 2
     }
 
-    // 7. macOS Style Notifications Section
+    // 8. macOS Style Notifications Section
     NotifSection {
         theme: notifWindow.theme
     }

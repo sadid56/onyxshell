@@ -82,17 +82,27 @@ PanelWindow {
         selectedIndex = (selectedIndex - 1 + clientsList.length) % clientsList.length;
     }
 
+    function quickSwitch() {
+        altTabWindow.active = false;
+        if (clientsList.length > 1) {
+            var target = clientsList[1];
+            if (target && target.address) {
+                var addr = target.address;
+                var script = "hl.dispatch(hl.dsp.focus({ window = 'address:" + addr + "' })); hl.dispatch(hl.dsp.window.alter_zorder({ mode = 'top', window = 'address:" + addr + "' }))";
+                Quickshell.execDetached(["hyprctl", "eval", script]);
+            }
+        }
+    }
+
     function selectAndClose() {
         if (!altTabWindow.active) return;
         var target = (selectedIndex >= 0 && selectedIndex < clientsList.length) ? clientsList[selectedIndex] : null;
-        altTabWindow.active = false;
         if (target && target.address) {
             var addr = target.address;
-            var script = "hl.dispatch(hl.dsp.focus({ window = 'address:" + addr + "' }))\n" +
-                         "hl.dispatch(hl.dsp.window.bring_to_top({ window = 'address:" + addr + "' }))\n" +
-                         "hl.dispatch(hl.dsp.window.alter_zorder({ mode = 'top', window = 'address:" + addr + "' }))";
+            var script = "hl.dispatch(hl.dsp.focus({ window = 'address:" + addr + "' })); hl.dispatch(hl.dsp.window.alter_zorder({ mode = 'top', window = 'address:" + addr + "' }))";
             Quickshell.execDetached(["hyprctl", "eval", script]);
         }
+        altTabWindow.active = false;
     }
 
     function cancelAndClose() {

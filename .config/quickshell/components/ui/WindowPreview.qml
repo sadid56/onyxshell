@@ -49,12 +49,11 @@ Item {
 
     readonly property bool hasCapture: resolvedToplevel !== null
 
-    Rectangle {
+    ClippingRectangle {
         id: bgContainer
         anchors.fill: parent
         radius: windowPreviewRoot.cornerRadius
         color: windowPreviewRoot.backgroundColor
-        clip: windowPreviewRoot.cornerRadius > 0
 
         ScreencopyView {
             id: screencopy

@@ -8,10 +8,9 @@ import "../modules/alt_tab"
 import "../modules/emoji"
 import "../modules/app_launcher"
 import "../modules/power_menu"
+import "../modules/overview"
 import "../modules/bar/components"
 import "../services"
-import "../modules/settings"
-import "../modules/overview"
 
 QtObject {
     id: popupManager
@@ -34,9 +33,8 @@ QtObject {
     property alias emojiLoader: emojiLoader
     property alias clipboardLoader: clipboardLoader
     property alias wallpaperSelectorLoader: wallpaperSelectorLoader
-    property alias settingsLoader: settingsLoader
     property alias powerMenuLoader: powerMenuLoader
-    property alias altTabLoader: altTabLoader
+    property alias altTab: altTab
     property alias errorPopup: errorPopup
     property alias trayMenuPopup: trayMenuPopup
     property alias confirmationModal: confirmationModal
@@ -74,10 +72,13 @@ QtObject {
     }
 
     function closeAllPopupsExcept(excludeLoader) {
-        var loaders = [overviewLoader, dashboardLoader, notifsLoader, calendarLoader, wifiLoader, resourcesLoader, emojiLoader, clipboardLoader, wallpaperSelectorLoader, settingsLoader, powerMenuLoader, altTabLoader, mediaLoader];
+        var loaders = [overviewLoader, dashboardLoader, notifsLoader, calendarLoader, wifiLoader, resourcesLoader, emojiLoader, clipboardLoader, wallpaperSelectorLoader, powerMenuLoader, mediaLoader];
         for (var i = 0; i < loaders.length; i++) {
             var l = loaders[i];
             if (l !== excludeLoader && l.loaded && l.item) l.item.active = false;
+        }
+        if (altTab && altTab !== excludeLoader && altTab.active) {
+            altTab.active = false;
         }
         if (trayMenuPopup && trayMenuPopup !== excludeLoader && trayMenuPopup.active) {
             trayMenuPopup.active = false;
@@ -97,16 +98,36 @@ QtObject {
         trayMenuPopup.closeTimer.restart();
     }
 
+    function quickSwitchAltTab() {
+        if (altTab) {
+            altTab.quickSwitch();
+        }
+    }
+
     function toggleAltTab() {
-        var loader = altTabLoader;
-        if (loader.item) {
-            if (loader.item.active) {
-                if (typeof loader.item.nextWindow === "function") loader.item.nextWindow();
+        if (altTab) {
+            if (altTab.active) {
+                if (typeof altTab.nextWindow === "function") altTab.nextWindow();
             } else {
-                closeAllPopupsExcept(loader);
-                loader.item.active = true;
-                if (loader.item.clientsList && loader.item.clientsList.length > 1) {
-                    loader.item.selectedIndex = 1;
+                closeAllPopupsExcept(null);
+                altTab.active = true;
+                if (altTab.clientsList && altTab.clientsList.length > 1) {
+                    altTab.selectedIndex = 1;
+                }
+            }
+            updateCenterPopupWidth();
+        }
+    }
+
+    function toggleAltTabPrev() {
+        if (altTab) {
+            if (altTab.active) {
+                if (typeof altTab.previousWindow === "function") altTab.previousWindow();
+            } else {
+                closeAllPopupsExcept(null);
+                altTab.active = true;
+                if (altTab.clientsList && altTab.clientsList.length > 1) {
+                    altTab.selectedIndex = altTab.clientsList.length - 1;
                 }
             }
             updateCenterPopupWidth();
@@ -214,14 +235,6 @@ QtObject {
             sourceComponent: WallpaperSelector { theme: popupManager.theme }
         },
         AutoUnloadLoader {
-            id: settingsLoader
-            sourceComponent: SettingsPopup {
-                theme: popupManager.theme
-                settingsService: popupManager.settingsService
-                appService: popupManager.appService
-            }
-        },
-        AutoUnloadLoader {
             id: dashboardLoader
             onItemInitialized: item => { item.activeChanged.connect(() => { popupManager.updateCenterPopupWidth(); }); }
             sourceComponent: AppLauncher {
@@ -233,10 +246,9 @@ QtObject {
             id: powerMenuLoader
             sourceComponent: PowerMenuPopup { theme: popupManager.theme; statusBar: popupManager.statusBar }
         },
-        Loader {
-            id: altTabLoader
-            active: true
-            sourceComponent: AltTab { theme: popupManager.theme }
+        AltTab {
+            id: altTab
+            theme: popupManager.theme
         },
         ErrorPopup { id: errorPopup; theme: popupManager.theme },
         TrayMenuPopup { id: trayMenuPopup; theme: popupManager.theme },

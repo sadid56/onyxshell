@@ -166,38 +166,6 @@ RowLayout {
                     onClicked: headerRoot.togglePowerProfile()
                 }
             }
-
-            // 4. Settings Shortcut
-            Rectangle {
-                width: 28
-                height: 28
-                radius: 14
-                color: settingsMouse.containsMouse
-                    ? (headerRoot.theme ? Qt.alpha(headerRoot.theme.getColor("primary"), 0.18) : "#453838")
-                    : "transparent"
-
-                Behavior on color { ColorAnimation { duration: 120 } }
-
-                UI.Icon {
-                    anchors.centerIn: parent
-                    size: 15
-                    icon: "categories/category-settings.svg"
-                    color: settingsMouse.containsMouse
-                        ? (headerRoot.theme ? headerRoot.theme.getColor("primary") : "#ffb3b4")
-                        : (headerRoot.theme ? headerRoot.theme.getColor("onSurfaceVariant") : "#c5c5d8")
-                }
-
-                MouseArea {
-                    id: settingsMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        headerRoot.closeRequested();
-                        Quickshell.execDetached(["qs", "ipc", "call", "shell", "toggleSettings"]);
-                    }
-                }
-            }
         }
     }
 }

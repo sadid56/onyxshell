@@ -103,7 +103,8 @@ Scope {
                 id: currentImg
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
-                asynchronous: false
+                asynchronous: true
+                mipmap: false
                 cache: true
                 sourceSize: Qt.size(wallpaperWindow.width > 0 ? wallpaperWindow.width : 1920, wallpaperWindow.height > 0 ? wallpaperWindow.height : 1080)
                 opacity: 1
