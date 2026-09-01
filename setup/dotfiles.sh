@@ -7,7 +7,7 @@ install_dotfiles() {
     local CONFIG_ITEMS=(
         hypr quickshell kitty fastfetch cava nvim
         xdg-desktop-portal fish matugen htop
-        fontconfig gtk-3.0 gtk-4.0 qt5ct qt6ct
+        fontconfig gtk-3.0 gtk-4.0 qt5ct qt6ct environment.d
         starship.toml kdeglobals
         brave-flags.conf chrome-flags.conf chromium-flags.conf
     )

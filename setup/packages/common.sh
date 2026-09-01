@@ -30,6 +30,7 @@ SHARED_BASE_PKGS=(
     grim
     slurp
     papirus-icon-theme
+    gnome-themes-extra
     qt5ct
     qt6ct
 )
