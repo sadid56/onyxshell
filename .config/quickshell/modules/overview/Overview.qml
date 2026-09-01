@@ -26,7 +26,7 @@ PanelWindow {
     property var appService: (typeof root !== "undefined" && root.appService) ? root.appService : null
     property var settingsService: (typeof root !== "undefined" && root.settingsService) ? root.settingsService : null
     property var shellConfig: (typeof root !== "undefined" && root.shellConfig) ? root.shellConfig : null
-    property int selectedIndex: 0
+    property int selectedIndex: -1
     property string searchQuery: ""
 
     readonly property int cornerRadius: (settingsService && settingsService.cornerRadius !== undefined) ? settingsService.cornerRadius : 20
@@ -121,7 +121,7 @@ PanelWindow {
 
     onActiveChanged: {
         if (active) {
-            selectedIndex = 0;
+            selectedIndex = -1;
             searchQuery = "";
             if (searchInput) searchInput.text = "";
             if (Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id > 0) {
@@ -134,7 +134,7 @@ PanelWindow {
         } else {
             showAllWorkspaces = false;
             searchQuery = "";
-            selectedIndex = 0;
+            selectedIndex = -1;
             if (searchInput) searchInput.text = "";
         }
     }
@@ -168,14 +168,14 @@ PanelWindow {
             Keys.onEscapePressed: overviewWindow.active = false
             Keys.onReturnPressed: {
                 if (overviewWindow.displayedClients.length > 0) {
-                    var target = overviewWindow.displayedClients[overviewWindow.selectedIndex] || overviewWindow.displayedClients[0];
+                    var target = overviewWindow.displayedClients[Math.max(0, overviewWindow.selectedIndex)] || overviewWindow.displayedClients[0];
                     service.focusAndCloseWindow(target, () => { overviewWindow.active = false; });
                 }
             }
-            Keys.onRightPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = (overviewWindow.selectedIndex + 1) % overviewWindow.displayedClients.length
-            Keys.onLeftPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = (overviewWindow.selectedIndex - 1 + overviewWindow.displayedClients.length) % overviewWindow.displayedClients.length
-            Keys.onDownPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = Math.min(overviewWindow.displayedClients.length - 1, overviewWindow.selectedIndex + overviewGrid.gridCols)
-            Keys.onUpPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = Math.max(0, overviewWindow.selectedIndex - overviewGrid.gridCols)
+            Keys.onRightPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = overviewWindow.selectedIndex < 0 ? 0 : ((overviewWindow.selectedIndex + 1) % overviewWindow.displayedClients.length)
+            Keys.onLeftPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = overviewWindow.selectedIndex < 0 ? (overviewWindow.displayedClients.length - 1) : ((overviewWindow.selectedIndex - 1 + overviewWindow.displayedClients.length) % overviewWindow.displayedClients.length)
+            Keys.onDownPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = overviewWindow.selectedIndex < 0 ? 0 : Math.min(overviewWindow.displayedClients.length - 1, overviewWindow.selectedIndex + overviewGrid.gridCols)
+            Keys.onUpPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = overviewWindow.selectedIndex < 0 ? 0 : Math.max(0, overviewWindow.selectedIndex - overviewGrid.gridCols)
         }
 
         ColumnLayout {
@@ -215,7 +215,7 @@ PanelWindow {
 
                 onTextChanged: {
                     overviewWindow.searchQuery = text.trim().toLowerCase();
-                    overviewWindow.selectedIndex = 0;
+                    overviewWindow.selectedIndex = -1;
                 }
 
                 onEscapePressed: {
@@ -228,15 +228,15 @@ PanelWindow {
 
                 onReturnPressed: {
                     if (overviewWindow.displayedClients.length > 0) {
-                        var target = overviewWindow.displayedClients[overviewWindow.selectedIndex] || overviewWindow.displayedClients[0];
+                        var target = overviewWindow.displayedClients[Math.max(0, overviewWindow.selectedIndex)] || overviewWindow.displayedClients[0];
                         service.focusAndCloseWindow(target, () => { overviewWindow.active = false; });
                     }
                 }
 
-                onRightPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = (overviewWindow.selectedIndex + 1) % overviewWindow.displayedClients.length
-                onLeftPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = (overviewWindow.selectedIndex - 1 + overviewWindow.displayedClients.length) % overviewWindow.displayedClients.length
-                onDownPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = Math.min(overviewWindow.displayedClients.length - 1, overviewWindow.selectedIndex + overviewGrid.gridCols)
-                onUpPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = Math.max(0, overviewWindow.selectedIndex - overviewGrid.gridCols)
+                onRightPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = overviewWindow.selectedIndex < 0 ? 0 : ((overviewWindow.selectedIndex + 1) % overviewWindow.displayedClients.length)
+                onLeftPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = overviewWindow.selectedIndex < 0 ? (overviewWindow.displayedClients.length - 1) : ((overviewWindow.selectedIndex - 1 + overviewWindow.displayedClients.length) % overviewWindow.displayedClients.length)
+                onDownPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = overviewWindow.selectedIndex < 0 ? 0 : Math.min(overviewWindow.displayedClients.length - 1, overviewWindow.selectedIndex + overviewGrid.gridCols)
+                onUpPressed: if (overviewWindow.displayedClients.length > 0) overviewWindow.selectedIndex = overviewWindow.selectedIndex < 0 ? 0 : Math.max(0, overviewWindow.selectedIndex - overviewGrid.gridCols)
             }
 
             OverviewGrid {

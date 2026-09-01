@@ -21,16 +21,12 @@ Rectangle {
     signal droppedAt(var client, real gx, real gy)
 
     radius: 20
-    color: isHovered || isSelected || dragMouse.drag.active
-           ? (theme ? theme.getColor("surfaceVariant") : "#282020")
-           : (theme ? theme.getColor("surface") : "#1a1414")
+    color: theme ? theme.getColor("surfaceVariant") : "#282020"
 
-    border.width: dragMouse.drag.active ? 2 : 1
+    border.width: dragMouse.drag.active ? 2 : 1.5
     border.color: dragMouse.drag.active
                   ? (theme ? theme.getColor("primary") : "#cba6f7")
-                  : (isHovered || isSelected
-                     ? (theme ? theme.getColor("outline") : "#605050")
-                     : (theme ? theme.getColor("outlineVariant") : "#382c2c"))
+                  : (theme ? theme.getColor("outline") : "#909097")
 
     property bool overviewActive: true
     readonly property bool isTopActive: Boolean(clientData && (clientData.focusHistoryID === 0 || cardRoot.isSelected))
@@ -45,11 +41,7 @@ Rectangle {
 
     readonly property real targetMinScale: Math.max(0.18, Math.min(0.40, 145.0 / Math.max(100, cardRoot.width)))
 
-    scale: {
-        if (dragMouse.drag.active) return 1.0 - (dragProgress * (1.0 - targetMinScale));
-        if (!cardRoot.overviewActive) return (isTopActive ? 1.45 : 1.15);
-        return 1.0;
-    }
+    scale: dragMouse.drag.active ? (1.0 - (dragProgress * (1.0 - targetMinScale))) : 1.0
     z: dragMouse.drag.active ? 999 : (isTopActive ? 10 : (isSelected ? 2 : 1))
     opacity: 1.0
 
@@ -59,14 +51,6 @@ Rectangle {
         shadowColor: "#80000000"
         shadowBlur: 0.8
         shadowVerticalOffset: 8
-    }
-
-    Behavior on scale {
-        enabled: true
-        NumberAnimation {
-            duration: dragMouse.drag.active ? 100 : 180
-            easing.type: dragMouse.drag.active ? Easing.OutQuad : Easing.OutQuint
-        }
     }
 
 
@@ -121,10 +105,7 @@ Rectangle {
                 border.width: closeBtnMouse.containsMouse ? 1 : 0
                 border.color: cardRoot.theme ? Qt.alpha(cardRoot.theme.getColor("outlineVariant"), 0.40) : "#35ffffff"
 
-                scale: closeBtnMouse.pressed ? 0.90 : (closeBtnMouse.containsMouse ? 1.06 : 1.0)
-                Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutQuad } }
-                Behavior on color { ColorAnimation { duration: 120 } }
-                Behavior on border.color { ColorAnimation { duration: 120 } }
+                scale: closeBtnMouse.pressed ? 0.90 : 1.0
 
                 IconImage {
                     anchors.centerIn: parent

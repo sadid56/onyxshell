@@ -95,7 +95,7 @@ Item {
                 width: stripRoot.cardW
                 height: stripRoot.cardH
                 radius: 14
-                scale: isDragTarget ? 1.04 : (isHovered ? 1.02 : 1.0)
+                scale: 1.0
 
                 color: isHighlighted
                        ? (stripRoot.theme ? Qt.alpha(stripRoot.theme.getColor("primaryContainer"), 0.90) : "#453850")

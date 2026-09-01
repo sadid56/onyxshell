@@ -31,6 +31,8 @@ QtObject {
         if (cls === "dbeaver" || cls.indexOf("mongodb") !== -1 || cls === "datagrip") return "󰆼";
 
         if (cls === "spotify") return "";
+        if (cls.indexOf("kdenlive") !== -1 || title.indexOf("kdenlive") !== -1 || cls === "org.kde.kdenlive") return "";
+        if (cls.indexOf("qemu") !== -1 || cls.indexOf("virt-manager") !== -1 || cls.indexOf("virtualbox") !== -1 || cls.indexOf("quickemu") !== -1 || cls.indexOf("boxes") !== -1 || cls.indexOf("looking-glass") !== -1 || title.indexOf("qemu") !== -1 || title.indexOf("virt-manager") !== -1 || title.indexOf("virtual machine") !== -1) return "";
         if (cls === "vlc" || cls === "mpv") return "󰕼";
         if (cls === "com.obsproject.studio") return "󰑋";
         if (cls === "steam") return "󰓓";

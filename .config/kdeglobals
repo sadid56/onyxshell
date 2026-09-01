@@ -9,6 +9,7 @@ widgetStyle=Breeze
 [KDE]
 ShowDeleteCommand=true
 SingleClick=false
+ShowAcceleratorMarkers=false
 
 [WM]
 activeFont=Inter,10,-1,5,600,0,0,0,0,0,0,0,0,0,0,1
