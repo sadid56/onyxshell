@@ -9,14 +9,13 @@ Comprehensive list of all default keyboard shortcuts and mouse gestures configur
 
 ---
 
-## 🚀 Application Launchers & Overviews
+## 🚀 Application Launchers & Desktop Navigation
 
 | Keybinding | Action |
 | :--- | :--- |
 | `SUPER + RETURN` | Open Default Terminal (Kitty) |
+| `ALT + SPACE` | **Open Quickshell Application Launcher** |
 | `SUPER + Q` | Toggle Dropdown Scratchpad Terminal |
-| `SUPER` or `SUPER + A` | **Toggle Full Window Overview & Search** |
-| `ALT + SPACE` | Open Quickshell Application Dashboard |
 | `SUPER + E` | Open File Manager (Yazi) |
 | `SUPER + B` | Launch Default Browser |
 | `SUPER + L` | Lock Screen (Hyprlock) |

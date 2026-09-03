@@ -21,7 +21,6 @@ SHARED_BASE_PKGS=(
     cava
     htop
     wl-clipboard
-    playerctl
     brightnessctl
     wireplumber
     pipewire
@@ -35,6 +34,7 @@ SHARED_BASE_PKGS=(
     qt6ct
     gcc
     make
+    polkit-gnome
 )
 
 # 2. Package mappings per distribution
@@ -47,7 +47,6 @@ get_distro_packages() {
             pkgs+=(
                 hyprshot
                 hyprsunset
-                hyprpolkitagent
                 quickshell
                 matugen
                 python

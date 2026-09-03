@@ -38,6 +38,7 @@ CONFIG_DIRS=(
     "gtk-4.0"
     "qt5ct"
     "qt6ct"
+    "environment.d"
 )
 
 CONFIG_FILES=(
@@ -83,7 +84,7 @@ rm -rf "$REPO_DIR/.config/quickshell"
 ln -sfn "qs" "$REPO_DIR/.config/quickshell"
 print_success "Maintained compatibility symlink .config/quickshell -> qs"
 
-# Ensure compiled C binaries are clean in repo if needed
+# Ensure compiled C binaries are clean in repo
 if [ -d "$REPO_DIR/.config/qs/c_tools" ]; then
     (cd "$REPO_DIR/.config/qs/c_tools" && make clean) >/dev/null 2>&1 || true
 fi
