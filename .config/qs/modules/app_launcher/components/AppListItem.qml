@@ -68,11 +68,17 @@ Item {
                 width: 24
                 height: 24
                 opacity: 1.0
-                source: (appItem && appItem.icon && appItem.icon !== "")
-                    ? (appItem.icon.indexOf("/") === 0 ? ("file://" + appItem.icon) : appItem.icon)
-                    : ("file://" + shellConfig.defaultAppIcon)
+                source: {
+                    var ic = (appItem && appItem.icon) ? String(appItem.icon) : "";
+                    if (!ic) return "file://" + shellConfig.defaultAppIcon;
+                    if (ic.indexOf("/") === 0) return "file://" + ic;
+                    if (ic.startsWith("file://") || ic.startsWith("image://") || ic.startsWith("qrc:/")) return ic;
+                    return "image://icon/" + ic;
+                }
                 onStatusChanged: {
-                    if (status === Image.Error) source = "file://" + shellConfig.defaultAppIcon;
+                    if (status === Image.Error && source !== "file://" + shellConfig.defaultAppIcon) {
+                        source = "file://" + shellConfig.defaultAppIcon;
+                    }
                 }
             }
         }

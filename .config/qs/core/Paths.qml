@@ -13,7 +13,6 @@ QtObject {
     // Central registry for all high-performance C binaries
     readonly property string sysTelemetry: binDir + "/sys_telemetry"
     readonly property string sysResources: binDir + "/sys_resources"
-    readonly property string listApps: binDir + "/list_apps"
     readonly property string decodeClip: binDir + "/decode_clip"
     readonly property string toggleFloat: binDir + "/toggle_float"
 

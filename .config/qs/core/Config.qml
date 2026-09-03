@@ -16,7 +16,6 @@ QtObject {
     // Central C-Tools Binaries
     readonly property string sysTelemetry: cToolsBinDir + "/sys_telemetry"
     readonly property string sysResources: cToolsBinDir + "/sys_resources"
-    readonly property string listApps: cToolsBinDir + "/list_apps"
     readonly property string decodeClip: cToolsBinDir + "/decode_clip"
 
     readonly property string iconsDir: assetsDir + "/icons"

@@ -1,9 +1,8 @@
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import "../core"
 
-QtObject {
+Item {
     id: appService
 
     property Paths paths: Paths {}
@@ -14,42 +13,63 @@ QtObject {
 
     signal appsReloaded()
 
-    property var appsProc: Process {
-        id: internalAppsProc
-        command: [appService.paths.listApps]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                appService.isLoading = false;
-                if (this.text && this.text.trim().length > 0) {
-                    try {
-                        var parsed = JSON.parse(this.text.trim());
-                        if (Array.isArray(parsed)) {
-                            var currentLen = appService.apps ? appService.apps.length : 0;
-                            var changed = !appService.isLoaded || (currentLen !== parsed.length);
-                            if (!changed && appService.apps) {
-                                for (var i = 0; i < parsed.length; i++) {
-                                    if (appService.apps[i].desktopId !== parsed[i].desktopId ||
-                                        appService.apps[i].name !== parsed[i].name ||
-                                        appService.apps[i].icon !== parsed[i].icon ||
-                                        appService.apps[i].exec !== parsed[i].exec) {
-                                        changed = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (changed) {
-                                appService.apps = parsed;
-                                appService.buildAppsMap(parsed);
-                                appService.isLoaded = true;
-                                appService.appsReloaded();
-                            }
-                        }
-                    } catch(e) {}
+    function reloadApps() {
+        if (!DesktopEntries.applications || !DesktopEntries.applications.values) return;
+        var list = DesktopEntries.applications.values;
+        var result = [];
+
+        for (var i = 0; i < list.length; i++) {
+            var entry = list[i];
+            if (!entry) continue;
+            // Exclude hidden entries
+            if (entry.noDisplay) continue;
+
+            var name = entry.name ? entry.name.trim() : "";
+            if (!name) continue;
+
+            var dId = entry.id ? entry.id.trim() : "";
+            var exec = entry.execString ? entry.execString.trim() : "";
+            var rawIcon = entry.icon ? entry.icon.trim() : "";
+            var resolvedIcon = "";
+            if (rawIcon) {
+                if (rawIcon.indexOf("/") === 0) {
+                    resolvedIcon = "file://" + rawIcon;
+                } else if (rawIcon.startsWith("file://") || rawIcon.startsWith("image://")) {
+                    resolvedIcon = rawIcon;
+                } else {
+                    resolvedIcon = "image://icon/" + rawIcon;
                 }
             }
-        }
-    }
 
+            var comment = entry.comment ? entry.comment.trim() : (entry.genericName ? entry.genericName.trim() : "");
+            var wmClass = entry.startupClass ? entry.startupClass.trim() : "";
+            var cats = entry.categories ? Array.from(entry.categories) : ["Utilities"];
+
+            result.push({
+                desktopId: dId,
+                name: name,
+                exec: exec,
+                icon: resolvedIcon,
+                rawIcon: rawIcon,
+                comment: comment,
+                description: comment,
+                wmClass: wmClass,
+                categories: cats,
+                entry: entry
+            });
+        }
+
+        // Sort alphabetically by name
+        result.sort(function(a, b) {
+            return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+        });
+
+        appService.apps = result;
+        appService.buildAppsMap(result);
+        appService.isLoaded = true;
+        appService.isLoading = false;
+        appService.appsReloaded();
+    }
 
     function buildAppsMap(list) {
         var map = {};
@@ -69,14 +89,15 @@ QtObject {
     }
 
     function refresh() {
-        if (isLoading) return;
-        isLoading = true;
-        internalAppsProc.running = false;
-        internalAppsProc.running = true;
+        reloadApps();
     }
 
     function launchApp(app) {
         if (!app) return;
+        if (app.entry && typeof app.entry.execute === "function") {
+            app.entry.execute();
+            return;
+        }
         var execStr = typeof app === "string" ? app : (app.exec || "");
         if (!execStr) return;
         var cmd = execStr.replace(/%[a-zA-Z]/g, "").trim();
@@ -103,7 +124,14 @@ QtObject {
         return null;
     }
 
+    Connections {
+        target: DesktopEntries
+        function onApplicationsChanged() {
+            appService.reloadApps();
+        }
+    }
+
     Component.onCompleted: {
-        refresh();
+        reloadApps();
     }
 }
