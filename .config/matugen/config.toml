@@ -3,7 +3,7 @@
 
 [templates.quickshell]
 input_path = '~/.config/matugen/templates/colors.json'
-output_path = '~/.config/quickshell/colors.json'
+output_path = '~/.config/qs/colors.json'
 
 [templates.kitty]
 input_path = '~/.config/matugen/templates/kitty-colors.conf'
@@ -17,5 +17,6 @@ output_path = '~/.config/fish/conf.d/matugen_colors.fish'
 [templates.hypr]
 input_path = '~/.config/matugen/templates/hypr-colors.lua'
 output_path = '~/.config/hypr/theme/colors.lua'
-post_hook = 'hyprctl reload config-only || true'
+# post_hook = 'hyprctl reload config-only || true'
+
 

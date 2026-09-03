@@ -24,7 +24,7 @@ fi
 
 CONFIG_DIRS=(
     "hypr"
-    "quickshell"
+    "qs"
     "kitty"
     "fastfetch"
     "cava"
@@ -78,11 +78,14 @@ for file in "${CONFIG_FILES[@]}"; do
     fi
 done
 
-# Ensure repository clipboard history and pinned clips remain clean empty arrays
-if [ -d "$REPO_DIR/.config/quickshell" ]; then
-    echo "[]" > "$REPO_DIR/.config/quickshell/clipboard_history.json"
-    echo "[]" > "$REPO_DIR/.config/quickshell/pinned_clips.json"
-    print_success "Sanitized clipboard history & pinned clips to empty arrays in repository"
+# Ensure compatibility symlink in repository (.config/quickshell -> qs)
+rm -rf "$REPO_DIR/.config/quickshell"
+ln -sfn "qs" "$REPO_DIR/.config/quickshell"
+print_success "Maintained compatibility symlink .config/quickshell -> qs"
+
+# Ensure compiled C binaries are clean in repo if needed
+if [ -d "$REPO_DIR/.config/qs/c_tools" ]; then
+    (cd "$REPO_DIR/.config/qs/c_tools" && make clean) >/dev/null 2>&1 || true
 fi
 
 echo ""

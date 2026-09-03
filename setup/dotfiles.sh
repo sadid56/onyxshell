@@ -5,7 +5,7 @@ install_dotfiles() {
     local backup_dir="$HOME/.config/onyxshell_backup_$(date +%Y%m%d_%H%M%S)"
 
     local CONFIG_ITEMS=(
-        hypr quickshell kitty fastfetch cava nvim
+        hypr qs quickshell kitty fastfetch cava nvim
         xdg-desktop-portal fish matugen htop
         fontconfig gtk-3.0 gtk-4.0 qt5ct qt6ct environment.d
         starship.toml kdeglobals
@@ -34,9 +34,18 @@ install_dotfiles() {
         print_step "Copying Onyxshell dotfiles to ~/.config/..."
         cp -r "$script_dir/.config/"* "$HOME/.config/"
 
+        # Ensure compatibility symlink ~/.config/quickshell -> ~/.config/qs
+        ln -sfn "$HOME/.config/qs" "$HOME/.config/quickshell"
+
         # Ensure executable permissions for scripts
         chmod +x "$HOME/.config/hypr/scripts/"* 2>/dev/null || true
-        chmod +x "$HOME/.config/quickshell/scripts/"* 2>/dev/null || true
+        chmod +x "$HOME/.config/qs/scripts/"* 2>/dev/null || true
+
+        # Build native C tools suite
+        if [ -d "$HOME/.config/qs/c_tools" ]; then
+            print_step "Compiling native C performance suite..."
+            (cd "$HOME/.config/qs/c_tools" && make clean && make) || print_warn "Failed to compile C tools. Ensure gcc and make are installed."
+        fi
 
         # Refresh font cache if fontconfig was installed
         if [ -f "$HOME/.config/fontconfig/fonts.conf" ] || command -v fc-cache &>/dev/null; then

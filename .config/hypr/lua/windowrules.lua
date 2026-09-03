@@ -4,11 +4,11 @@ hl.window_rule({
     suppress_event = "maximize",
 })
 
-hl.window_rule({
-    name = "grouped-window-border",
-    match = { group = true },
-    border_size = 2,
-})
+-- hl.window_rule({
+--     name = "grouped-window-border",
+--     match = { group = true },
+--     border_size = 2,
+-- })
 
 hl.window_rule({
     name = "fix-xwayland-drags",
@@ -31,12 +31,6 @@ hl.layer_rule({
 	animation    = "none",
 })
 
-hl.layer_rule({
-	name         = "quickshell-overview-style",
-	match        = { namespace = "^(quickshell-overview)$" },
-	blur         = false,
-	animation    = "none",
-})
 
 hl.window_rule({
     name      = "xdg-float",
@@ -114,24 +108,9 @@ hl.window_rule({
     size   = { 900, 650 },
 })
 
-hl.window_rule({
-    name   = "calculator-float",
-    match  = { class = "^(org.gnome.Calculator|gnome-calculator|Calculator)$" },
-    float  = true,
-    center = true,
-    size   = { 400, 600 },
-})
 
-hl.window_rule({
-    name   = "calendar-float",
-    match  = { class = "^(org.gnome.Calendar|gnome-calendar|Calendar)$" },
-    float  = true,
-    center = true,
-    size   = { 900, 650 },
-})
-
-hl.window_rule({
-    name      = "discord-special",
-    match     = { class = "^(discord|vesktop|Discord)$" },
-    workspace = "special:magic",
-})
+-- hl.window_rule({
+--     name      = "discord-special",
+--     match     = { class = "^(discord|vesktop|Discord)$" },
+--     workspace = "special:magic",
+-- })

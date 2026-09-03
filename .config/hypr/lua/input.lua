@@ -21,37 +21,6 @@ hl.gesture({
 	action = "workspace",
 })
 
-hl.gesture({
-	fingers = 3,
-	direction = "up",
-	action = function()
-		hl.exec_cmd("qs ipc call shell toggleOverview")
-	end,
-})
-
-hl.gesture({
-	fingers = 3,
-	direction = "down",
-	action = function()
-		hl.exec_cmd("qs ipc call shell toggleOverview")
-	end,
-})
-
-hl.gesture({
-	fingers = 4,
-	direction = "up",
-	action = function()
-		hl.exec_cmd("qs ipc call shell toggleOverviewAll")
-	end,
-})
-
-hl.gesture({
-	fingers = 4,
-	direction = "down",
-	action = function()
-		hl.exec_cmd("qs ipc call shell toggleOverviewAll")
-	end,
-})
 
 -----------------------
 ---- CONFIGURATION ----

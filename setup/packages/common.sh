@@ -33,6 +33,8 @@ SHARED_BASE_PKGS=(
     gnome-themes-extra
     qt5ct
     qt6ct
+    gcc
+    make
 )
 
 # 2. Package mappings per distribution
@@ -49,7 +51,6 @@ get_distro_packages() {
                 quickshell
                 matugen
                 python
-                python-psutil
                 cliphist
                 yazi
                 satty
@@ -64,7 +65,6 @@ get_distro_packages() {
             pkgs+=(
                 cliphist
                 python3
-                python3-psutil
                 pipewire-pulseaudio
                 google-noto-sans-cjk-fonts
                 google-noto-color-emoji-fonts
@@ -74,7 +74,6 @@ get_distro_packages() {
         opensuse)
             pkgs+=(
                 python3
-                python3-psutil
                 pipewire-pulseaudio
                 noto-sans-fonts
                 noto-coloremoji-fonts

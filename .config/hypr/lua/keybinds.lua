@@ -10,21 +10,6 @@ local secondMod = "ALT"
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("~/.config/hypr/scripts/dropdown.sh"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(
-	mainMod .. " + SUPER_L",
-	hl.dsp.exec_cmd("qs ipc call shell toggleOverview"),
-	{ release = true }
-)
-hl.bind(
-	mainMod .. " + SUPER_R",
-	hl.dsp.exec_cmd("qs ipc call shell toggleOverview"),
-	{ release = true }
-)
-
-hl.bind(
-	mainMod .. " + A",
-	hl.dsp.exec_cmd("qs ipc call shell toggleOverviewAll")
-)
 
 hl.bind(
 	secondMod .. " + SPACE",
@@ -71,8 +56,8 @@ hl.bind(
 
 -- Basic Window Actions
 hl.bind(mainMod .. " + X", hl.dsp.window.close())
-hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_float.py single"))
-hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_float.py all"))
+hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd((os.getenv("HOME") or "/home/sadid") .. "/.config/qs/c_tools/bin/toggle_float single"))
+hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd((os.getenv("HOME") or "/home/sadid") .. "/.config/qs/c_tools/bin/toggle_float all"))
 hl.bind(mainMod .. " + backslash", hl.dsp.layout("togglesplit"))
 
 -- Cycle & Move Focus
