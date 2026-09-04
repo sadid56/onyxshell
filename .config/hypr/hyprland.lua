@@ -33,8 +33,8 @@ end)
 
 -------------------------------
 ---- ENVIRONMENT VARIABLES ----
--------------------------------
-hl.env("QS_CONFIG_PATH", "/.config/qs")
+local home = os.getenv("HOME")
+hl.env("QS_CONFIG_PATH", home .. "/.config/qs")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
