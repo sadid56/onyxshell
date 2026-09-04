@@ -32,7 +32,7 @@ QtObject {
     property Theme rootTheme: rootTheme
     property alias theme: rootTheme
 
-    property alias wallpaperBackground: wallpaperBackground
+    property var wallpaperBackground: null
     property alias dashboardLoader: popupManager.dashboardLoader
     property alias mediaLoader: popupManager.mediaLoader
     property alias notifsLoader: popupManager.notifsLoader
@@ -150,10 +150,6 @@ QtObject {
     property list<QtObject> shellObjects: [
         Theme {
             id: rootTheme
-        },
-
-        Wallpaper {
-            id: wallpaperBackground
         },
 
         SysStats {

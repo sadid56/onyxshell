@@ -68,45 +68,17 @@ Item {
             Layout.rightMargin: 2
         }
 
-        Row {
-            spacing: 2
-            height: 14
+        UI.Icon {
+            size: 15
+            icon: "media/music.svg"
+            color: mediaBarRoot.theme
+                ? (mediaBarRoot.isPlaying ? mediaBarRoot.theme.getColor("primary") : mediaBarRoot.theme.getColor("outline"))
+                : "#adc6ff"
+            opacity: mediaBarRoot.isPlaying ? 1.0 : 0.65
             Layout.alignment: Qt.AlignVCenter
 
-            Repeater {
-                model: [
-                    { minH: 3, maxH: 13, dur: 450 },
-                    { minH: 5, maxH: 15, dur: 360 },
-                    { minH: 3, maxH: 12, dur: 520 },
-                    { minH: 4, maxH: 14, dur: 410 }
-                ]
-                delegate: Rectangle {
-                    id: eqBar
-                    width: 3
-                    radius: 1.5
-                    anchors.bottom: parent.bottom
-                    color: mediaBarRoot.theme
-                        ? (mediaBarRoot.isPlaying ? mediaBarRoot.theme.getColor("primary") : mediaBarRoot.theme.getColor("outline"))
-                        : "#adc6ff"
-                    opacity: mediaBarRoot.isPlaying ? 1.0 : 0.5
-
-                    height: mediaBarRoot.isPlaying ? modelData.maxH : 3
-
-                    SequentialAnimation on height {
-                        loops: Animation.Infinite
-                        running: mediaBarRoot.isPlaying
-                        NumberAnimation { from: modelData.minH; to: modelData.maxH; duration: modelData.dur; easing.type: Easing.InOutSine }
-                        NumberAnimation { from: modelData.maxH; to: modelData.minH; duration: modelData.dur; easing.type: Easing.InOutSine }
-                    }
-
-                    Behavior on height {
-                        enabled: !mediaBarRoot.isPlaying
-                        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
-                    }
-                    Behavior on opacity { NumberAnimation { duration: 200 } }
-                    Behavior on color { ColorAnimation { duration: 200 } }
-                }
-            }
+            Behavior on color { ColorAnimation { duration: 200 } }
+            Behavior on opacity { NumberAnimation { duration: 200 } }
         }
 
         UI.Typography {

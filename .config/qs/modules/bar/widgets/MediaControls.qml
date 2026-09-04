@@ -160,6 +160,7 @@ ClippingRectangle {
                     theme: mediaRoot.theme
                     mediaService: mediaRoot.mediaService
                     isPlaying: mediaRoot.isPlaying
+                    isWindowActive: (typeof mediaWindow !== "undefined" && mediaWindow) ? Boolean(mediaWindow.active || (mediaWindow.visible && mediaWindow.opacity > 0.01)) : true
                     mediaLength: mediaRoot.mediaLength
                     mediaPosition: mediaRoot.mediaPosition
                 }

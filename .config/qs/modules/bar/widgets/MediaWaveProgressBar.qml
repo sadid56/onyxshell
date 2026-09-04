@@ -5,6 +5,7 @@ Canvas {
     property var theme
     property var mediaService
     property bool isPlaying: false
+    property bool isWindowActive: true
     property int mediaLength: 0
     property int mediaPosition: 0
 
@@ -20,11 +21,11 @@ Canvas {
 
     Timer {
         id: waveAnimTimer
-        interval: 33
-        running: waveCanvas.isPlaying
+        interval: 60
+        running: waveCanvas.isPlaying && waveCanvas.isWindowActive && waveCanvas.visible && waveCanvas.opacity > 0.01
         repeat: true
         onTriggered: {
-            waveCanvas.phase += 0.14;
+            waveCanvas.phase += 0.25;
             waveCanvas.requestPaint();
         }
     }
@@ -45,7 +46,7 @@ Canvas {
             ctx.lineCap = "round";
             ctx.strokeStyle = waveColor;
             ctx.moveTo(0, midY);
-            for (var x = 0; x <= pX; x += 2) {
+            for (var x = 0; x <= pX; x += 4) {
                 var wave = Math.sin(x * 0.12 - waveCanvas.phase) * 2.8;
                 ctx.lineTo(x, midY + wave);
             }

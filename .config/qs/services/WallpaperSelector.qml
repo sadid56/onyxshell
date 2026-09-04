@@ -93,17 +93,7 @@ Popup {
         }
     }
 
-    Timer {
-        id: autoApplyTimer
-        interval: 80
-        repeat: false
-        property string pendingPath: ""
-        onTriggered: {
-            if (pendingPath !== "") {
-                wallpaperSetter.applyWallpaper(pendingPath, false);
-            }
-        }
-    }
+
 
     property var wallpaperSetter: Process {
         id: wallpaperSetter
@@ -111,17 +101,24 @@ Popup {
 
         function applyWallpaper(filePath, closeWindow) {
             shouldClose = (closeWindow === true);
+            if (shouldClose) {
+                wallpaperWindow.active = false;
+            }
             if (typeof root !== "undefined" && root && typeof root.setWallpaper === "function") {
                 root.setWallpaper(filePath);
             }
-            command = ["sh", "-c", "echo \"" + filePath + "\" > " + root.shellConfig.quickshellDir + "/current_wallpaper && matugen image \"" + filePath + "\" --source-color-index 0 -t scheme-content -m dark"];
+            var awwwArgs = "-t none";
+            if (shouldClose) {
+                var transitions = ["wave", "wipe", "grow", "center", "outer", "any", "left", "right", "top", "bottom", "fade"];
+                var chosen = transitions[Math.floor(Math.random() * transitions.length)];
+                var angle = Math.floor(Math.random() * 360);
+                awwwArgs = "--transition-type " + chosen + " --transition-angle " + angle + " --transition-duration 1.5 --transition-fps 144 --transition-bezier .54,0,.34,.99";
+            }
+            command = ["sh", "-c", "awww img \"" + filePath + "\" " + awwwArgs + " && echo \"" + filePath + "\" > " + root.shellConfig.quickshellDir + "/current_wallpaper && matugen image \"" + filePath + "\" --source-color-index 0 -t scheme-content -m dark"];
             running = false;
             running = true;
         }
         onExited: {
-            if (shouldClose) {
-                wallpaperWindow.active = false;
-            }
             rootTheme.reloadColors();
         }
     }
@@ -176,28 +173,23 @@ Popup {
                 if (currentIndex > 0) {
                     currentIndex--;
                     wallpapersListInst.contentX = getScrollTarget(currentIndex);
-                    var wp = model[currentIndex];
-                    if (wp) {
-                        autoApplyTimer.pendingPath = wp.path;
-                        autoApplyTimer.restart();
-                    }
                 }
             }
             Keys.onRightPressed: {
                 if (currentIndex < count - 1) {
                     currentIndex++;
                     wallpapersListInst.contentX = getScrollTarget(currentIndex);
-                    var wp = model[currentIndex];
-                    if (wp) {
-                        autoApplyTimer.pendingPath = wp.path;
-                        autoApplyTimer.restart();
-                    }
                 }
             }
             Keys.onReturnPressed: {
                 var wp = model[currentIndex];
                 if (wp) {
-                    autoApplyTimer.stop();
+                    wallpaperWindow.wallpaperSetter.applyWallpaper(wp.path, true);
+                }
+            }
+            Keys.onEnterPressed: {
+                var wp = model[currentIndex];
+                if (wp) {
                     wallpaperWindow.wallpaperSetter.applyWallpaper(wp.path, true);
                 }
             }

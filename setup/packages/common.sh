@@ -9,7 +9,7 @@ SHARED_BASE_PKGS=(
     hypridle
     hyprlock
     hyprpicker
-    hyprpaper
+    awww
     xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
     jq

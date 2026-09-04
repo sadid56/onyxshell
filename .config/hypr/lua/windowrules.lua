@@ -4,11 +4,11 @@ hl.window_rule({
     suppress_event = "maximize",
 })
 
--- hl.window_rule({
---     name = "grouped-window-border",
---     match = { group = true },
---     border_size = 2,
--- })
+hl.window_rule({
+    name = "grouped-window-border",
+    match = { group = true },
+    border_size = 2,
+})
 
 hl.window_rule({
     name = "fix-xwayland-drags",

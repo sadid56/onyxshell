@@ -20,6 +20,7 @@ hl.env("TERMINAL", terminal)
 ---- AUTOSTART ----
 -------------------
 hl.on("hyprland.start", function()
+	hl.exec_cmd("awww-daemon")
 	hl.exec_cmd("qs")
 	hl.exec_cmd("hypridle -c ~/.config/hypr/config/hypridle.conf")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
