@@ -9,8 +9,8 @@ BarPill {
     anchors.top: parent.top
     anchors.topMargin: 6
     anchors.right: barWindow ? barWindow.rightIslandRef.left : parent.right
-    pillHeight: 34
-    pillRadius: 16
+    pillHeight: barWindow ? Math.max(20, barWindow.barHeight - 6) : 34
+    pillRadius: Math.floor(pillHeight / 2)
     pillColor: barWindow ? barWindow.barSurfaceColor : "#1e1e2e"
 
     anchors.rightMargin: 8

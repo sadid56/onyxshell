@@ -1,10 +1,9 @@
 {
   "accentColor": "auto",
+  "barHeight": 36,
   "cornerRadius": 20,
   "dndEnabled": false,
-  "mutedApps": [
-    "antigravity-ide"
-  ],
+  "mutedApps": ["antigravity-ide"],
   "fontFamily": "Noto Sans",
   "fontMono": "JetBrainsMono Nerd Font",
   "fontSize": 12,

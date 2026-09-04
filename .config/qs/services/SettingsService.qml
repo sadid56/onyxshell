@@ -7,6 +7,7 @@ Item {
     id: settingsService
 
     property string accentColor: "auto"
+    property int barHeight: 40
     property int cornerRadius: (typeof root !== "undefined" && root.shellConfig) ? root.shellConfig.cornerRadius : (parseInt(Quickshell.env("ROUNDED")) || 16)
     property bool dndEnabled: false
     property var mutedApps: []
@@ -108,6 +109,7 @@ Item {
     function getSettingsObject() {
         return {
             accentColor: settingsService.accentColor,
+            barHeight: settingsService.barHeight,
             cornerRadius: settingsService.cornerRadius,
             dndEnabled: settingsService.dndEnabled,
             mutedApps: settingsService.mutedApps,
@@ -163,6 +165,7 @@ Item {
             var prevSize = settingsService.fontSize;
 
             if (data.accentColor !== undefined) settingsService.accentColor = data.accentColor;
+            if (data.barHeight !== undefined && data.barHeight > 0) settingsService.barHeight = data.barHeight;
             if (data.cornerRadius !== undefined && data.cornerRadius > 0) settingsService.cornerRadius = data.cornerRadius;
             if (data.dndEnabled !== undefined) settingsService.dndEnabled = data.dndEnabled;
             if (Array.isArray(data.mutedApps)) settingsService.mutedApps = data.mutedApps;

@@ -73,7 +73,7 @@ Item {
         var artist = (activePlayer.trackArtist || "").trim();
         var artUrl = activePlayer.trackArtUrl || "";
         var len = Math.round(activePlayer.length || 0);
-        var pos = Math.round(activePlayer.position || 0);
+        var pos = (activePlayer.positionSupported && activePlayer.position !== undefined) ? Math.round(activePlayer.position || 0) : 0;
 
         if (st === "Playing" || st === "Paused") {
             if (title === "") {
@@ -98,7 +98,7 @@ Item {
     }
 
     function onPlayerPositionChanged(player) {
-        if (player === activePlayer && player.position !== undefined) {
+        if (player && player === activePlayer && player.positionSupported && player.position !== undefined) {
             mediaPosition = Math.round(player.position);
         }
     }
@@ -113,7 +113,16 @@ Item {
             function onTrackArtistChanged() { mediaService.updateActivePlayer(); }
             function onTrackArtUrlChanged() { mediaService.updateActivePlayer(); }
             function onLengthChanged() { mediaService.updateActivePlayer(); }
-            function onPositionChanged() { mediaService.onPlayerPositionChanged(modelData); }
+        }
+    }
+
+    // Only monitor position changes on the currently active player
+    Connections {
+        target: mediaService.activePlayer
+        function onPositionChanged() {
+            if (mediaService.activePlayer && mediaService.activePlayer.positionSupported) {
+                mediaService.onPlayerPositionChanged(mediaService.activePlayer);
+            }
         }
     }
 
@@ -177,9 +186,11 @@ Item {
     }
 
     function seek(seconds) {
-        if (activePlayer && activePlayer.canSeek) {
-            activePlayer.position = seconds;
-            mediaPosition = seconds;
+        if (activePlayer && activePlayer.canSeek && activePlayer.positionSupported) {
+            try {
+                activePlayer.position = seconds;
+                mediaPosition = seconds;
+            } catch (e) {}
         }
     }
 

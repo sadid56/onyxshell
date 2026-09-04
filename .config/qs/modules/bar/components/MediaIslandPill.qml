@@ -10,8 +10,8 @@ BarPill {
     anchors.topMargin: 6
     anchors.left: barWindow ? barWindow.leftIslandRef.right : parent.left
     anchors.leftMargin: 8
-    pillHeight: 34
-    pillRadius: 16
+    pillHeight: barWindow ? Math.max(20, barWindow.barHeight - 6) : 34
+    pillRadius: Math.floor(pillHeight / 2)
     pillColor: barWindow ? barWindow.barSurfaceColor : "#1e1e2e"
 
     readonly property bool hasMediaActive: (typeof mediaLoader !== "undefined" && mediaLoader.loaded && mediaLoader.item && mediaLoader.item.active)

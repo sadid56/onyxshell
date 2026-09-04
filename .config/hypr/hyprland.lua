@@ -34,8 +34,7 @@ end)
 -------------------------------
 ---- ENVIRONMENT VARIABLES ----
 -------------------------------
-hl.env("QS_CONFIG_PATH", (os.getenv("HOME") or "/home/sadid") .. "/.config/qs")
-hl.env("GTK_THEME", "Adwaita:dark")
+hl.env("QS_CONFIG_PATH", "/.config/qs")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("XDG_CURRENT_DESKTOP", "Hyprland")

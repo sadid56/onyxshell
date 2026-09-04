@@ -10,6 +10,7 @@ Row {
     id: trayRow
 
     property var barWindow
+    property int pillHeight: barWindow ? Math.max(20, barWindow.barHeight - 6) : 34
 
     anchors.top: parent.top
     anchors.topMargin: 6
@@ -24,8 +25,8 @@ Row {
         delegate: BarPill {
             id: singleTrayPill
 
-            pillHeight: 34
-            pillRadius: 17
+            pillHeight: trayRow.pillHeight
+            pillRadius: Math.floor(trayRow.pillHeight / 2)
             pillColor: barWindow ? barWindow.barSurfaceColor : "#1e1e2e"
             contentPadding: 14
             contentWidth: 20

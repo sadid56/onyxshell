@@ -12,7 +12,7 @@ import "../../components/ui" as UI
 PanelWindow {
     id: barWindow
     anchors { top: true; left: true; right: true }
-    implicitHeight: 56
+    implicitHeight: Math.max(56, barHeight + 20)
     color: "transparent"
     WlrLayershell.layer: WlrLayer.Overlay
 
@@ -20,7 +20,7 @@ PanelWindow {
     visible: !barWindow.isFullscreen
 
     margins { top: 0; left: 0; right: 0 }
-    exclusiveZone: isFullscreen ? 0 : 40
+    exclusiveZone: isFullscreen ? 0 : barHeight
 
     property var theme
     property var sysStats
@@ -34,7 +34,7 @@ PanelWindow {
     property var toggleMedia
     property int notifCount: 0
 
-    property int barHeight: 40
+    property int barHeight: (typeof root !== "undefined" && root && root.settingsService && root.settingsService.barHeight !== undefined) ? root.settingsService.barHeight : 40
     property int barCornerRadius: (typeof root !== "undefined" && root && root.settingsService && root.settingsService.cornerRadius !== undefined) ? root.settingsService.cornerRadius : ((typeof root !== "undefined" && root && root.shellConfig) ? root.shellConfig.cornerRadius : 16)
     readonly property color barSurfaceColor: barWindow.theme ? barWindow.theme.getColor("surface") : "#1e1e2e"
     readonly property real rightIslandBaseWidth: rightIslandDock ? rightIslandDock.rightIslandBaseWidth : 230
