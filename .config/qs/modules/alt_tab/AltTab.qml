@@ -26,7 +26,7 @@ PanelWindow {
 
     property var clientsProc: Process {
         id: clientsProc
-        command: ["hyprctl", "clients", "-j"]
+        command: [Quickshell.env("HOME") + "/.config/qs/c_tools/bin/alt_tab_clients"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -34,18 +34,9 @@ PanelWindow {
                     if (!txt) return;
                     var parsed = JSON.parse(txt);
                     if (parsed) {
-                        var curWsId = (Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id > 0) ? Hyprland.focusedWorkspace.id : 1;
-                        var filtered = [];
-                        for (var i = 0; i < parsed.length; i++) {
-                            var c = parsed[i];
-                            if (c && !c.hidden && c.workspace && c.workspace.id === curWsId) {
-                                filtered.push(c);
-                            }
-                        }
-                        filtered.sort((a, b) => (a.focusHistoryID || 0) - (b.focusHistoryID || 0));
                         var wasZero = (altTabWindow.selectedIndex === 0);
-                        altTabWindow.clientsList = filtered;
-                        if (altTabWindow.active && wasZero && filtered.length > 1) {
+                        altTabWindow.clientsList = parsed;
+                        if (altTabWindow.active && wasZero && parsed.length > 1) {
                             altTabWindow.selectedIndex = 1;
                         }
                     }
@@ -87,9 +78,7 @@ PanelWindow {
         if (clientsList.length > 1) {
             var target = clientsList[1];
             if (target && target.address) {
-                var addr = target.address;
-                var script = "hl.dispatch(hl.dsp.focus({ window = 'address:" + addr + "' })); hl.dispatch(hl.dsp.window.alter_zorder({ mode = 'top', window = 'address:" + addr + "' }))";
-                Quickshell.execDetached(["hyprctl", "eval", script]);
+                Quickshell.execDetached([Quickshell.env("HOME") + "/.config/qs/c_tools/bin/alt_tab_clients", "focus", target.address]);
             }
         }
     }
@@ -98,9 +87,7 @@ PanelWindow {
         if (!altTabWindow.active) return;
         var target = (selectedIndex >= 0 && selectedIndex < clientsList.length) ? clientsList[selectedIndex] : null;
         if (target && target.address) {
-            var addr = target.address;
-            var script = "hl.dispatch(hl.dsp.focus({ window = 'address:" + addr + "' })); hl.dispatch(hl.dsp.window.alter_zorder({ mode = 'top', window = 'address:" + addr + "' }))";
-            Quickshell.execDetached(["hyprctl", "eval", script]);
+            Quickshell.execDetached([Quickshell.env("HOME") + "/.config/qs/c_tools/bin/alt_tab_clients", "focus", target.address]);
         }
         altTabWindow.active = false;
     }

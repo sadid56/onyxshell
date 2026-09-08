@@ -3,11 +3,75 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #define PREVIEW_DIR "/tmp/cliphist_previews"
 
-int main(void) {
+static void copy_clip(const char *entry) {
+    int in_pipe[2];
+    int mid_pipe[2];
+    if (pipe(in_pipe) < 0 || pipe(mid_pipe) < 0) return;
+
+    if (fork() == 0) {
+        close(in_pipe[1]);
+        dup2(in_pipe[0], STDIN_FILENO);
+        close(in_pipe[0]);
+
+        close(mid_pipe[0]);
+        dup2(mid_pipe[1], STDOUT_FILENO);
+        close(mid_pipe[1]);
+
+        execlp("cliphist", "cliphist", "decode", NULL);
+        _exit(1);
+    }
+    close(in_pipe[0]);
+
+    if (fork() == 0) {
+        close(in_pipe[1]);
+        close(mid_pipe[1]);
+        dup2(mid_pipe[0], STDIN_FILENO);
+        close(mid_pipe[0]);
+
+        execlp("wl-copy", "wl-copy", NULL);
+        _exit(1);
+    }
+    close(mid_pipe[0]);
+    close(mid_pipe[1]);
+
+    (void)write(in_pipe[1], entry, strlen(entry));
+    close(in_pipe[1]);
+
+    while (wait(NULL) > 0) {}
+}
+
+static void delete_clip(const char *entry) {
+    int pfd[2];
+    if (pipe(pfd) < 0) return;
+    if (fork() == 0) {
+        close(pfd[1]);
+        dup2(pfd[0], STDIN_FILENO);
+        close(pfd[0]);
+        execlp("cliphist", "cliphist", "delete", NULL);
+        _exit(1);
+    }
+    close(pfd[0]);
+    (void)write(pfd[1], entry, strlen(entry));
+    close(pfd[1]);
+
+    while (wait(NULL) > 0) {}
+}
+
+int main(int argc, char **argv) {
+    if (argc > 2 && strcmp(argv[1], "copy") == 0) {
+        copy_clip(argv[2]);
+        return 0;
+    }
+    if (argc > 2 && strcmp(argv[1], "delete") == 0) {
+        delete_clip(argv[2]);
+        return 0;
+    }
+
     mkdir(PREVIEW_DIR, 0755);
 
     FILE *pipe = popen("cliphist list", "r");

@@ -73,7 +73,7 @@ QtObject {
     }
 
     function copyEntry(entry) {
-        Quickshell.execDetached(["bash", "-c", "printf '%s' \"$1\" | cliphist decode | wl-copy", "cliphist-copy", entry]);
+        Quickshell.execDetached([root.paths.decodeClip, "copy", entry]);
     }
 
     function deleteEntry(entry) {
@@ -86,7 +86,7 @@ QtObject {
             arr.splice(idx, 1);
             root.entries = arr;
         }
-        Quickshell.execDetached(["bash", "-c", "printf '%s' \"$1\" | cliphist delete", "cliphist-delete", entry]);
+        Quickshell.execDetached([root.paths.decodeClip, "delete", entry]);
         refreshTimer.restart();
     }
 

@@ -10,11 +10,12 @@ HYPRSUNSET_BIN="$(which hyprsunset 2>/dev/null || echo "$HOME/.local/bin/hyprsun
 ensure_daemon() {
     if ! pgrep -x hyprsunset >/dev/null 2>&1; then
         setsid "$HYPRSUNSET_BIN" -i >/dev/null 2>&1 &
-        for i in {1..20}; do
-            if hyprctl hyprsunset identity >/dev/null 2>&1; then
+        local sock="${XDG_RUNTIME_DIR}/hypr/${HYPRLAND_INSTANCE_SIGNATURE}/.hyprsunset.sock"
+        for i in {1..25}; do
+            if [ -S "$sock" ]; then
                 break
             fi
-            sleep 0.05
+            sleep 0.01
         done
     fi
 }

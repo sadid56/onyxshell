@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import Quickshell.Io
 
 Item {
@@ -7,7 +8,7 @@ Item {
 
     Process {
         id: statsFetcher
-        command: ["sh", "-c", "echo \"VOL: $(wpctl get-volume @DEFAULT_AUDIO_SINK@)\"; echo \"MIC: $(wpctl get-volume @DEFAULT_AUDIO_SOURCE@)\"; echo \"BRI: $(brightnessctl -m)\"; echo \"WIFI: $(nmcli radio wifi 2>/dev/null)\"; echo \"NIGHT: $([ -f \"${XDG_RUNTIME_DIR:-/tmp}/hyprsunset_${USER}.state\" ] && pgrep -x hyprsunset >/dev/null && echo on || echo off)\"; echo \"PPD: $(powerprofilesctl get 2>/dev/null)\"; echo \"UP: $(uptime -p 2>/dev/null)\""]
+        command: [Quickshell.env("HOME") + "/.config/qs/c_tools/bin/quick_stats"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var lines = this.text.split('\n');

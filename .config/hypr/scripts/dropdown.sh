@@ -1,4 +1,9 @@
 #!/bin/bash
+BIN="$HOME/.config/qs/c_tools/bin/hypr_dropdown"
+if [ -x "$BIN" ]; then
+    exec "$BIN"
+fi
+
 spawned=false
 if ! hyprctl clients | grep -q "class: kitty-dropdown"; then
     kitty --class kitty-dropdown -o background_opacity=1.0 -o background_blur=0 &
@@ -12,7 +17,6 @@ if ! hyprctl clients | grep -q "class: kitty-dropdown"; then
     sleep 0.05
 fi
 
-# Turn off background blur and dimming for dropdown terminal
 hyprctl eval 'hl.config({ decoration = { dim_special = 0.0, blur = { special = false } } })'
 
 if [ "$spawned" = true ]; then

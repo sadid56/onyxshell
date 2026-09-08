@@ -285,7 +285,8 @@ PanelWindow {
                 notifWindow.isMuted = false;
                 var targetVol = notifWindow.lastUnmutedVolume > 0 ? notifWindow.lastUnmutedVolume : 50;
                 notifWindow.volumeValue = targetVol;
-                command = ["sh", "-c", "wpctl set-mute @DEFAULT_AUDIO_SINK@ 0; wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ " + (targetVol / 100).toFixed(2)];
+                Quickshell.execDetached(["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "0"]);
+                command = ["wpctl", "set-volume", "-l", "1.5", "@DEFAULT_AUDIO_SINK@", (targetVol / 100).toFixed(2)];
             }
             running = false;
             Qt.callLater(() => running = true);
@@ -348,9 +349,12 @@ PanelWindow {
         id: volumeSetter
         function setVolume(val) {
             if (val > 0) {
+                if (notifWindow.isMuted) {
+                    notifWindow.isMuted = false;
+                    Quickshell.execDetached(["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "0"]);
+                }
                 notifWindow.lastUnmutedVolume = val;
-                notifWindow.isMuted = false;
-                command = ["sh", "-c", "wpctl set-mute @DEFAULT_AUDIO_SINK@ 0; wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ " + (val / 100).toFixed(2)];
+                command = ["wpctl", "set-volume", "-l", "1.5", "@DEFAULT_AUDIO_SINK@", (val / 100).toFixed(2)];
             } else {
                 notifWindow.isMuted = true;
                 command = ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "1"];

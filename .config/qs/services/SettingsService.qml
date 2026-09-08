@@ -30,32 +30,6 @@ Item {
         onTextChanged: loadSettings()
     }
 
-    Timer {
-        id: fileCheckTimer
-        interval: 1000
-        repeat: true
-        running: true
-        onTriggered: {
-            if (settingsFile && typeof settingsFile.reload === "function") {
-                settingsFile.reload();
-            }
-            loadSettings();
-        }
-    }
-
-    Process {
-        id: settingsReader
-        command: ["cat", settingsService.settingsFilePath]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var content = this.text ? this.text.trim() : "";
-                if (content && content.length > 0) {
-                    settingsService.loadFromJson(content);
-                }
-            }
-        }
-    }
-
     MutedAppsHelper { id: mutedHelper }
 
     property var rootTheme: null
@@ -200,9 +174,6 @@ Item {
 
         if (fileText && fileText.trim().length > 0) {
             loadFromJson(fileText);
-        } else {
-            settingsReader.running = false;
-            settingsReader.running = true;
         }
     }
 }

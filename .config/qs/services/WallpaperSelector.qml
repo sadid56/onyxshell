@@ -78,7 +78,7 @@ Popup {
 
     property var wallpaperFetcher: Process {
         id: wallpaperFetcher
-        command: ["find", root.shellConfig.homeDir + "/Pictures/wallpapers", "-maxdepth", "2", "-type", "f", "-and", "(", "-name", "*.jpg", "-o", "-name", "*.png", "-o", "-name", "*.jpeg", "-o", "-name", "*.gif", ")"]
+        command: [Quickshell.env("HOME") + "/.config/qs/c_tools/bin/fast_wallpapers", root.shellConfig.homeDir + "/Pictures/wallpapers"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var lines = this.text.split("\n");

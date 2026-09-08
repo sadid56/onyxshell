@@ -8,7 +8,7 @@ local secondMod = "ALT"
 ---- APP LAUNCHERS ---
 ----------------------
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("~/.config/hypr/scripts/dropdown.sh"))
+hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd((os.getenv("HOME") or "") .. "/.config/qs/c_tools/bin/hypr_dropdown"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 
 hl.bind(

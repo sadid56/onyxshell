@@ -37,20 +37,7 @@ QtObject {
     readonly property int easingOutQuad: Easing.OutQuad
     readonly property int easingOutQuint: Easing.OutQuint
 
-    property string currentDistro: "linux"
-
-    property var distroDetectProc: Process {
-        command: ["sh", "-c", "source /etc/os-release 2>/dev/null && echo $ID"]
-        running: true
-        stdout: SplitParser {
-            onRead: data => {
-                var d = data.trim().toLowerCase();
-                if (d !== "") {
-                    config.currentDistro = d;
-                }
-            }
-        }
-    }
+    property string currentDistro: "arch"
 
     function getScript(scriptName) {
         return scriptsDir + "/" + scriptName;

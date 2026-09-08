@@ -114,7 +114,7 @@ PanelWindow {
 
     property var wifiScanner: Process {
         id: wifiScanner
-        command: ["sh", "-c", "echo 'SAVED:'; nmcli -t -f NAME,TYPE connection show | grep '802-11-wireless' | cut -d: -f1; echo 'SCANNED:'; nmcli -t -f SSID,SIGNAL,SECURITY,ACTIVE device wifi list"]
+        command: [Quickshell.env("HOME") + "/.config/qs/c_tools/bin/wifi_fast_scan"]
         stdout: StdioCollector { onStreamFinished: wifiWindow.parseWifiList(this.text) }
     }
 

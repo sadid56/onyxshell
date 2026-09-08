@@ -23,7 +23,7 @@ Item {
     Process {
         id: browserTitleProc
         property string browserClass: "brave"
-        command: ["sh", "-c", "hyprctl clients -j 2>/dev/null | jq -r '[.[] | select(.class | test(\"" + browserClass + "\"; \"i\")) | .title] | first // \"\"'"]
+        command: [Quickshell.env("HOME") + "/.config/qs/c_tools/bin/alt_tab_clients", "title", browserClass]
         stdout: SplitParser {
             onRead: data => {
                 var raw = data.trim();

@@ -69,23 +69,6 @@ Item {
         }
     }
 
-    Process {
-        id: colorReader
-        command: ["cat", theme.colorsJsonPath]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var content = this.text;
-                if (content && content.trim().length > 0) {
-                    try {
-                        theme.colors = JSON.parse(content.trim());
-                    } catch (e) {
-                        console.log("Failed to parse colors JSON:", e);
-                    }
-                }
-            }
-        }
-    }
-
     function loadFromFile() {
         var fileText = (typeof colorsFile.text === "function") ? colorsFile.text() : colorsFile.text;
         if (fileText && fileText.trim().length > 0) {
@@ -114,7 +97,5 @@ Item {
                 } catch (e) {}
             }
         }
-        colorReader.running = false;
-        colorReader.running = true;
     }
 }
