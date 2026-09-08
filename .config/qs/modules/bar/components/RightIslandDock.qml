@@ -8,16 +8,18 @@ Item {
 
     property var barWindow
     property var sysStatsIndicator: sysStatsItem
-    property var powerMenuButton: powerButtonItem
+    property var notifButton: notifButtonItem
+    property var powerMenuButton: notifButtonItem
 
     readonly property bool hasResourcesActive: (typeof resourcesLoader !== "undefined" && resourcesLoader.loaded && resourcesLoader.item && resourcesLoader.item.active)
-    readonly property bool hasRightPopupActive: hasResourcesActive
+    readonly property bool hasNotifActive: (typeof notifsLoader !== "undefined" && notifsLoader.loaded && notifsLoader.item && notifsLoader.item.active)
+    readonly property bool hasRightPopupActive: hasResourcesActive || hasNotifActive
     readonly property real rightIslandBaseWidth: (typeof rightContentRow !== "undefined" && rightContentRow) ? (rightContentRow.implicitWidth + 36) : 230
 
     anchors.top: parent.top
     anchors.right: parent.right
     height: barWindow ? barWindow.barHeight : 40
-    width: hasResourcesActive ? 380 : (barWindow ? barWindow.rightIslandBaseWidth : rightIslandBaseWidth)
+    width: hasRightPopupActive ? (hasNotifActive ? 440 : 380) : (barWindow ? barWindow.rightIslandBaseWidth : rightIslandBaseWidth)
     Behavior on width { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
 
     Corner {
@@ -79,26 +81,52 @@ Item {
         }
 
         MouseArea {
-            id: powerButtonItem
+            id: notifButtonItem
             Layout.preferredWidth: 20
             Layout.preferredHeight: 20
             Layout.alignment: Qt.AlignVCenter
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
 
+            function getNotifX() {
+                var pos = notifButtonItem.mapToItem(null, 0, 0);
+                return pos.x + notifButtonItem.width / 2;
+            }
+
+            onEntered: {
+                if (typeof root !== "undefined" && root.stopLoaderTimerAndActivate && typeof notifsLoader !== "undefined") {
+                    root.stopLoaderTimerAndActivate(notifsLoader, notifButtonItem.getNotifX());
+                    if (typeof wifiLoader !== "undefined") root.setLoaderInactive(wifiLoader);
+                    if (typeof calendarLoader !== "undefined") root.setLoaderInactive(calendarLoader);
+                    if (typeof resourcesLoader !== "undefined") root.setLoaderInactive(resourcesLoader);
+                }
+            }
+            onExited: {
+                if (typeof root !== "undefined" && root.restartLoaderTimer && typeof notifsLoader !== "undefined") {
+                    root.restartLoaderTimer(notifsLoader);
+                }
+            }
             onClicked: {
-                if (typeof root !== "undefined" && root.toggleLoaderActive && typeof powerMenuLoader !== "undefined") {
-                    root.toggleLoaderActive(powerMenuLoader);
+                if (typeof root !== "undefined" && root.toggleLoaderActive && typeof notifsLoader !== "undefined") {
+                    root.toggleLoaderActive(notifsLoader, notifButtonItem.getNotifX());
                 }
             }
 
             UI.Icon {
                 anchors.centerIn: parent
                 size: 16
-                icon: "system/power.svg"
-                color: powerButtonItem.containsMouse
-                    ? ((barWindow && barWindow.theme) ? barWindow.theme.getColor("error") : "#ff5555")
-                    : ((barWindow && barWindow.theme) ? barWindow.theme.getColor("onSurface") : "#FFFFFF")
+                icon: {
+                    var cfg = ((typeof shellConfig !== "undefined" && shellConfig) ? shellConfig : (typeof root !== "undefined" ? root.shellConfig : null));
+                    if (cfg && cfg.getNotificationIcon) {
+                        return cfg.getNotificationIcon((typeof root !== "undefined" && root.dndEnabled), (barWindow ? barWindow.notifCount : 0) > 0);
+                    }
+                    return "system/notification.svg";
+                }
+                color: (barWindow && barWindow.notifCount > 0)
+                    ? ((barWindow && barWindow.theme) ? barWindow.theme.getColor("primary") : "#ffb3b4")
+                    : (notifButtonItem.containsMouse
+                        ? ((barWindow && barWindow.theme) ? barWindow.theme.getColor("primary") : "#ffb3b4")
+                        : ((barWindow && barWindow.theme) ? barWindow.theme.getColor("onSurface") : "#FFFFFF"))
 
                 Behavior on color { ColorAnimation { duration: 140 } }
             }

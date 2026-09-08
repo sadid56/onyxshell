@@ -18,7 +18,7 @@ Item {
         if (!barWindow) return 200;
         if (hasCenterPopup) return barWindow.centerPopupTargetWidth;
         if (hasNotif) return notifRow.implicitWidth + 36;
-        return (typeof clockItem !== "undefined" && clockItem) ? (clockItem.implicitWidth + 32) : 200;
+        return (typeof clockItem !== "undefined" && clockItem && clockItem.implicitWidth > 0) ? Math.max(140, clockItem.implicitWidth + 32) : 160;
     }
 
     width: currentWidth

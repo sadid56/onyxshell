@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Mpris
 
 Item {
@@ -18,6 +19,37 @@ Item {
     readonly property bool rawHasMedia: (mediaStatus === "Playing" || mediaStatus === "Paused") && mediaTitle !== "" && mediaTitle !== "No media playing"
 
     property bool hasMedia: false
+
+    Process {
+        id: browserTitleProc
+        property string browserClass: "brave"
+        command: ["sh", "-c", "hyprctl clients -j 2>/dev/null | jq -r '[.[] | select(.class | test(\"" + browserClass + "\"; \"i\")) | .title] | first // \"\"'"]
+        stdout: SplitParser {
+            onRead: data => {
+                var raw = data.trim();
+                if (raw) {
+                    var clean = raw.replace(/\s*-\s*(Brave|Google Chrome|Chromium|Firefox).*$/i, "").trim();
+                    if (clean && mediaService.hasMedia && (!mediaService.mediaTitle || mediaService.mediaTitle === "Media" || mediaService.mediaTitle === "Playing Media")) {
+                        mediaService.mediaTitle = clean;
+                    }
+                }
+            }
+        }
+    }
+
+    function fetchBrowserFallbackTitle(ident) {
+        var cls = "brave";
+        var idLower = (ident || "").toLowerCase();
+        if (idLower.indexOf("chrome") !== -1) cls = "chrome";
+        else if (idLower.indexOf("firefox") !== -1) cls = "firefox";
+        else if (idLower.indexOf("chromium") !== -1) cls = "chromium";
+        else if (idLower.indexOf("brave") !== -1) cls = "brave";
+        else cls = idLower.split(" ")[0] || "brave";
+
+        browserTitleProc.browserClass = cls;
+        browserTitleProc.running = false;
+        Qt.callLater(() => { browserTitleProc.running = true; });
+    }
 
     function findActivePlayer() {
         var list = Mpris.players.values;
@@ -75,10 +107,35 @@ Item {
         var len = Math.round(activePlayer.length || 0);
         var pos = (activePlayer.positionSupported && activePlayer.position !== undefined) ? Math.round(activePlayer.position || 0) : 0;
 
-        if (st === "Playing" || st === "Paused") {
-            if (title === "") {
-                title = "Media";
+        // 1. Fallback to metadata dictionary if trackTitle is empty
+        if (!title && activePlayer.metadata) {
+            var meta = activePlayer.metadata;
+            title = (meta["xesam:title"] || meta["title"] || "").toString().trim();
+            if (!artist) {
+                var mArt = meta["xesam:artist"] || meta["artist"];
+                if (Array.isArray(mArt) && mArt.length > 0) artist = mArt.join(", ").trim();
+                else if (typeof mArt === "string") artist = mArt.trim();
             }
+        }
+
+        if (st === "Playing" || st === "Paused") {
+            var isBrowser = false;
+            var ident = (activePlayer.identity || "").toLowerCase();
+            if (ident.indexOf("brave") !== -1 || ident.indexOf("chrome") !== -1 || ident.indexOf("firefox") !== -1 || ident.indexOf("chromium") !== -1) {
+                isBrowser = true;
+            }
+
+            if (title === "" || title === "Media") {
+                if (isBrowser) {
+                    fetchBrowserFallbackTitle(activePlayer.identity);
+                    title = "Media";
+                } else if (activePlayer.identity) {
+                    title = activePlayer.identity;
+                } else {
+                    title = "Media";
+                }
+            }
+
             gracePeriodTimer.stop();
             hasMedia = true;
             mediaStatus = st;
@@ -112,13 +169,21 @@ Item {
             function onTrackTitleChanged() { mediaService.updateActivePlayer(); }
             function onTrackArtistChanged() { mediaService.updateActivePlayer(); }
             function onTrackArtUrlChanged() { mediaService.updateActivePlayer(); }
+            function onMetadataChanged() { mediaService.updateActivePlayer(); }
+            function onTrackChanged() { mediaService.updateActivePlayer(); }
             function onLengthChanged() { mediaService.updateActivePlayer(); }
         }
     }
 
-    // Only monitor position changes on the currently active player
+    // Only monitor position changes and real-time updates on the currently active player
     Connections {
         target: mediaService.activePlayer
+        function onPlaybackStateChanged() { mediaService.syncMediaData(); }
+        function onTrackTitleChanged() { mediaService.syncMediaData(); }
+        function onTrackArtistChanged() { mediaService.syncMediaData(); }
+        function onTrackArtUrlChanged() { mediaService.syncMediaData(); }
+        function onMetadataChanged() { mediaService.syncMediaData(); }
+        function onTrackChanged() { mediaService.syncMediaData(); }
         function onPositionChanged() {
             if (mediaService.activePlayer && mediaService.activePlayer.positionSupported) {
                 mediaService.onPlayerPositionChanged(mediaService.activePlayer);

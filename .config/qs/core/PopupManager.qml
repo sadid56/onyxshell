@@ -48,10 +48,6 @@ QtObject {
             activeCenterPopupWidth = calendarLoader.item.popupWidth || 500;
             return;
         }
-        if (notifsLoader.loaded && notifsLoader.item && notifsLoader.item.active) {
-            activeCenterPopupWidth = notifsLoader.item.popupWidth || 540;
-            return;
-        }
         if (clipboardLoader.loaded && clipboardLoader.item && clipboardLoader.item.active) {
             activeCenterPopupWidth = clipboardLoader.item.popupWidth || 480;
             return;
@@ -193,8 +189,7 @@ QtObject {
         },
         AutoUnloadLoader {
             id: notifsLoader
-            onItemInitialized: item => { item.activeChanged.connect(() => { popupManager.updateCenterPopupWidth(); }); }
-            sourceComponent: NotificationCenter { theme: popupManager.theme }
+            sourceComponent: NotificationCenter { theme: popupManager.theme; statusBar: popupManager.statusBar }
         },
         AutoUnloadLoader {
             id: calendarLoader

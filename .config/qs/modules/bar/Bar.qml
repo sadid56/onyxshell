@@ -125,9 +125,9 @@ PanelWindow {
     function getWifiX() { return netIslandPill.getWifiX(); }
     function getResourcesX() { return rightIslandDock.sysStatsIndicator.getResourcesX(); }
     function getNotifX() {
-        return (typeof centerIsland !== "undefined" && centerIsland && typeof centerIsland.clockItem !== "undefined" && centerIsland.clockItem)
-            ? centerIsland.clockItem.getNotifX()
-            : (width / 2 + 50);
+        return (typeof rightIslandDock !== "undefined" && rightIslandDock && typeof rightIslandDock.notifButton !== "undefined" && rightIslandDock.notifButton)
+            ? rightIslandDock.notifButton.getNotifX()
+            : (width - 32);
     }
     function getPowerX() {
         var pos = rightIslandDock.powerMenuButton.mapToItem(null, 0, 0);
