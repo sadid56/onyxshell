@@ -56,8 +56,8 @@ hl.bind(
 
 -- Basic Window Actions
 hl.bind(mainMod .. " + X", hl.dsp.window.close())
-hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd((os.getenv("HOME") or "/home/sadid") .. "/.config/qs/c_tools/bin/toggle_float single"))
-hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd((os.getenv("HOME") or "/home/sadid") .. "/.config/qs/c_tools/bin/toggle_float all"))
+hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd((os.getenv("HOME") or "") .. "/.config/qs/c_tools/bin/toggle_float single"))
+hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd((os.getenv("HOME") or "") .. "/.config/qs/c_tools/bin/toggle_float all"))
 hl.bind(mainMod .. " + backslash", hl.dsp.layout("togglesplit"))
 
 -- Cycle & Move Focus

@@ -5,7 +5,7 @@ Comprehensive list of all default keyboard shortcuts and mouse gestures configur
 > [!TIP]
 > - `SUPER` refers to the Windows / Command key.
 > - `ALT` refers to the Alt / Option key.
-> - Keybindings can be customized in [`~/.config/hypr/lua/keybinds.lua`](file:///home/sadid/onyxshell/.config/hypr/lua/keybinds.lua).
+> - Keybindings can be customized in [`~/.config/hypr/lua/keybinds.lua`](.config/hypr/lua/keybinds.lua).
 
 ---
 

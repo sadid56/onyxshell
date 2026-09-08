@@ -9,7 +9,6 @@ SHARED_BASE_PKGS=(
     hypridle
     hyprlock
     hyprpicker
-    awww
     xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
     jq
@@ -34,7 +33,6 @@ SHARED_BASE_PKGS=(
     qt6ct
     gcc
     make
-    polkit-gnome
 )
 
 # 2. Package mappings per distribution
@@ -45,6 +43,8 @@ get_distro_packages() {
     case "$target_distro" in
         arch)
             pkgs+=(
+                awww
+                polkit-gnome
                 hyprshot
                 hyprsunset
                 quickshell

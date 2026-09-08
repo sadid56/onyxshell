@@ -5,7 +5,7 @@ install_dotfiles() {
     local backup_dir="$HOME/.config/onyxshell_backup_$(date +%Y%m%d_%H%M%S)"
 
     local CONFIG_ITEMS=(
-        hypr qs quickshell kitty fastfetch cava nvim
+        hypr qs kitty fastfetch cava nvim
         xdg-desktop-portal fish matugen htop
         fontconfig gtk-3.0 gtk-4.0 qt5ct qt6ct environment.d
         starship.toml kdeglobals
@@ -20,7 +20,7 @@ install_dotfiles() {
 
         local backup_count=0
         for item in "${CONFIG_ITEMS[@]}"; do
-            if [ -e "$HOME/.config/$item" ]; then
+            if [ -e "$HOME/.config/$item" ] || [ -L "$HOME/.config/$item" ]; then
                 mv "$HOME/.config/$item" "$backup_dir/"
                 echo -e "  ${YELLOW}[*] Backed up $item${RESET}"
                 backup_count=$((backup_count + 1))
@@ -34,8 +34,10 @@ install_dotfiles() {
         print_step "Copying Onyxshell dotfiles to ~/.config/..."
         cp -r "$script_dir/.config/"* "$HOME/.config/"
 
-        # Ensure compatibility symlink ~/.config/quickshell -> ~/.config/qs
-        ln -sfn "$HOME/.config/qs" "$HOME/.config/quickshell"
+        # Ensure default wallpaper exists if current_wallpaper is missing or invalid
+        if [ ! -s "$HOME/.config/qs/current_wallpaper" ] || [ ! -f "$(cat "$HOME/.config/qs/current_wallpaper" 2>/dev/null)" ]; then
+            echo "$HOME/.config/qs/assets/images/default-wallpaper.png" > "$HOME/.config/qs/current_wallpaper"
+        fi
 
         # Ensure executable permissions for scripts
         chmod +x "$HOME/.config/hypr/scripts/"* 2>/dev/null || true

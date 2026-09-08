@@ -38,13 +38,18 @@ setup_display_manager() {
         esac
 
         if command -v greetd &>/dev/null || [ -d /etc/greetd ]; then
+            local hypr_cmd="Hyprland"
+            if command -v start-hyprland &>/dev/null; then
+                hypr_cmd="start-hyprland"
+            fi
+
             sudo mkdir -p /etc/greetd
-            sudo tee /etc/greetd/config.toml >/dev/null << 'EOF_GREETD'
+            sudo tee /etc/greetd/config.toml >/dev/null << EOF_GREETD
 [terminal]
 vt = 1
 
 [default_session]
-command = "tuigreet --time --remember --cmd start-hyprland --asterisks"
+command = "tuigreet --time --remember --cmd ${hypr_cmd} --asterisks"
 user = "greeter"
 EOF_GREETD
 

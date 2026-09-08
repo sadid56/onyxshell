@@ -79,10 +79,6 @@ for file in "${CONFIG_FILES[@]}"; do
     fi
 done
 
-# Ensure compatibility symlink in repository (.config/quickshell -> qs)
-rm -rf "$REPO_DIR/.config/quickshell"
-ln -sfn "qs" "$REPO_DIR/.config/quickshell"
-print_success "Maintained compatibility symlink .config/quickshell -> qs"
 
 # Ensure compiled C binaries are clean in repo
 if [ -d "$REPO_DIR/.config/qs/c_tools" ]; then
