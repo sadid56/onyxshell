@@ -49,6 +49,16 @@ install_dotfiles() {
             xdg-mime default org.kde.dolphin.desktop inode/directory 2>/dev/null || true
         fi
 
+        # Generate initial dynamic color palette with Matugen
+        if command -v matugen &>/dev/null; then
+            local def_wp
+            def_wp="$(cat "$HOME/.config/qs/current_wallpaper" 2>/dev/null)"
+            if [ -n "$def_wp" ] && [ -f "$def_wp" ]; then
+                print_step "Generating dynamic color palette with Matugen..."
+                matugen image "$def_wp" --source-color-index 0 -t scheme-content -m dark >/dev/null 2>&1 || true
+            fi
+        fi
+
         # Ensure executable permissions for scripts
         chmod +x "$HOME/.config/hypr/scripts/"* 2>/dev/null || true
         chmod +x "$HOME/.config/qs/scripts/"* 2>/dev/null || true

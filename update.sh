@@ -67,7 +67,7 @@ print_step "Syncing configuration folders and files..."
 for dir in "${CONFIG_DIRS[@]}"; do
     if [ -d "$HOME/.config/$dir" ]; then
         mkdir -p "$REPO_DIR/.config/$dir"
-        rsync -av --delete --exclude="test_*.qml" "$HOME/.config/$dir/" "$REPO_DIR/.config/$dir/"
+        rsync -av --delete --exclude="test_*.qml" --exclude="current_wallpaper" "$HOME/.config/$dir/" "$REPO_DIR/.config/$dir/"
         print_success "Synced $dir"
     else
         print_warn "~/.config/$dir not found on your system, skipping."

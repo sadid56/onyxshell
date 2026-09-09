@@ -52,6 +52,10 @@ get_distro_packages() {
                 python
                 cliphist
                 dolphin
+                breeze
+                breeze-icons
+                kio-extras
+                ffmpegthumbs
                 satty
                 pipewire-pulse
                 noto-fonts
