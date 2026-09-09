@@ -17,6 +17,17 @@ output_path = '~/.config/fish/conf.d/matugen_colors.fish'
 [templates.hypr]
 input_path = '~/.config/matugen/templates/hypr-colors.lua'
 output_path = '~/.config/hypr/theme/colors.lua'
-# post_hook = 'hyprctl reload config-only || true'
+[templates.dolphin]
+input_path = '~/.config/matugen/templates/matugen.colors'
+output_path = '~/.local/share/color-schemes/Matugen.colors'
+[templates.kdeglobals]
+input_path = '~/.config/matugen/templates/kdeglobals'
+output_path = '~/.config/kdeglobals.hyprland'
 
+[templates.gtk3]
+input_path = '~/.config/matugen/templates/gtk-colors.css'
+output_path = '~/.config/gtk-3.0/colors.css'
 
+[templates.gtk4]
+input_path = '~/.config/matugen/templates/gtk-colors.css'
+output_path = '~/.config/gtk-4.0/colors.css'

@@ -39,14 +39,18 @@ CONFIG_DIRS=(
     "qt5ct"
     "qt6ct"
     "environment.d"
+    "autostart"
 )
 
 CONFIG_FILES=(
     "starship.toml"
+    "kdeglobals.hyprland"
     "kdeglobals"
-    "brave-flags.conf"
+    "dolphinrc"
+    "kwalletrc"
+    "brave-origin-flags.conf"
     "chrome-flags.conf"
-    "chromium-flags.conf"
+    "code-flags.conf"
 )
 
 echo ""
@@ -63,7 +67,7 @@ print_step "Syncing configuration folders and files..."
 for dir in "${CONFIG_DIRS[@]}"; do
     if [ -d "$HOME/.config/$dir" ]; then
         mkdir -p "$REPO_DIR/.config/$dir"
-        rsync -av --delete "$HOME/.config/$dir/" "$REPO_DIR/.config/$dir/"
+        rsync -av --delete --exclude="test_*.qml" "$HOME/.config/$dir/" "$REPO_DIR/.config/$dir/"
         print_success "Synced $dir"
     else
         print_warn "~/.config/$dir not found on your system, skipping."
@@ -71,8 +75,12 @@ for dir in "${CONFIG_DIRS[@]}"; do
 done
 
 for file in "${CONFIG_FILES[@]}"; do
-    if [ -f "$HOME/.config/$file" ]; then
-        cp "$HOME/.config/$file" "$REPO_DIR/.config/$file"
+    if [ -f "$HOME/.config/$file" ] || [ -L "$HOME/.config/$file" ]; then
+        if [ "$file" = "kdeglobals" ]; then
+            (cd "$REPO_DIR/.config" && ln -sf kdeglobals.hyprland kdeglobals)
+        else
+            cp -a "$HOME/.config/$file" "$REPO_DIR/.config/$file"
+        fi
         print_success "Synced $file"
     else
         print_warn "~/.config/$file not found on your system, skipping."

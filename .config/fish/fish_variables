@@ -19,3 +19,4 @@ SETUVAR fish_pager_color_completion:e6e1e5
 SETUVAR fish_pager_color_description:757680
 SETUVAR fish_pager_color_prefix:ffb3b4\x1e\x2do
 SETUVAR fish_pager_color_selected_background:\x2d\x2dbackground\x3d49454f
+SETUVAR fish_user_paths:/home/sadid/\x2elocal/bin

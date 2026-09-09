@@ -34,10 +34,10 @@ hl.layer_rule({
 
 hl.window_rule({
     name      = "xdg-float",
-    match     = { class = "xdg-desktop-portal-gtk" },
+    match     = { class = "^(xdg-desktop-portal-.*|org.freedesktop.impl.portal.desktop.kde)$" },
     float     = true,
     center    = true,
-    size      = { 1100, 750 },
+    size      = { 1200, 800 },
     animation = "popin 90%",
 })
 
@@ -77,16 +77,8 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name   = "yazi-float",
-    match  = { class = "^(yazi)$" },
-    float  = true,
-    center = true,
-    size   = { 1200, 750 },
-})
-
-hl.window_rule({
-    name   = "yazi-title-float",
-    match  = { title = "^(yazi|Yazi:.*)$" },
+    name   = "dolphin-float",
+    match  = { class = "^(org.kde.dolphin|dolphin)$" },
     float  = true,
     center = true,
     size   = { 1200, 750 },

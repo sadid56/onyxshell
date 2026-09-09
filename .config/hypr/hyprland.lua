@@ -12,7 +12,7 @@ hl.monitor({
 ---- MY PROGRAMS ----
 ---------------------
 terminal = os.getenv("TERMINAL") or "kitty"
-fileManager = terminal .. " --class yazi -e yazi"
+fileManager = "dolphin"
 browser = os.getenv("BROWSER") or "brave-origin"
 hl.env("TERMINAL", terminal)
 
@@ -26,9 +26,10 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
 	hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
-	hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
+	hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
-	hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'")
+	hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'")
+	hl.exec_cmd("ln -sf ~/.config/kdeglobals.hyprland ~/.config/kdeglobals")
 end)
 
 
