@@ -27,7 +27,6 @@ SHARED_BASE_PKGS=(
     libsecret
     grim
     slurp
-    papirus-icon-theme
     gnome-themes-extra
     qt5ct
     qt6ct
