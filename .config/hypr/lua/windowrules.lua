@@ -100,6 +100,20 @@ hl.window_rule({
     size   = { 900, 650 },
 })
 
+hl.window_rule({
+    name   = "gwenview-float",
+    match  = { class = "^(org.kde.gwenview|gwenview)$" },
+    float  = true,
+    center = true,
+})
+
+hl.window_rule({
+    name   = "satty-float",
+    match  = { class = "^(com.gabm.satty|satty)$" },
+    float  = true,
+    center = true,
+})
+
 
 -- hl.window_rule({
 --     name      = "discord-special",

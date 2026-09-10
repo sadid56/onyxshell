@@ -21,8 +21,8 @@ Item {
     opacity: isSelected ? 1.0 : (isHovered ? 0.9 : 0.75)
     z: isSelected ? 5 : (isHovered ? 2 : 1)
 
-    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-    Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutQuad } }
+    Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+    Behavior on opacity { NumberAnimation { duration: 140; easing.type: Easing.OutQuad } }
 
     ClippingRectangle {
         id: cardBg
@@ -35,8 +35,10 @@ Item {
             source: modelData ? ("file://" + modelData.path) : ""
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
+            sourceSize: Qt.size(560, 360)
+            cache: true
             smooth: true
-            mipmap: true
+            mipmap: false
         }
 
         Rectangle {

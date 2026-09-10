@@ -17,11 +17,21 @@ Popup {
 
     contentRectY: active ? Screen.height - popupHeight - 20 : Screen.height + 20
 
+    readonly property string quickshellDir: (typeof root !== "undefined" && root && root.shellConfig)
+        ? root.shellConfig.quickshellDir
+        : (Quickshell.env("HOME") + "/.config/qs")
+    readonly property string wallpapersDir: (typeof root !== "undefined" && root && root.shellConfig)
+        ? (root.shellConfig.homeDir + "/Pictures/wallpapers")
+        : (Quickshell.env("HOME") + "/Pictures/wallpapers")
+
     property var wallpapersList: []
+    property bool animationsEnabled: false
 
     FileView {
         id: currentWallpaperFile
-        path: root.shellConfig.quickshellDir + "/current_wallpaper"
+        path: wallpaperWindow.quickshellDir + "/current_wallpaper"
+        watchChanges: true
+        blockLoading: true
     }
 
     Component.onCompleted: {
@@ -30,12 +40,21 @@ Popup {
 
     onActiveChanged: {
         if (active) {
-            selectCurrentWallpaper();
-            refreshWallpapers();
-            Qt.callLater(() => {
-                selectCurrentWallpaper();
-                wallpapersListInst.forceActiveFocus();
-            });
+            wallpaperWindow.animationsEnabled = false;
+            if (currentWallpaperFile && typeof currentWallpaperFile.reload === "function") {
+                currentWallpaperFile.reload();
+            }
+            if (!wallpapersList || wallpapersList.length === 0) {
+                refreshWallpapers();
+            } else {
+                selectCurrentWallpaper(false);
+                Qt.callLater(() => {
+                    selectCurrentWallpaper(false);
+                    wallpapersListInst.forceActiveFocus();
+                });
+            }
+        } else {
+            wallpaperWindow.animationsEnabled = false;
         }
     }
 
@@ -48,37 +67,51 @@ Popup {
         if (!wallpapersList || wallpapersList.length === 0) return 0;
         var cardTotalWidth = 280 + 32;
         var totalW = wallpapersList.length * cardTotalWidth - 32;
-        var targetX = index * cardTotalWidth - (wallpapersListInst.width - 280) / 2;
-        var maxScroll = totalW - wallpapersListInst.width;
-        return maxScroll > 0 ? Math.max(0, Math.min(targetX, maxScroll)) : 0;
+        var listW = wallpapersListInst.width > 0 ? wallpapersListInst.width : wallpaperWindow.popupWidth;
+        var targetX = index * cardTotalWidth - (listW - 280) / 2;
+        var maxScroll = Math.max(0, totalW - listW);
+        return Math.max(0, Math.min(targetX, maxScroll));
     }
 
-    function selectCurrentWallpaper() {
+    function selectCurrentWallpaper(animate) {
         if (!wallpapersList || wallpapersList.length === 0) return;
         var currentPath = "";
         if (typeof wallpaperBackground !== "undefined" && wallpaperBackground && wallpaperBackground.currentWallpaperPath) {
             currentPath = wallpaperBackground.currentWallpaperPath;
         } else {
+            if (currentWallpaperFile && typeof currentWallpaperFile.reload === "function") {
+                currentWallpaperFile.reload();
+            }
             var fileText = (typeof currentWallpaperFile.text === "function") ? currentWallpaperFile.text() : currentWallpaperFile.text;
             if (fileText) currentPath = fileText.trim();
         }
 
         var indexToSelect = 0;
-        for (var i = 0; i < wallpapersList.length; i++) {
-            if (wallpapersList[i].path === currentPath) {
-                indexToSelect = i;
-                break;
+        if (currentPath !== "") {
+            for (var i = 0; i < wallpapersList.length; i++) {
+                if (wallpapersList[i].path === currentPath) {
+                    indexToSelect = i;
+                    break;
+                }
             }
         }
         wallpapersListInst.currentIndex = indexToSelect;
         var targetX = getScrollTarget(indexToSelect);
-        wallpapersListInst.contentX = targetX;
+        if (animate === false) {
+            wallpaperWindow.animationsEnabled = false;
+            wallpapersListInst.contentX = targetX;
+            Qt.callLater(() => {
+                wallpaperWindow.animationsEnabled = true;
+            });
+        } else {
+            wallpapersListInst.contentX = targetX;
+        }
         wallpapersListInst.forceActiveFocus();
     }
 
     property var wallpaperFetcher: Process {
         id: wallpaperFetcher
-        command: [Quickshell.env("HOME") + "/.config/qs/c_tools/bin/fast_wallpapers", root.shellConfig.homeDir + "/Pictures/wallpapers"]
+        command: [Quickshell.env("HOME") + "/.config/qs/c_tools/bin/fast_wallpapers", wallpaperWindow.wallpapersDir]
         stdout: StdioCollector {
             onStreamFinished: {
                 var lines = this.text.split("\n");
@@ -88,7 +121,9 @@ Popup {
                     if (path !== "") list.push({ path: path, name: path.substring(path.lastIndexOf("/") + 1) });
                 }
                 wallpaperWindow.wallpapersList = list;
-                Qt.callLater(selectCurrentWallpaper);
+                Qt.callLater(() => {
+                    selectCurrentWallpaper(false);
+                });
             }
         }
     }
@@ -114,12 +149,17 @@ Popup {
                 var angle = Math.floor(Math.random() * 360);
                 awwwArgs = "--transition-type " + chosen + " --transition-angle " + angle + " --transition-duration 1.5 --transition-fps 144 --transition-bezier .54,0,.34,.99";
             }
-            command = ["sh", "-c", "awww img \"" + filePath + "\" " + awwwArgs + " && echo \"" + filePath + "\" > " + root.shellConfig.quickshellDir + "/current_wallpaper && matugen image \"" + filePath + "\" --source-color-index 0 -t scheme-content -m dark"];
+            var qsDir = wallpaperWindow.quickshellDir;
+            command = ["sh", "-c", "awww img \"" + filePath + "\" " + awwwArgs + " && echo \"" + filePath + "\" > \"" + qsDir + "/current_wallpaper\" && matugen image \"" + filePath + "\" --source-color-index 0 -t scheme-content -m dark"];
             running = false;
             running = true;
         }
         onExited: {
-            rootTheme.reloadColors();
+            if (typeof rootTheme !== "undefined" && rootTheme && typeof rootTheme.reloadColors === "function") {
+                rootTheme.reloadColors();
+            } else if (wallpaperWindow.theme && typeof wallpaperWindow.theme.reloadColors === "function") {
+                wallpaperWindow.theme.reloadColors();
+            }
         }
     }
 
@@ -143,14 +183,16 @@ Popup {
             clip: true
             model: wallpaperWindow.wallpapersList
             focus: true
+            cacheBuffer: 1200
             boundsBehavior: Flickable.StopAtBounds
             highlightRangeMode: ListView.NoHighlightRange
             highlightFollowsCurrentItem: false
 
             Behavior on contentX {
+                enabled: wallpaperWindow.animationsEnabled
                 NumberAnimation {
-                    duration: 480
-                    easing.type: Easing.OutQuint
+                    duration: 180
+                    easing.type: Easing.OutCubic
                 }
             }
 
