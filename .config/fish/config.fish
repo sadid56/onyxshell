@@ -150,3 +150,4 @@ alias la="ls -A --color=auto"
 # Added by Antigravity CLI installer
 set -gx PATH "$HOME/.local/bin" $PATH
 
+

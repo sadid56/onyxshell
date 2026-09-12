@@ -71,8 +71,8 @@ hl.window_rule({
 
 
 hl.window_rule({
-    name   = "thunar-float",
-    match  = { class = "^([Tt]hunar)$" },
+    name   = "nautilus-float",
+    match  = { class = "^(org.gnome.Nautilus|nautilus)$" },
     float  = true,
     center = true,
     size   = { 1200, 750 },

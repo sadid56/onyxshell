@@ -12,7 +12,7 @@ hl.monitor({
 ---- MY PROGRAMS ----
 ---------------------
 terminal = os.getenv("TERMINAL") or "kitty"
-fileManager = "thunar"
+fileManager = "nautilus"
 browser = os.getenv("BROWSER") or "brave-origin"
 hl.env("TERMINAL", terminal)
 

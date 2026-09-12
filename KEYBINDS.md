@@ -16,7 +16,7 @@ Comprehensive list of all default keyboard shortcuts and mouse gestures configur
 | `SUPER + RETURN` | Open Default Terminal (Kitty) |
 | `ALT + SPACE` | **Open Quickshell Application Launcher** |
 | `SUPER + Q` | Toggle Dropdown Scratchpad Terminal |
-| `SUPER + E` | Open File Manager (Thunar) |
+| `SUPER + E` | Open File Manager (Nautilus) |
 | `SUPER + B` | Launch Default Browser |
 | `SUPER + L` | Lock Screen (Hyprlock) |
 | `SUPER + M` | Open Power Menu |

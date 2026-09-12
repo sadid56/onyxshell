@@ -20,3 +20,4 @@ Thumbs.db
 # Native C tools binaries
 .config/qs/c_tools/bin/*
 !.config/qs/c_tools/bin/.gitkeep
+.config/gtk-3.0/bookmarks

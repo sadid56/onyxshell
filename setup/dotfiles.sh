@@ -8,9 +8,9 @@ install_dotfiles() {
         hypr qs kitty fastfetch cava nvim
         xdg-desktop-portal fish matugen htop
         fontconfig gtk-3.0 gtk-4.0 qt5ct qt6ct environment.d
-        autostart Thunar xfce4
+        autostart
         starship.toml kdeglobals kdeglobals.hyprland
-        kwalletrc
+        kwalletrc user-dirs.dirs
         brave-origin-flags.conf chrome-flags.conf code-flags.conf
     )
 
@@ -36,6 +36,23 @@ install_dotfiles() {
         print_step "Copying Onyxshell dotfiles to ~/.config/..."
         cp -r "$script_dir/.config/"* "$HOME/.config/"
 
+        # Ensure essential user directories exist
+        mkdir -p "$HOME/Projects" "$HOME/Documents" "$HOME/Downloads" "$HOME/Pictures" "$HOME/Videos" "$HOME/Music"
+
+        # Dynamically generate GTK bookmarks for current user's $HOME (portable across systems)
+        mkdir -p "$HOME/.config/gtk-3.0"
+        cat << BOOKMARKS_EOF > "$HOME/.config/gtk-3.0/bookmarks"
+file://$HOME/Projects Projects
+file://$HOME/Downloads Downloads
+file://$HOME/Documents Documents
+file://$HOME/Pictures Pictures
+file://$HOME/Videos Videos
+file://$HOME/Music Music
+file://$HOME/onyxshell Onyxshell
+file://$HOME/.config Config
+BOOKMARKS_EOF
+        ln -sf "$HOME/.config/gtk-3.0/bookmarks" "$HOME/.gtk-bookmarks"
+
         # Ensure default wallpaper exists if current_wallpaper is missing or invalid
         if [ ! -s "$HOME/.config/qs/current_wallpaper" ] || [ ! -f "$(cat "$HOME/.config/qs/current_wallpaper" 2>/dev/null)" ]; then
             echo "$HOME/.config/qs/assets/images/default-wallpaper.png" > "$HOME/.config/qs/current_wallpaper"
@@ -44,9 +61,9 @@ install_dotfiles() {
         # Ensure local color-schemes directory exists for Matugen
         mkdir -p "$HOME/.local/share/color-schemes"
 
-        # Set Thunar as default file manager for directories
+        # Set Nautilus as default file manager for directories
         if command -v xdg-mime &>/dev/null; then
-            xdg-mime default thunar.desktop inode/directory 2>/dev/null || true
+            xdg-mime default org.gnome.Nautilus.desktop inode/directory 2>/dev/null || true
         fi
 
         # Generate initial dynamic color palette with Matugen

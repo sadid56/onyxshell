@@ -40,8 +40,6 @@ CONFIG_DIRS=(
     "qt6ct"
     "environment.d"
     "autostart"
-    "Thunar"
-    "xfce4"
 )
 
 CONFIG_FILES=(
@@ -49,6 +47,7 @@ CONFIG_FILES=(
     "kdeglobals.hyprland"
     "kdeglobals"
     "kwalletrc"
+    "user-dirs.dirs"
     "brave-origin-flags.conf"
     "chrome-flags.conf"
     "code-flags.conf"
@@ -68,7 +67,7 @@ print_step "Syncing configuration folders and files..."
 for dir in "${CONFIG_DIRS[@]}"; do
     if [ -d "$HOME/.config/$dir" ]; then
         mkdir -p "$REPO_DIR/.config/$dir"
-        rsync -av --delete --exclude="test_*.qml" --exclude="current_wallpaper" "$HOME/.config/$dir/" "$REPO_DIR/.config/$dir/"
+        rsync -av --delete --exclude="test_*.qml" --exclude="current_wallpaper" --exclude="bookmarks" "$HOME/.config/$dir/" "$REPO_DIR/.config/$dir/"
         print_success "Synced $dir"
     else
         print_warn "~/.config/$dir not found on your system, skipping."
@@ -88,8 +87,8 @@ for file in "${CONFIG_FILES[@]}"; do
     fi
 done
 
-# Remove deprecated dolphin configuration if present in repo
-rm -f "$REPO_DIR/.config/dolphinrc"
+# Clean deprecated file manager configurations
+rm -rf "$REPO_DIR/.config/dolphinrc" "$REPO_DIR/.config/Thunar" "$REPO_DIR/.config/xfce4"
 
 # Ensure compiled C binaries are clean in repo
 if [ -d "$REPO_DIR/.config/qs/c_tools" ]; then
