@@ -28,7 +28,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
 	hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
-	hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'")
+	hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'")
 end)
 
 
