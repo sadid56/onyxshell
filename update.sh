@@ -44,9 +44,6 @@ CONFIG_DIRS=(
 
 CONFIG_FILES=(
     "starship.toml"
-    "kdeglobals.hyprland"
-    "kdeglobals"
-    "kwalletrc"
     "user-dirs.dirs"
     "brave-origin-flags.conf"
     "chrome-flags.conf"
@@ -76,19 +73,17 @@ done
 
 for file in "${CONFIG_FILES[@]}"; do
     if [ -f "$HOME/.config/$file" ] || [ -L "$HOME/.config/$file" ]; then
-        if [ "$file" = "kdeglobals" ]; then
-            (cd "$REPO_DIR/.config" && ln -sf kdeglobals.hyprland kdeglobals)
-        else
-            cp -a "$HOME/.config/$file" "$REPO_DIR/.config/$file"
-        fi
+        cp -a "$HOME/.config/$file" "$REPO_DIR/.config/$file"
         print_success "Synced $file"
     else
         print_warn "~/.config/$file not found on your system, skipping."
     fi
 done
 
-# Clean deprecated file manager configurations
-rm -rf "$REPO_DIR/.config/dolphinrc" "$REPO_DIR/.config/Thunar" "$REPO_DIR/.config/xfce4"
+# Clean deprecated KDE and other unused configurations
+rm -rf "$REPO_DIR/.config/dolphinrc" "$REPO_DIR/.config/Thunar" "$REPO_DIR/.config/xfce4" \
+       "$REPO_DIR/.config/kdeglobals" "$REPO_DIR/.config/kdeglobals.hyprland" "$REPO_DIR/.config/kwalletrc" \
+       "$REPO_DIR/.config/matugen/templates/kdeglobals" "$REPO_DIR/.config/matugen/templates/matugen.colors"
 
 # Ensure compiled C binaries are clean in repo
 if [ -d "$REPO_DIR/.config/qs/c_tools" ]; then

@@ -44,15 +44,13 @@ get_distro_packages() {
         arch)
             pkgs+=(
                 awww
-                polkit-kde-agent
+                polkit-gnome
                 hyprshot
                 hyprsunset
                 quickshell
                 matugen
                 python
                 cliphist
-                breeze
-                breeze-icons
                 satty
                 pipewire-pulse
                 noto-fonts

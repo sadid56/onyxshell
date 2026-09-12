@@ -9,8 +9,8 @@ install_dotfiles() {
         xdg-desktop-portal fish matugen htop
         fontconfig gtk-3.0 gtk-4.0 qt5ct qt6ct environment.d
         autostart
-        starship.toml kdeglobals kdeglobals.hyprland
-        kwalletrc user-dirs.dirs
+        starship.toml
+        user-dirs.dirs
         brave-origin-flags.conf chrome-flags.conf code-flags.conf
     )
 
@@ -59,7 +59,6 @@ BOOKMARKS_EOF
         fi
 
         # Ensure local color-schemes directory exists for Matugen
-        mkdir -p "$HOME/.local/share/color-schemes"
 
         # Set Nautilus as default file manager for directories
         if command -v xdg-mime &>/dev/null; then

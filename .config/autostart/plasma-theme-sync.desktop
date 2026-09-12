@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Plasma Theme Restore
-Comment=Restore native KDE Plasma theme when logging into Plasma
-Exec=sh -c "[ -f ~/.config/kdeglobals.plasma ] && ln -sf ~/.config/kdeglobals.plasma ~/.config/kdeglobals || true"
-OnlyShowIn=KDE;
-X-KDE-autostart-phase=0

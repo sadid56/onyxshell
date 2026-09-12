@@ -18,10 +18,6 @@ output_path = '~/.config/fish/conf.d/matugen_colors.fish'
 input_path = '~/.config/matugen/templates/hypr-colors.lua'
 output_path = '~/.config/hypr/theme/colors.lua'
 
-[templates.kdeglobals]
-input_path = '~/.config/matugen/templates/kdeglobals'
-output_path = '~/.config/kdeglobals.hyprland'
-
 [templates.gtk3]
 input_path = '~/.config/matugen/templates/gtk-colors.css'
 output_path = '~/.config/gtk-3.0/colors.css'
