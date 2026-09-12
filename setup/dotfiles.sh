@@ -8,9 +8,9 @@ install_dotfiles() {
         hypr qs kitty fastfetch cava nvim
         xdg-desktop-portal fish matugen htop
         fontconfig gtk-3.0 gtk-4.0 qt5ct qt6ct environment.d
-        autostart
+        autostart Thunar xfce4
         starship.toml kdeglobals kdeglobals.hyprland
-        dolphinrc kwalletrc
+        kwalletrc
         brave-origin-flags.conf chrome-flags.conf code-flags.conf
     )
 
@@ -44,9 +44,9 @@ install_dotfiles() {
         # Ensure local color-schemes directory exists for Matugen
         mkdir -p "$HOME/.local/share/color-schemes"
 
-        # Set Dolphin as default file manager for directories
+        # Set Thunar as default file manager for directories
         if command -v xdg-mime &>/dev/null; then
-            xdg-mime default org.kde.dolphin.desktop inode/directory 2>/dev/null || true
+            xdg-mime default thunar.desktop inode/directory 2>/dev/null || true
         fi
 
         # Generate initial dynamic color palette with Matugen

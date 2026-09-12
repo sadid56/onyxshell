@@ -68,17 +68,11 @@ hl.window_rule({
     center = true,
 })
 
-hl.window_rule({
-    name   = "nautilus-float",
-    match  = { class = "^(org.gnome.Nautilus|nautilus)$" },
-    float  = true,
-    center = true,
-    size   = { 1200, 750 },
-})
+
 
 hl.window_rule({
-    name   = "dolphin-float",
-    match  = { class = "^(org.kde.dolphin|dolphin)$" },
+    name   = "thunar-float",
+    match  = { class = "^([Tt]hunar)$" },
     float  = true,
     center = true,
     size   = { 1200, 750 },

@@ -40,13 +40,14 @@ CONFIG_DIRS=(
     "qt6ct"
     "environment.d"
     "autostart"
+    "Thunar"
+    "xfce4"
 )
 
 CONFIG_FILES=(
     "starship.toml"
     "kdeglobals.hyprland"
     "kdeglobals"
-    "dolphinrc"
     "kwalletrc"
     "brave-origin-flags.conf"
     "chrome-flags.conf"
@@ -87,6 +88,8 @@ for file in "${CONFIG_FILES[@]}"; do
     fi
 done
 
+# Remove deprecated dolphin configuration if present in repo
+rm -f "$REPO_DIR/.config/dolphinrc"
 
 # Ensure compiled C binaries are clean in repo
 if [ -d "$REPO_DIR/.config/qs/c_tools" ]; then

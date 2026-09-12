@@ -11,6 +11,7 @@ SHARED_BASE_PKGS=(
     hyprpicker
     xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
+    thunar
     jq
     socat
     kitty
@@ -50,11 +51,10 @@ get_distro_packages() {
                 matugen
                 python
                 cliphist
-                dolphin
+                tumbler
+                thunar-archive-plugin
                 breeze
                 breeze-icons
-                kio-extras
-                ffmpegthumbs
                 satty
                 pipewire-pulse
                 noto-fonts

@@ -1,1 +1,145 @@
 @import 'colors.css';
+
+/* Universal GTK3 Window & Dialogs */
+window,
+dialog,
+.thunar-window {
+    background-color: @theme_bg_color;
+    color: @theme_fg_color;
+}
+
+/* File list & Icon views */
+.view,
+textview text,
+treeview,
+iconview,
+.thunar-window .standard-view,
+.thunar-window .view {
+    background-color: @theme_base_color;
+    color: @theme_text_color;
+}
+
+/* Selected items */
+.view:selected,
+.view:selected:focus,
+textview text:selected,
+treeview:selected,
+treeview:selected:focus,
+iconview:selected,
+iconview:selected:focus,
+*:selected {
+    background-color: @theme_selected_bg_color;
+    color: @theme_selected_fg_color;
+}
+
+/* Thunar Side Pane */
+.thunar-window .sidebar,
+.thunar-window treeview.sidebar,
+.thunar-window scrolledwindow.sidebar,
+.thunar-window paned > scrolledwindow:first-child {
+    background-color: @theme_bg_color;
+    color: @theme_fg_color;
+    border-right: 1px solid @borders;
+}
+
+.thunar-window treeview.sidebar:selected {
+    background-color: @theme_selected_bg_color;
+    color: @theme_selected_fg_color;
+    border-radius: 8px;
+}
+
+/* Headerbar, Toolbar & Location/Pathbar */
+headerbar,
+toolbar,
+.thunar-window .location-bar,
+.thunar-window .path-bar-box {
+    background-color: @header_bg;
+    color: @header_fg;
+    border-bottom: 1px solid @borders;
+}
+
+/* Pathbar buttons */
+.thunar-window .path-bar-box button {
+    background-color: @theme_button_background_normal;
+    color: @theme_button_foreground_normal;
+    border: 1px solid @borders;
+    border-radius: 6px;
+    margin: 2px;
+}
+
+.thunar-window .path-bar-box button:checked,
+.thunar-window .path-bar-box button:active {
+    background-color: @theme_selected_bg_color;
+    color: @theme_selected_fg_color;
+}
+
+/* Search and text entries */
+entry {
+    background-color: @theme_base_color;
+    color: @theme_text_color;
+    border: 1px solid @borders;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+entry:focus {
+    border-color: @accent_color;
+}
+
+/* Action buttons */
+button {
+    background-color: @theme_button_background_normal;
+    color: @theme_button_foreground_normal;
+    border: 1px solid @borders;
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+button:hover {
+    background-color: alpha(@accent_color, 0.25);
+    color: @theme_fg_color;
+}
+
+button:checked,
+button:active {
+    background-color: @theme_selected_bg_color;
+    color: @theme_selected_fg_color;
+}
+
+/* Menus & Popups */
+menu,
+popover {
+    background-color: @theme_bg_color;
+    color: @theme_fg_color;
+    border: 1px solid @borders;
+    border-radius: 10px;
+    padding: 4px;
+}
+
+menuitem {
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+
+menuitem:hover {
+    background-color: @theme_selected_bg_color;
+    color: @theme_selected_fg_color;
+}
+
+/* Statusbar */
+statusbar,
+.thunar-window statusbar {
+    background-color: @theme_bg_color;
+    color: @insensitive_fg_color;
+    border-top: 1px solid @borders;
+}
+
+/* Scrollbars */
+scrollbar slider {
+    background-color: @borders;
+    border-radius: 10px;
+}
+
+scrollbar slider:hover {
+    background-color: @accent_color;
+}

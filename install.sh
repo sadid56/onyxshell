@@ -23,6 +23,8 @@ source "$SCRIPT_DIR/setup/display_manager.sh"
 source "$SCRIPT_DIR/setup/shell.sh"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/setup/wallpaper.sh"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/setup/icons.sh"
 
 # Help flag handling
 show_help() {
@@ -85,7 +87,10 @@ setup_user_shell
 # 7. Recommended Wallpaper Pack Installation
 setup_wallpapers
 
-# 8. Completion Message
+# 8. Colloid Icon Theme Installation
+setup_icons
+
+# 9. Completion Message
 echo ""
 echo -e "${GREEN}${BOLD}====================================================${RESET}"
 echo -e "${GREEN}${BOLD}      🎉   Onyxshell Installation Complete!  🎉${RESET}"

@@ -27,6 +27,7 @@ output_path = '~/.config/kdeglobals.hyprland'
 [templates.gtk3]
 input_path = '~/.config/matugen/templates/gtk-colors.css'
 output_path = '~/.config/gtk-3.0/colors.css'
+post_hook = 'thunar -q 2>/dev/null || true; gsettings set org.gnome.desktop.interface gtk-theme "Adwaita" && gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"'
 
 [templates.gtk4]
 input_path = '~/.config/matugen/templates/gtk-colors.css'
